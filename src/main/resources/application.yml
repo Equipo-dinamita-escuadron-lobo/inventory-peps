@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: InventoryPEPS
+
+  profiles:
+    active:
+    - ${PROFILE:dev}
