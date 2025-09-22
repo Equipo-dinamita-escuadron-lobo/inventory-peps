@@ -2,6 +2,7 @@ package kardex.PEPS.InventoryPEPS.domain.model;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import kardex.PEPS.InventoryPEPS.domain.enums.MovementType;
@@ -16,15 +17,17 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Kardex {
     private Long idKardex;
+    private Long factCode;
     private ZonedDateTime date;
     private String details;
-    private int amount;
+    private int quantity;
     private BigDecimal unitPrice;
     private MovementType type;
-    private Product objProduct;
+    private int availableQuantity;
 
-    private List<DetailOutput>detailsOutput;
-    private List<DetailOutput>detailsOrigin;
+    private Product product;
+    private List<DetailOutput>detailsOutput= new ArrayList<>();
+    private List<DetailOutput>detailsOrigin= new ArrayList<>(); 
 
     
 }

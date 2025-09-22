@@ -1,7 +1,19 @@
 spring:
   application:
-    name: InventoryPEPS
+    name: inventorypeps
 
   profiles:
     active:
     - ${PROFILE:dev}
+
+  # Configuración de internacionalización
+  messages:
+    basename: messages
+    encoding: UTF-8
+    cache-duration: 3600
+    fallback-to-system-locale: false
+    use-code-as-default-message: false
+
+server:
+  error:
+    include-stacktrace: never

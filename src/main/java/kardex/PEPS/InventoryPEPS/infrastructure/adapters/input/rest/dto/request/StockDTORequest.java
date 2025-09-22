@@ -17,7 +17,7 @@ public class StockDTORequest {
 
     private Long idProduct;
 
-    private int amount;
+    private int quantity;
 
     private Double price;
 

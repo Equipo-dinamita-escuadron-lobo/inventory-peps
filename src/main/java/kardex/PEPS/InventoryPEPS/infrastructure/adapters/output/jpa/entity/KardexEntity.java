@@ -10,7 +10,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -22,7 +21,7 @@ import lombok.Setter;
 import java.util.List;
 
 @Entity
-@Table(name = "Kardex")
+@Table(name = "kardex")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -32,25 +31,31 @@ public class KardexEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idKardex;
 
+    @Column(name="fact_code")
+    private Long factCode;
+
     @Column(name = "date", nullable=false)
     private  ZonedDateTime date;
 
     @Column(name="detail", nullable = false)
     private String details;
 
-    @Column(name = "amount", nullable = false)
-    private int amount;
+    @Column(name = "quantity", nullable = false)
+    private int quantity;
 
-    @Column(name="unit_value")
+    @Column(name="unit_price")
     private BigDecimal unitPrice;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Type")
+    @Column(name = "type")
     private MovementType type;
 
+    @Column(name="available_quantity")
+    private int availableQuantity;
+
     @ManyToOne
-    @JoinColumn(name="idProduct", nullable = false)
-    private ProductEntity objProduct;
+    @JoinColumn(name="product_id", nullable = false)
+    private ProductEntity product;
 
    @OneToMany(mappedBy = "movementSale")
     private List<DetailOutputEntity> detailsOutput;

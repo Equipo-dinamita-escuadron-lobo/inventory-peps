@@ -16,7 +16,8 @@ public class KardexPurchaseDTOResponse {
     private Long idKardex;
     private ZonedDateTime date;
     private String details;
-    private int amount;
+    private int quantity;
     private BigDecimal unitPrice;
     private String type;
+    private Long factCode;
 }

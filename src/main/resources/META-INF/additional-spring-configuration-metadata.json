@@ -1,0 +1,22 @@
+{"properties": [
+  {
+    "name": "jwt.auth.converter.principle-attribute",
+    "type": "java.lang.String",
+    "description": "A description for 'jwt.auth.converter.principle-attribute'"
+  },
+  {
+    "name": "jwt.auth.converter.resource-id",
+    "type": "java.lang.String",
+    "description": "A description for 'jwt.auth.converter.resource-id'"
+  },
+  {
+    "name": "services.stock.base-url",
+    "type": "java.lang.String",
+    "description": "A description for 'services.stock.base-url'"
+  },
+  {
+    "name": "services.products.base-url",
+    "type": "java.lang.String",
+    "description": "A description for 'services.products.base-url'"
+  }
+]}

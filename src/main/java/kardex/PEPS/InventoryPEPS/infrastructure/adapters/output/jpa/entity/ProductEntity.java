@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name="Product")
+@Table(name="product")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -25,7 +25,8 @@ public class ProductEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long idProduct;
+    @Column(nullable = false, unique = true)
+    private Long productId;
     
     @Column(name ="name", nullable = false, length =50 )
     private String name;
@@ -36,10 +37,13 @@ public class ProductEntity {
     @Column(name ="presentation", nullable = false, length =50 )
     private String presentation;
 
-    @Column(name ="responsible", nullable = false, length =50 )
-    private String manager;
+    @Column(name="enterprise_id", nullable = false)
+    private String enterpriseId;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "objProduct")
+    @Column(nullable = false)
+    private boolean state;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "product")
     private List<KardexEntity> recordsKardex;
 
 }
