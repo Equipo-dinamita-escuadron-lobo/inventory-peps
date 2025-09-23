@@ -15,7 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class KardexRecordsDTOResponse {
-     private Long idKardex;
+    private Long idKardex;
     private ZonedDateTime date;
     private String detail;
 
@@ -23,9 +23,9 @@ public class KardexRecordsDTOResponse {
     private BigDecimal entryUnitPrice;
     private BigDecimal entryTotalPrice;
 
-    private Integer outputQuantity;
-    private BigDecimal outputUnitPrice;
-    private BigDecimal outputTotalPrice;
+    private List<SaleDetailDTO> outputDetails;  
+    private Integer outputQuantity;            
+    private BigDecimal outputTotalPrice;   
 
     private List<Balance> balance;
 

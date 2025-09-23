@@ -160,7 +160,7 @@ public class KardexCommandService implements IKardexCommandPort {
         Kardex returnMovement = new Kardex();
         returnMovement.setProduct(product.get()); // Usar el mismo producto
         returnMovement.setFactCode(originalPurchase.getFactCode()); // Referenciar la misma factura
-        returnMovement.setDetails("Return of purchase: " + originalPurchase.getIdKardex());
+        returnMovement.setDetails(kardex.getDetails());
         returnMovement.setQuantity(originalPurchase.getQuantity());
         returnMovement.setUnitPrice(originalPurchase.getUnitPrice());
         returnMovement.setDate(ZonedDateTime.now());
@@ -226,7 +226,7 @@ public class KardexCommandService implements IKardexCommandPort {
                 Kardex returnMovement = new Kardex();
                 returnMovement.setProduct(product.get());
                 returnMovement.setFactCode(originalSale.getFactCode());
-                returnMovement.setDetails("Return for sale " + originalSale.getIdKardex() + ", from purchase lot " + originalPurchaseLot.getIdKardex());
+                returnMovement.setDetails(kardex.getDetails());
                 returnMovement.setQuantity(detail.getAmountUsed());
                 returnMovement.setUnitPrice(detail.getUnitPrice()); // Precio de la venta
                 returnMovement.setDate(ZonedDateTime.now());

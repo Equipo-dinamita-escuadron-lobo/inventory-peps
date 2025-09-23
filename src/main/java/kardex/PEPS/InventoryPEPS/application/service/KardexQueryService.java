@@ -21,6 +21,7 @@ import kardex.PEPS.InventoryPEPS.domain.enums.MovementType;
 import kardex.PEPS.InventoryPEPS.domain.model.Balance;
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.domain.model.KardexReport;
+import kardex.PEPS.InventoryPEPS.domain.model.SaleDetail;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexQueryOutputPort;
 import lombok.RequiredArgsConstructor;
 
@@ -129,31 +130,65 @@ public class KardexQueryService implements IKardexQueryPort {
     private void handleSale(Kardex mov, LinkedList<Balance> queue, KardexReport row) {
         if (row != null) {
             row.setOutputQuantity(mov.getQuantity());
+            
+            // --- CAMBIO PRINCIPAL: Generar lista de detalles de salida ---
+            List<SaleDetail> saleDetails = new ArrayList<>();
             BigDecimal totalCost = BigDecimal.ZERO;
-            if (mov.getDetailsOutput() != null) {
-                for (var det : mov.getDetailsOutput()) {
-                    totalCost = totalCost.add(det.getUnitPrice().multiply(BigDecimal.valueOf(det.getAmountUsed())));
+            
+            // Simulamos el proceso FIFO para generar los detalles
+            int remain = mov.getQuantity();
+            Iterator<Balance> iterator = queue.iterator();
+            
+            while (remain > 0 && iterator.hasNext()) {
+                Balance lote = queue.peekFirst(); // Obtenemos el primer lote (FIFO)
+                
+                int amountToConsume;
+                if (lote.getAmount() <= remain) {
+                    // Consumimos todo el lote
+                    amountToConsume = lote.getAmount();
+                    remain -= lote.getAmount();
+                } else {
+                    // Consumimos parcialmente
+                    amountToConsume = remain;
+                    remain = 0;
+                }
+                
+                // Creamos el detalle de este lote consumido
+                BigDecimal detailTotal = lote.getUnitPrice().multiply(BigDecimal.valueOf(amountToConsume));
+                SaleDetail detail = new SaleDetail(amountToConsume, lote.getUnitPrice(), detailTotal);
+                saleDetails.add(detail);
+                totalCost = totalCost.add(detailTotal);
+                
+                // Si el lote se consumió completamente, lo eliminamos; si no, lo actualizamos
+                if (lote.getAmount() <= amountToConsume) {
+                    queue.pollFirst();
+                } else {
+                    lote.setAmount(lote.getAmount() - amountToConsume);
+                    lote.setTotalPrice(lote.getUnitPrice().multiply(BigDecimal.valueOf(lote.getAmount())));
                 }
             }
+            
+            // Asignamos los detalles y totales al row
+            row.setOutputDetails(saleDetails);
             row.setOutputTotalPrice(totalCost);
-            row.setOutputUnitPrice(mov.getQuantity() != 0
-                    ? totalCost.divide(BigDecimal.valueOf(mov.getQuantity()), BigDecimal.ROUND_HALF_UP)
-                    : BigDecimal.ZERO);
-        }
-        
-        int remain = mov.getQuantity();
-        while (remain > 0 && !queue.isEmpty()) {
-            Balance lote = queue.peekFirst();
-            if (lote.getAmount() <= remain) {
-                remain -= lote.getAmount();
-                queue.pollFirst();
-            } else {
-                lote.setAmount(lote.getAmount() - remain);
-                lote.setTotalPrice(lote.getUnitPrice().multiply(BigDecimal.valueOf(lote.getAmount())));
-                remain = 0;
+            
+        } else {
+            // Lógica original para procesar la cola sin generar detalles de salida
+            int remain = mov.getQuantity();
+            while (remain > 0 && !queue.isEmpty()) {
+                Balance lote = queue.peekFirst();
+                if (lote.getAmount() <= remain) {
+                    remain -= lote.getAmount();
+                    queue.pollFirst();
+                } else {
+                    lote.setAmount(lote.getAmount() - remain);
+                    lote.setTotalPrice(lote.getUnitPrice().multiply(BigDecimal.valueOf(lote.getAmount())));
+                    remain = 0;
+                }
             }
         }
     }
+
 
     private void handleSalesReturn(Kardex mov, LinkedList<Balance> queue, KardexReport row) {
         // Una devolución de venta es una ENTRADA que se coloca al PRINCIPIO de la cola.
@@ -166,35 +201,71 @@ public class KardexQueryService implements IKardexQueryPort {
         }
     }
 
-    private void handlePurchaseReturn(Kardex mov, LinkedList<Balance> queue, KardexReport row) {
+   private void handlePurchaseReturn(Kardex mov, LinkedList<Balance> queue, KardexReport row) {
         // Una devolución de compra es una SALIDA de un lote específico, no necesariamente el primero.
         if (row != null) {
             row.setOutputQuantity(mov.getQuantity());
-            row.setOutputUnitPrice(mov.getUnitPrice());
-            row.setOutputTotalPrice(mov.getUnitPrice().multiply(new BigDecimal(mov.getQuantity())));
-        }
-
-        int amountToRemove = mov.getQuantity();
-        Iterator<Balance> iterator = queue.iterator();
-        while (iterator.hasNext() && amountToRemove > 0) {
-            Balance lote = iterator.next();
-
-            // Buscamos el lote por el costo unitario.
-            // Para un sistema real, sería más robusto buscar por un ID de lote.
-            if (lote.getUnitPrice().compareTo(mov.getUnitPrice()) == 0) {
-                if (lote.getAmount() <= amountToRemove) {
-                    // Si el lote se consume completamente, lo eliminamos.
-                    amountToRemove -= lote.getAmount();
-                    iterator.remove();
-                } else {
-                    // Si el lote se consume parcialmente, actualizamos su cantidad.
-                    lote.setAmount(lote.getAmount() - amountToRemove);
-                    lote.setTotalPrice(lote.getUnitPrice().multiply(BigDecimal.valueOf(lote.getAmount())));
-                    amountToRemove = 0;
+            
+            // --- CAMBIO: Generar lista de detalles de salida para devolución de compra ---
+            List<SaleDetail> saleDetails = new ArrayList<>();
+            BigDecimal totalCost = BigDecimal.ZERO;
+            
+            int amountToRemove = mov.getQuantity();
+            Iterator<Balance> iterator = queue.iterator();
+            
+            while (iterator.hasNext() && amountToRemove > 0) {
+                Balance lote = iterator.next();
+                
+                // Buscamos el lote por el costo unitario
+                if (lote.getUnitPrice().compareTo(mov.getUnitPrice()) == 0) {
+                    int amountUsed;
+                    
+                    if (lote.getAmount() <= amountToRemove) {
+                        // Si el lote se consume completamente
+                        amountUsed = lote.getAmount();
+                        amountToRemove -= lote.getAmount();
+                        iterator.remove();
+                    } else {
+                        // Si el lote se consume parcialmente
+                        amountUsed = amountToRemove;
+                        lote.setAmount(lote.getAmount() - amountToRemove);
+                        lote.setTotalPrice(lote.getUnitPrice().multiply(BigDecimal.valueOf(lote.getAmount())));
+                        amountToRemove = 0;
+                    }
+                    
+                    // Crear el detalle de salida para este lote
+                    BigDecimal detailTotal = lote.getUnitPrice().multiply(BigDecimal.valueOf(amountUsed));
+                    SaleDetail detail = new SaleDetail(amountUsed, lote.getUnitPrice(), detailTotal);
+                    saleDetails.add(detail);
+                    totalCost = totalCost.add(detailTotal);
+                }
+            }
+            
+            // --- CAMBIO: Usar la nueva estructura ---
+            row.setOutputDetails(saleDetails);
+            row.setOutputTotalPrice(totalCost);
+            
+        } else {
+            // Lógica original para procesar la cola sin generar detalles de salida
+            int amountToRemove = mov.getQuantity();
+            Iterator<Balance> iterator = queue.iterator();
+            while (iterator.hasNext() && amountToRemove > 0) {
+                Balance lote = iterator.next();
+                
+                if (lote.getUnitPrice().compareTo(mov.getUnitPrice()) == 0) {
+                    if (lote.getAmount() <= amountToRemove) {
+                        amountToRemove -= lote.getAmount();
+                        iterator.remove();
+                    } else {
+                        lote.setAmount(lote.getAmount() - amountToRemove);
+                        lote.setTotalPrice(lote.getUnitPrice().multiply(BigDecimal.valueOf(lote.getAmount())));
+                        amountToRemove = 0;
+                    }
                 }
             }
         }
     }
+
 
     // --- Métodos de utilidad (sin cambios) ---
 

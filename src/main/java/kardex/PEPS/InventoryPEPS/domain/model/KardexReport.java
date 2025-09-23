@@ -23,9 +23,9 @@ public class KardexReport {
     private BigDecimal entryUnitPrice;
     private BigDecimal entryTotalPrice;
 
-    private Integer outputQuantity;
-    private BigDecimal outputUnitPrice;
-    private BigDecimal outputTotalPrice;
+    private List<SaleDetail> outputDetails;  
+    private Integer outputQuantity;           
+    private BigDecimal outputTotalPrice;     
 
     private List<Balance> balance;
 
