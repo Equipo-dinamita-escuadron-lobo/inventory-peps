@@ -6,10 +6,14 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator; // Importante para remover elementos de forma segura
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import kardex.PEPS.InventoryPEPS.application.ports.input.IKardexQueryPort;
@@ -27,57 +31,72 @@ public class KardexQueryService implements IKardexQueryPort {
     private final IKardexQueryOutputPort kardexQueryOutputPort;
 
     @Override
-    public List<KardexReport> getRecordsKardexByProduct(Long productId, LocalDate start, LocalDate end) {
+    public Page<KardexReport> getRecordsKardexByProduct(Long productId, LocalDate start, LocalDate end,Pageable pageable) {
+         // --- PASO 1: Calcular la lista COMPLETA de reportes (Lógica original) ---
 
         // Fase 1: Obtener movimientos anteriores para saldo inicial
         List<Kardex> prevMovements = kardexQueryOutputPort.findMovementsByProductBeforeDate(productId, start);
 
-        // Fase 2: Obtener movimientos dentro de rango
+        // Fase 2: Obtener TODOS los movimientos dentro de rango (sin paginación de BD)
+        // Asegúrate de tener un método que devuelva List, no Page.
         List<Kardex> periodMovements = kardexQueryOutputPort.findMovementsByProductAndDateRange(productId, start, end);
 
-        // Cola (implementación FIFO de la existencia a la fecha de inicio)
+        // Cola para procesar el inventario
         LinkedList<Balance> inventoryQueue = new LinkedList<>();
-        // Procesar movimientos previos SOLO para construir saldo inicial
         processMovements(prevMovements, inventoryQueue);
 
-        List<KardexReport> report = new ArrayList<>();
+        // Lista para almacenar el reporte completo
+        List<KardexReport> fullReport = new ArrayList<>();
 
-        // --- Saldo inicial ---
+        // Saldo inicial
+        /* 
         KardexReport initialRow = new KardexReport();
         ZonedDateTime zonedStart = start.atStartOfDay(ZoneId.systemDefault());
         initialRow.setDate(zonedStart);
         initialRow.setDetail("SALDO INICIAL");
-        List<Balance> initialBalance = copyBalance(inventoryQueue);
-        initialRow.setBalance(initialBalance);
-        updateRowTotals(initialRow, initialBalance);
-        report.add(initialRow);
+        initialRow.setBalance(copyBalance(inventoryQueue));
+        updateRowTotals(initialRow, initialRow.getBalance());
+        fullReport.add(initialRow);*/
 
-        // Procesar movimientos del periodo
+        // Procesar todos los movimientos del periodo
         for (Kardex mov : periodMovements) {
             KardexReport row = new KardexReport();
             row.setDate(mov.getDate());
             row.setDetail(mov.getDetails());
 
-            if (mov.getType() == MovementType.PURCHASE) { // Entrada por Compra
+            if (mov.getType() == MovementType.PURCHASE) {
                 handlePurchase(mov, inventoryQueue, row);
-
-            } else if (mov.getType() == MovementType.SALE) { // Salida por Venta
+            } else if (mov.getType() == MovementType.SALE) {
                 handleSale(mov, inventoryQueue, row);
-
-            } else if (mov.getType() == MovementType.PURCHASE_RETURN) { // Salida por Devolución de Compra
+            } else if (mov.getType() == MovementType.PURCHASE_RETURN) {
                 handlePurchaseReturn(mov, inventoryQueue, row);
-
-            } else if (mov.getType() == MovementType.SALES_RETURN) { // Entrada por Devolución de Venta
+            } else if (mov.getType() == MovementType.SALES_RETURN) {
                 handleSalesReturn(mov, inventoryQueue, row);
             }
 
-            // Actualiza saldo después del movimiento
-            List<Balance> saldoActual = copyBalance(inventoryQueue);
-            row.setBalance(saldoActual);
-            updateRowTotals(row, saldoActual);
-            report.add(row);
+            row.setBalance(copyBalance(inventoryQueue));
+            updateRowTotals(row, row.getBalance());
+            fullReport.add(row);
         }
-        return report;
+
+        // --- PASO 2: Paginar la lista COMPLETA en memoria ---
+
+        int pageSize = pageable.getPageSize();
+        int currentPage = pageable.getPageNumber();
+        int startItem = currentPage * pageSize;
+        List<KardexReport> pagedList;
+
+        if (fullReport.size() < startItem) {
+            // Si el índice de inicio está fuera del tamaño de la lista, devuelve una lista vacía.
+            pagedList = Collections.emptyList();
+        } else {
+            int toIndex = Math.min(startItem + pageSize, fullReport.size());
+            pagedList = fullReport.subList(startItem, toIndex);
+        }
+
+        // --- PASO 3: Crear y devolver un objeto Page ---
+        // Se usa PageImpl para construir una implementación de Page.
+        return new PageImpl<>(pagedList, pageable, fullReport.size());
     }
 
     // Procesa todos los movimientos para construir el estado de la cola

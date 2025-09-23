@@ -61,4 +61,6 @@ public interface IKardexRestMapper {
     List<KardexRecordsDTOResponse> toDTORenponseRecords(List<KardexReport> kardex);
 
     List<KardexPurchaseDTOResponse> toDTOSaleReturn(List<Kardex> sales);
+
+    KardexRecordsDTOResponse toDTORecord(KardexReport kardexReport);
 }

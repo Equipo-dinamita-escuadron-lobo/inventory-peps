@@ -22,10 +22,9 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexSaleDTOResponse;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.mapper.IKardexRestMapper;
 import lombok.RequiredArgsConstructor;
-
 import java.util.List;
-
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -68,18 +67,26 @@ public class KardexPEPSController {
         return responseDTO.of();
     }
     @GetMapping("/kardexlist")
-    public ResponseEntity<ResponseDTO<List<KardexRecordsDTOResponse>>> getKardexListPEPSByDate(
+    public ResponseDTO<Page<KardexRecordsDTOResponse>>getKardexListPEPSByDate(
         @RequestParam @NotNull(message = "The product ID is required.") Long productId,
         @Valid @ModelAttribute KardexByDateDTORequest kardex,Pageable pageable) {
 
-        List<KardexReport> kardexReports=kardexQueryPort.getRecordsKardexByProduct(productId, kardex.getStartDate(),kardex.getEndDate());
-        List<KardexRecordsDTOResponse> kardexRecords=kardexRestMapper.toDTORenponseRecords(kardexReports);
-        ResponseDTO<List<KardexRecordsDTOResponse>> responseDTO=ResponseDTO.<List<KardexRecordsDTOResponse>>builder()
-        .data(kardexRecords)
-        .status(200)
-        .message("Kardex listened sucesfully").build();
+        // 1. Llama al servicio (esto ya es correcto)
+        Page<KardexReport> kardexReports = kardexQueryPort.getRecordsKardexByProduct(productId, kardex.getStartDate(), kardex.getEndDate(), pageable);
+        
+        // 2. Mapea la página usando el método correcto (ahora se llama toDTORecord)
+        // MapStruct aplicará toDTORecord a cada elemento de la página.
+        Page<KardexRecordsDTOResponse> kardexRecords = kardexReports.map(kardexRestMapper::toDTORecord);
 
-        return responseDTO.of();
+        // 3. Construye la respuesta (esto ya es correcto)
+        return  ResponseDTO.<Page<KardexRecordsDTOResponse>>builder() //response = ResponseDTO.<Page<KardexRecordsDTOResponse>>builder()
+                .data(kardexRecords)
+                .status(200)
+                .message("Kardex records retrieved successfully")
+                .build();
+        
+        // 4. Devuelve un ResponseEntity con el código de estado OK.
+        //return ResponseEntity.ok(response);
     }
     @PostMapping("/purchasereturn")
     public ResponseEntity<ResponseDTO<KardexPurchaseDTOResponse>> purchaseReturn(@RequestBody KardexPurchaseReturnDTORequest kardexPurchaseReturnDTORequest) {
