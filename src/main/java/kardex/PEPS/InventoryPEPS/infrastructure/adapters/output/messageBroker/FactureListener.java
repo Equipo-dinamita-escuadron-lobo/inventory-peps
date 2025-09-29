@@ -60,6 +60,19 @@ public class FactureListener extends AbstractMessageListener<EventDto<KardexRabb
                 kardexCommandPort.registerPurchaseReturn(kardexReturnOnPurchase);
                 log.info("Registering purchase-return in Kardex for product ID: {}", kardexReturnOnPurchase.getProduct().getProductId());        
             break;
+            case NONCOMMERCIALENTRY:
+                Kardex nonCommercialEntry=kardexRabbitMQMapper.toDomain(event.getData());
+                kardexCommandPort.registerNonCommercialEntry(nonCommercialEntry);
+                log.info("Registering Non-commercial-Entry in Kardex for product ID: {}",nonCommercialEntry.getProduct().getProductId());
+
+            break;
+            case NONCOMMERCIALEXIT:
+                Kardex nonCommercialExit=kardexRabbitMQMapper.toDomain(event.getData());
+                kardexCommandPort.registerNonCommercialExit(nonCommercialExit);
+                log.info("Registering Non-commercial-Exit in Kardex for product ID: {}");
+
+            break;
+
             default:
                 throw new IllegalArgumentException("Unsupported event type: " + event.getType());
         }

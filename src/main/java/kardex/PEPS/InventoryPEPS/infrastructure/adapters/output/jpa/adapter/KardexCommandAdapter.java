@@ -98,6 +98,55 @@ public class KardexCommandAdapter implements IKardexCommandOutputPort {
     public int updateAvaliableAmount(Long idKardex, int newAmount) {
         return kardexRepository.updateAvaliableAmount(idKardex, newAmount);
     }
+
+    @Override
+    public Kardex registerNonCommercialExit(Kardex kardex,List<Kardex> lotsToUpdate) {
+       
+         ProductEntity productEntity=productRepository.getReferenceById(kardex.getProduct().getId());
+
+
+
+        //actualizar el lote
+        for(Kardex domainLot:lotsToUpdate){
+            KardexEntity entityToUpdate=kardexEntityCommandMapper.toEntity(domainLot);
+            entityToUpdate.setProduct(productEntity);
+            kardexRepository.save(entityToUpdate);
+        }
+
+        //Guardamos primero el kardex de la venta
+        KardexEntity kardexEntity=kardexEntityCommandMapper.toEntity(kardex);
+        kardexEntity.setProduct(productEntity);
+        kardexEntity=kardexRepository.save(kardexEntity);
+
+
+        //Guardar detalles de la venta
+        for(DetailOutput detail:kardex.getDetailsOutput()){
+            DetailOutputEntity detailEntity=new DetailOutputEntity();
+            detailEntity.setAmountUsed(detail.getAmountUsed());
+            detailEntity.setUnitPrice(detail.getUnitPrice());
+
+            //movimientos de venta
+            detailEntity.setMovementSale(kardexEntity);
+
+            // Usar el ID del movimiento de origen desde la referencia del objeto
+            KardexEntity originEntity=kardexRepository.getReferenceById(detail.getMovementOrigin().getIdKardex());
+            detailEntity.setMovementOrigin(originEntity);
+
+            detailOutPutRepository.save(detailEntity);
+
+        }
+       
+        return kardexEntityCommandMapper.toDomain(kardexEntity);
+
+    }
+
+    @Override
+    public Kardex registerNonCommercialEntry(Kardex kardex) {
+        ProductEntity productEntity=productRepository.getReferenceById(kardex.getProduct().getId());
+        KardexEntity kardexEntity=kardexEntityCommandMapper.toEntity(kardex);
+        kardexEntity.setProduct(productEntity);
+       return kardexEntityCommandMapper.toDomain(kardexRepository.save(kardexEntity));
+    }
     
    
 
