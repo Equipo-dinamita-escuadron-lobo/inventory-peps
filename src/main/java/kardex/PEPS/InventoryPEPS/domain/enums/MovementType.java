@@ -5,5 +5,7 @@ public enum MovementType {
     SALE, 
     OPENING_BALANCE,
     PURCHASE_RETURN,
-    SALES_RETURN
+    SALES_RETURN,
+    nonCommercialExit,
+    nonCommercialEntry
 }

@@ -9,5 +9,8 @@ public interface  IKardexCommandPort {
      Kardex registerSale(Kardex kardex);
      Kardex registerPurchaseReturn(Kardex kardex);
      List<Kardex> registerSaleReturn(Kardex kardex);
+     Kardex registerNonCommercialExit(Kardex kardex);
+     Kardex registerNonCommercialEntry(Kardex kardex);
+
     
 }

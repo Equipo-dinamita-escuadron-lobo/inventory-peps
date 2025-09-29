@@ -9,6 +9,7 @@ import org.mapstruct.Named;
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.domain.model.KardexReport;
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
+import kardex.PEPS.InventoryPEPS.domain.model.SaleDetail;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.request.KardexPurchaseDTORequest;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.request.KardexPurchaseReturnDTORequest;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.request.KardexSaleDTORequest;
@@ -16,6 +17,7 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.request.
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexPurchaseDTOResponse;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexRecordsDTOResponse;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexSaleDTOResponse;
+import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.SaleDetailDTO;
 
 @Mapper(componentModel ="spring")
 public interface IKardexRestMapper {
@@ -63,4 +65,13 @@ public interface IKardexRestMapper {
     List<KardexPurchaseDTOResponse> toDTOSaleReturn(List<Kardex> sales);
 
     KardexRecordsDTOResponse toDTORecord(KardexReport kardexReport);
+    
+    // Mapea los detalles de salida
+    SaleDetailDTO toSaleDetailDTO(SaleDetail saleDetail);
+    
+    // Mapea listas de detalles
+    List<SaleDetailDTO> toSaleDetailDTOs(List<SaleDetail> saleDetails);
+
+
+    
 }

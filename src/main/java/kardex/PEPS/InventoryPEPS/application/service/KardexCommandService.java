@@ -160,7 +160,7 @@ public class KardexCommandService implements IKardexCommandPort {
         Kardex returnMovement = new Kardex();
         returnMovement.setProduct(product.get()); // Usar el mismo producto
         returnMovement.setFactCode(originalPurchase.getFactCode()); // Referenciar la misma factura
-        returnMovement.setDetails("Return of purchase: " + originalPurchase.getIdKardex());
+        returnMovement.setDetails(kardex.getDetails());
         returnMovement.setQuantity(originalPurchase.getQuantity());
         returnMovement.setUnitPrice(originalPurchase.getUnitPrice());
         returnMovement.setDate(ZonedDateTime.now());
@@ -226,7 +226,7 @@ public class KardexCommandService implements IKardexCommandPort {
                 Kardex returnMovement = new Kardex();
                 returnMovement.setProduct(product.get());
                 returnMovement.setFactCode(originalSale.getFactCode());
-                returnMovement.setDetails("Return for sale " + originalSale.getIdKardex() + ", from purchase lot " + originalPurchaseLot.getIdKardex());
+                returnMovement.setDetails(kardex.getDetails());
                 returnMovement.setQuantity(detail.getAmountUsed());
                 returnMovement.setUnitPrice(detail.getUnitPrice()); // Precio de la venta
                 returnMovement.setDate(ZonedDateTime.now());
@@ -241,6 +241,90 @@ public class KardexCommandService implements IKardexCommandPort {
             }
        }
            return createdReturnMovements;
+    }
+
+
+    @Override
+    public Kardex registerNonCommercialExit(Kardex kardex) {
+        int quantityToSell = kardex.getQuantity();
+        Long productId = kardex.getProduct().getProductId();
+        verifyAmount(quantityToSell);
+        Optional<Product> product=existProductByProductId(productId);
+        
+        // --- 1. PREPARACIÓN Y VALIDACIÓN ---
+
+        // Obtenemos todos los lotes de compra con saldo disponible, ordenados por fecha (PEPS)
+        List<Kardex> availablePurchases = kardexQueryOutputPort.findAvailablePurchasesOrderedByDate(product.get().getProductId());
+
+        // Verificamos el stock total en memoria para evitar una consulta extra
+        int totalAmountAvailable = availablePurchases.stream()
+                                                    .mapToInt(Kardex::getAvailableQuantity)
+                                                    .sum();
+        if (totalAmountAvailable < quantityToSell) {
+            log.info("Insufficient stock. Requested: " + quantityToSell + ", Available: " +  totalAmountAvailable);
+            formatterResultOutputPort.returnBusinessRuleErrorResponse(400, "Insufficient stock. Requested: " + quantityToSell + ", Available: " +  totalAmountAvailable);
+        }
+        
+        // --- 2. LÓGICA PEPS: PROCESAMIENTO EN MEMORIA ---
+
+        List<DetailOutput> detailsToCreate = new ArrayList<>();
+        List<Kardex> lotsToUpdate = new ArrayList<>(); // <-- Lista para registrar los lotes actualizados
+        int remainingQuantityToSell = quantityToSell;
+
+        for (Kardex purchaseLot : availablePurchases) {
+            if (remainingQuantityToSell <= 0) {
+                break; // Venta completada
+            }
+
+            int amountToTakeFromLot = Math.min(remainingQuantityToSell, purchaseLot.getAvailableQuantity());
+
+            // Si se usa algo de este lote, se actualiza y se añade a la lista para persistir
+            if (amountToTakeFromLot > 0) {
+                int newAvailableAmount = purchaseLot.getAvailableQuantity() - amountToTakeFromLot;
+                purchaseLot.setAvailableQuantity(newAvailableAmount);
+                lotsToUpdate.add(purchaseLot); // <-- ¡Clave! Registrar el lote modificado
+
+                // Creamos el detalle de la salida
+                DetailOutput detail = new DetailOutput();
+                detail.setAmountUsed(amountToTakeFromLot);
+                detail.setUnitPrice(purchaseLot.getUnitPrice());
+                detail.setMovementOrigin(purchaseLot); // Vinculamos al lote de COMPRA
+                
+                detailsToCreate.add(detail);
+                
+                remainingQuantityToSell -= amountToTakeFromLot;
+            }
+        }
+
+        //creacion del movimiento de salida no comercial
+
+        Kardex nonCommercialExit = new Kardex();
+       // saleMovement.setProduct(kardexSaleRequest.getProduct());
+        nonCommercialExit.setProduct(product.get());
+        nonCommercialExit.setFactCode(kardex.getFactCode());
+        nonCommercialExit.setDetails(kardex.getDetails());
+        nonCommercialExit.setQuantity(quantityToSell);
+        nonCommercialExit.setDate(ZonedDateTime.now());
+        nonCommercialExit.setType(MovementType.nonCommercialEntry);
+        nonCommercialExit.setAvailableQuantity(0); // Las ventas no tienen saldo
+        nonCommercialExit.setDetailsOutput(detailsToCreate); // Asignamos los detalles creados
+
+        
+        return kardexCommandOutputPort.registerNonCommercialExit(nonCommercialExit,lotsToUpdate);
+
+    }
+
+    @Override
+    public Kardex registerNonCommercialEntry(Kardex kardex) {
+       
+        Optional<Product> product=existProductByProductId(kardex.getProduct().getProductId());
+        verifyAmount(kardex.getQuantity());
+        
+        kardex.setProduct( product.get());
+        kardex.setDate(ZonedDateTime.now());
+        kardex.setType(MovementType.nonCommercialEntry);
+        kardex.setAvailableQuantity(kardex.getQuantity());
+        return kardexCommandOutputPort.registerNonCommercialEntry(kardex);
     }
 
 
