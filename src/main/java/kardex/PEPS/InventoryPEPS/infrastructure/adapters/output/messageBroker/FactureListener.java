@@ -36,7 +36,6 @@ public class FactureListener extends AbstractMessageListener<EventDto<KardexRabb
         handleMessage(event, channel, deliveryTag);
     }
 
-
     @Override
     protected void processEvent(EventDto<KardexRabbitDto, EventFactureType> event) {
         switch (event.getType()) {

@@ -14,13 +14,18 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity.Produ
 @Mapper(componentModel = "spring")
 public interface  IProductEntityMapper {
 
-   @Mapping(target = "recordsKardex", ignore=true)
+    @Mapping(target = "recordsKardex", ignore = true)
     Product toDomain(ProductEntity productEntity);
 
+    @Mapping(target = "recordsKardex", ignore = true)
     ProductEntity toEntity(Product product);
 
     List<ProductEntity> toEntity(List<Product> products);
 
+
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "recordsKardex", ignore = true)
     void updateEntityFromProduct(Product product, @MappingTarget ProductEntity entity);
+
+
 }

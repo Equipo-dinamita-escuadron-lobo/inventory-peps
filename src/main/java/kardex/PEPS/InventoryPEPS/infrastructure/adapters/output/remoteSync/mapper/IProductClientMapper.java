@@ -8,9 +8,9 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.remoteSync.dto.P
 
 @Mapper(componentModel = "spring")
 public interface IProductClientMapper {
-    ProductSyncDto toDto(Product product);
 
+    ProductSyncDto toDto(Product product);
+    
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "manager", ignore = true)
     Product toDomain(ProductSyncDto dto);
 }

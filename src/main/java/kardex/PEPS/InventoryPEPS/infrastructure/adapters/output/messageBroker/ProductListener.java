@@ -40,6 +40,7 @@ public class ProductListener extends AbstractMessageListener<EventDto<ProductAsy
         this.eventRecoveryActionPort = productRecoveryActionPort;
     }
 
+    
     /**
      * @brief Handles product events from RabbitMQ queue
      * @param event Product event with data and type information

@@ -3,8 +3,6 @@ package kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.respons
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
-
-import kardex.PEPS.InventoryPEPS.domain.model.Balance;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,13 +22,8 @@ public class KardexRecordsDTOResponse {
     private BigDecimal entryTotalPrice;
 
     private List<SaleDetailDTO> outputDetails;  
-    private Integer outputQuantity;            
-    private BigDecimal outputTotalPrice;   
-
-    private List<Balance> balance;
-
-
-    private int totalBalanceQuantity;
-    private BigDecimal totalBalanceValue;
     
+    private List<BanlanceDTO> balance;
+
+
 }

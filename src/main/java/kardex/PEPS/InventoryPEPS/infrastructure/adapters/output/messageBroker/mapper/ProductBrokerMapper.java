@@ -8,8 +8,8 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.dt
 
 @Mapper(componentModel = "spring")
 public interface ProductBrokerMapper {  
+
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "manager", ignore = true)
     Product toDomain(ProductAsyncDto productAsyncDto);
     
 }

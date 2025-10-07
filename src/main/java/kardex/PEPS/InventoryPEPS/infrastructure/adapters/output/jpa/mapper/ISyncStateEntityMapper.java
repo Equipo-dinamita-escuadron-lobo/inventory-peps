@@ -7,6 +7,7 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity.SyncS
 
 @Mapper(componentModel = "spring")
 public interface ISyncStateEntityMapper {
+
     SyncState toDomain(SyncStateEntity entity);
     SyncStateEntity toEntity(SyncState domain);
 }
