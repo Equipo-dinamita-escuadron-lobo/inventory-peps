@@ -1,4 +1,4 @@
-package kardex.PEPS.InventoryPEPS.application.service;
+package kardex.PEPS.InventoryPEPS.application.service.query;
 
 import java.util.List;
 
@@ -24,5 +24,6 @@ public class ProductQueryService implements IProductQueryPort {
         log.info(messageServicePort.getMessage(MessageKeys.LOG_PRODUCT_QUERY_ALL, enterpriseId));
         return productQueryOutputPort.findAll(enterpriseId);
     }
+    
     
 }

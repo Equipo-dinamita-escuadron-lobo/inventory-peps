@@ -1,4 +1,4 @@
-package kardex.PEPS.InventoryPEPS.application.service;
+package kardex.PEPS.InventoryPEPS.application.service.command;
 
 import org.springframework.stereotype.Service;
 
@@ -29,6 +29,7 @@ public class StockIntegrationService {
             .build();
     }
 
+    
     /**
      * Llama al servicio de stock para actualizar el inventario
      */

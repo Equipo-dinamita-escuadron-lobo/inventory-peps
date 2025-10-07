@@ -30,7 +30,7 @@ public class DetailOutputEntity {
     private int amountUsed;
 
     @Column(name="unit_value", nullable = false)
-    private BigDecimal UnitPrice;
+    private BigDecimal unitPrice;
 
    @ManyToOne
     @JoinColumn(name = "id_movement_sale")

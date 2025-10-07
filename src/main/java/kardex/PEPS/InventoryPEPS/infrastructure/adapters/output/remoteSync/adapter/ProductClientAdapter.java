@@ -17,7 +17,6 @@ public class ProductClientAdapter  implements IProductClientPort {
     private final IProductClientMapper productClientMapper;
     private final IProductClient productClient;
 
-
     @Override
     public List<Product> findAllProductsByEnterpriseId(String enterpriseId, Instant since) {
         return productClient.findAllProductsByEnterpriseId(enterpriseId, since)

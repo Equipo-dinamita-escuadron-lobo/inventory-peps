@@ -11,8 +11,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SaleDetailDTO {
-    private int quantityUsed;        
-    private BigDecimal unitPrice;  
+public class BanlanceDTO {
+    private int quantity;
+    private BigDecimal unitPrice;
     private BigDecimal totalPrice;
 }

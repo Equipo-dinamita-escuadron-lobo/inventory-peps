@@ -22,7 +22,6 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response
 @Mapper(componentModel ="spring")
 public interface IKardexRestMapper {
 
-
     @Mapping(target = "product", source = "productId", qualifiedByName = "idToProduct")
    @Mapping(target = "date", ignore = true)
     @Mapping(target = "idKardex", ignore = true)
@@ -71,7 +70,5 @@ public interface IKardexRestMapper {
     
     // Mapea listas de detalles
     List<SaleDetailDTO> toSaleDetailDTOs(List<SaleDetail> saleDetails);
-
-
     
 }

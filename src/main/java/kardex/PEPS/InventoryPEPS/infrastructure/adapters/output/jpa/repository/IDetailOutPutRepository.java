@@ -1,7 +1,6 @@
 package kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.repository;
 
 import java.util.List;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,4 +12,10 @@ public interface  IDetailOutPutRepository extends JpaRepository<DetailOutputEnti
   @Query("SELECT d FROM DetailOutputEntity d JOIN FETCH d.movementOrigin WHERE d.movementSale.idKardex = :idMovementSale")
   List<DetailOutputEntity> findByMovementSaleId(@Param("idMovementSale") Long idMovementSale);
 
+  @Query("SELECT d FROM DetailOutputEntity d WHERE d.movementSale.idKardex = :idKardex")
+    List<DetailOutputEntity> findByMovementSale(@Param("idKardex") Long idKardex);
+    
+  @Query("SELECT d FROM DetailOutputEntity d WHERE d.movementSale.idKardex = :idKardex ORDER BY d.idDetailOutput DESC")
+  List<DetailOutputEntity> findByMovementSaleOrderedDesc(@Param("idKardex") Long idKardex);
+ 
 }

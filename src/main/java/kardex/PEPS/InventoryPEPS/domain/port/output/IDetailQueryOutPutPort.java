@@ -7,5 +7,8 @@ public interface IDetailQueryOutPutPort {
 
     List<DetailOutput> findByMovementSale(Long idMovementsale);
     void deleteById(Long id);
+
+    List<DetailOutput> findByMovementSaleOrderedDesc(Long idKardexSale);
+    DetailOutput update(DetailOutput detail);
     
 }
