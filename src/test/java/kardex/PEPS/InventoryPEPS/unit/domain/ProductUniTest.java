@@ -10,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +23,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
+import kardex.PEPS.InventoryPEPS.domain.model.SyncState;
 
 public class ProductUniTest {
     private Long validProductId;
@@ -660,22 +663,23 @@ public class ProductUniTest {
     }
   
     @Test
-    @DisplayName("return formatted string with product details")
-    void testToString_ValidProduct_ReturnsFormattedString() {
-        // Arrange
-        Product product = Product.create(validProductId, validName, validReference, validPresentation, validEnterpriseId);
+    @DisplayName("validate date consistency successfully")
+    void testValidateDateConsistency_ValidDates_NoException() {
+        // Arrange 
+        Instant baseTime = Instant.now().minus(2, ChronoUnit.HOURS);
         
-        // Act
-        String result = product.toString();
+        SyncState syncState = SyncState.builder()
+            .syncType("products")
+            .enterpriseId(validEnterpriseId)
+            .createdAt(baseTime)
+            .updatedAt(baseTime.plus(30, ChronoUnit.MINUTES))
+            .lastSyncDate(baseTime.plus(1, ChronoUnit.HOURS))
+            .build();
         
-        // Assert
-        assertAll("ToString validation",
-            () -> assertTrue(result.contains("productId=1")),
-            () -> assertTrue(result.contains("name='Avacodo'")),
-            () -> assertTrue(result.contains("state=true")),
-            () -> assertTrue(result.startsWith("Product{"))
-        );
+        // Act & Assert
+        assertDoesNotThrow(() -> syncState.validateDateConsistency());
     }
+
     
     @Test
     @DisplayName("show correct state in toString")

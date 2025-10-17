@@ -224,7 +224,7 @@ public class SyncStateUnitTest {
         // Arrange
         SyncState syncState = SyncState.createInitialProductSync(validEnterpriseId);
         
-        // Act & Assert
+        // Act y Assert
         assertTrue(syncState.isFirstSync());
     }
     
@@ -235,7 +235,7 @@ public class SyncStateUnitTest {
         Instant recentDate = Instant.now().minus(1, ChronoUnit.DAYS);
         SyncState syncState = SyncState.createForProductSync(validEnterpriseId, recentDate);
         
-        // Act & Assert
+        // Act y Assert
         assertFalse(syncState.isFirstSync());
     }
     
@@ -249,7 +249,7 @@ public class SyncStateUnitTest {
             .lastSyncDate(null)
             .build();
         
-        // Act & Assert
+        // Act y Assert
         assertTrue(syncState.isFirstSync());
     }
     
@@ -261,7 +261,7 @@ public class SyncStateUnitTest {
         SyncState syncState = SyncState.createForProductSync(validEnterpriseId, oldDate);
         Instant threshold = Instant.now().minus(5, ChronoUnit.DAYS);
         
-        // Act & Assert
+        // Act y Assert
         assertTrue(syncState.isOutdated(threshold));
     }
     
@@ -279,7 +279,7 @@ public class SyncStateUnitTest {
     
     @Test
     @DisplayName("return true when last sync date is null")
-    void testIsOutdated_NullLastSyncDate_ReturnsTrue() {
+    void testIsOutdated_NullLastSyncDate() {
         // Arrange
         SyncState syncState = SyncState.builder()
             .syncType("products")
@@ -294,8 +294,8 @@ public class SyncStateUnitTest {
     
 
     @Test
-    @DisplayName("Should return true when sync is needed after specified minutes")
-    void testNeedsSyncAfterMinutes_OldSync_ReturnsTrue() {
+    @DisplayName("return true when sync is needed after specified minutes")
+    void testNeedsSyncAfterMinutes_OldSync() {
         // Arrange
         Instant oldDate = Instant.now().minus(65, ChronoUnit.MINUTES);
         SyncState syncState = SyncState.createForProductSync(validEnterpriseId, oldDate);
@@ -306,18 +306,18 @@ public class SyncStateUnitTest {
     
     @Test
     @DisplayName("Should return false when sync is recent")
-    void testNeedsSyncAfterMinutes_RecentSync_ReturnsFalse() {
+    void testNeedsSyncAfterMinutes_RecentSync() {
         // Arrange
         Instant recentDate = Instant.now().minus(30, ChronoUnit.MINUTES);
         SyncState syncState = SyncState.createForProductSync(validEnterpriseId, recentDate);
         
-        // Act & Assert
+        // Act y Assert
         assertFalse(syncState.needsSyncAfterMinutes(60));
     }
     
     @Test
-    @DisplayName("Should return true when last sync date is null")
-    void testNeedsSyncAfterMinutes_NullLastSyncDate_ReturnsTrue() {
+    @DisplayName("return true when last sync date is null")
+    void testNeedsSyncAfterMinutes_NullLastSyncDate() {
         // Arrange
         SyncState syncState = SyncState.builder()
             .syncType("products")
@@ -325,14 +325,14 @@ public class SyncStateUnitTest {
             .lastSyncDate(null)
             .build();
         
-        // Act & Assert
+        // Act y Assert
         assertTrue(syncState.needsSyncAfterMinutes(60));
     }
     
-    // ==================== getMinutesSinceLastSync() ====================
+
     @Test
-    @DisplayName("Should calculate minutes since last sync correctly")
-    void testGetMinutesSinceLastSync_WithLastSync_ReturnsCorrectMinutes() {
+    @DisplayName("calculate minutes since last sync correctly")
+    void testGetMinutesSinceLastSync_WithLastSync() {
         // Arrange
         Instant syncDate = Instant.now().minus(120, ChronoUnit.MINUTES);
         SyncState syncState = SyncState.createForProductSync(validEnterpriseId, syncDate);
@@ -341,11 +341,11 @@ public class SyncStateUnitTest {
         long minutes = syncState.getMinutesSinceLastSync();
         
         // Assert
-        assertTrue(minutes >= 119 && minutes <= 121); // Allow 1 minute tolerance
+        assertTrue(minutes >= 119 && minutes <= 121); 
     }
     
     @Test
-    @DisplayName("Should return max value when last sync date is null")
+    @DisplayName("return max value when last sync date is null")
     void testGetMinutesSinceLastSync_NullLastSyncDate_ReturnsMaxValue() {
         // Arrange
         SyncState syncState = SyncState.builder()
@@ -354,13 +354,13 @@ public class SyncStateUnitTest {
             .lastSyncDate(null)
             .build();
         
-        // Act & Assert
+        // Act y Assert
         assertEquals(Long.MAX_VALUE, syncState.getMinutesSinceLastSync());
     }
     
-    // ==================== getMinutesSinceCreation() ====================
+ 
     @Test
-    @DisplayName("Should calculate minutes since creation correctly")
+    @DisplayName("calculate minutes since creation correctly")
     void testGetMinutesSinceCreation_WithCreatedAt_ReturnsPositiveValue() {
         // Arrange
         SyncState syncState = SyncState.createForProductSync(validEnterpriseId, validSyncDate);
@@ -373,8 +373,8 @@ public class SyncStateUnitTest {
     }
     
     @Test
-    @DisplayName("Should return zero when created at is null")
-    void testGetMinutesSinceCreation_NullCreatedAt_ReturnsZero() {
+    @DisplayName("return zero when created at is null")
+    void testGetMinutesSinceCreation_NullCreatedAt() {
         // Arrange
         SyncState syncState = SyncState.builder()
             .syncType("products")
@@ -382,14 +382,14 @@ public class SyncStateUnitTest {
             .createdAt(null)
             .build();
         
-        // Act & Assert
+        // Act y Assert
         assertEquals(0, syncState.getMinutesSinceCreation());
     }
     
-    // ==================== isProductSync() ====================
+
     @Test
-    @DisplayName("Should return true for product sync type")
-    void testIsProductSync_ProductType_ReturnsTrue() {
+    @DisplayName("return true for product sync type")
+    void testIsProductSync_ProductType() {
         // Arrange
         SyncState syncState = SyncState.createForProductSync(validEnterpriseId, validSyncDate);
         
@@ -398,22 +398,22 @@ public class SyncStateUnitTest {
     }
     
     @Test
-    @DisplayName("Should return false for non-product sync type")
-    void testIsProductSync_DifferentType_ReturnsFalse() {
+    @DisplayName("return false for non-product sync type")
+    void testIsProductSync_DifferentType() {
         // Arrange
         SyncState syncState = SyncState.builder()
             .syncType("orders")
             .enterpriseId(validEnterpriseId)
             .build();
         
-        // Act & Assert
+        // Act y Assert
         assertFalse(syncState.isProductSync());
     }
     
-    // ==================== wasUpdatedInLastMinutes() ====================
+
     @Test
-    @DisplayName("Should return true when updated recently")
-    void testWasUpdatedInLastMinutes_RecentUpdate_ReturnsTrue() {
+    @DisplayName("return true when updated recently")
+    void testWasUpdatedInLastMinutes_RecentUpdate() {
         // Arrange
         SyncState syncState = SyncState.createForProductSync(validEnterpriseId, validSyncDate);
         
@@ -422,7 +422,7 @@ public class SyncStateUnitTest {
     }
     
     @Test
-    @DisplayName("Should return false when updated long ago")
+    @DisplayName("return false when updated long ago")
     void testWasUpdatedInLastMinutes_OldUpdate_ReturnsFalse() {
         // Arrange
         SyncState syncState = SyncState.builder()
@@ -431,13 +431,13 @@ public class SyncStateUnitTest {
             .updatedAt(Instant.now().minus(120, ChronoUnit.MINUTES))
             .build();
         
-        // Act & Assert
+        // Act y Assert
         assertFalse(syncState.wasUpdatedInLastMinutes(60));
     }
     
     @Test
-    @DisplayName("Should return false when updated at is null")
-    void testWasUpdatedInLastMinutes_NullUpdatedAt_ReturnsFalse() {
+    @DisplayName("return false when updated at is null")
+    void testWasUpdatedInLastMinutes_NullUpdatedAt() {
         // Arrange
         SyncState syncState = SyncState.builder()
             .syncType("products")
@@ -445,14 +445,14 @@ public class SyncStateUnitTest {
             .updatedAt(null)
             .build();
         
-        // Act & Assert
+        // Act y Assert
         assertFalse(syncState.wasUpdatedInLastMinutes(60));
     }
     
-    // ==================== validateForUpdate() ====================
+ 
     @Test
-    @DisplayName("Should validate successfully for update")
-    void testValidateForUpdate_ValidState_NoException() {
+    @DisplayName("validate successfully for update")
+    void testValidateForUpdate_ValidState() {
         // Arrange
         SyncState syncState = SyncState.createForProductSync(validEnterpriseId, validSyncDate);
         
@@ -463,15 +463,15 @@ public class SyncStateUnitTest {
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {"  ", "\t"})
-    @DisplayName("Should throw exception when enterprise ID is invalid for update")
-    void testValidateForUpdate_InvalidEnterpriseId_ThrowsException(String invalidEnterpriseId) {
+    @DisplayName("throw exception when enterprise ID is invalid for update")
+    void testValidateForUpdate_InvalidEnterpriseId(String invalidEnterpriseId) {
         // Arrange
         SyncState syncState = SyncState.builder()
             .syncType("products")
             .enterpriseId(invalidEnterpriseId)
             .build();
         
-        // Act & Assert
+        // Act y Assert
         IllegalStateException exception = assertThrows(
             IllegalStateException.class,
             () -> syncState.validateForUpdate()
@@ -483,15 +483,15 @@ public class SyncStateUnitTest {
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {"  ", "\t"})
-    @DisplayName("Should throw exception when sync type is invalid for update")
-    void testValidateForUpdate_InvalidSyncType_ThrowsException(String invalidSyncType) {
+    @DisplayName("throw exception when sync type is invalid for update")
+    void testValidateForUpdate_InvalidSyncType(String invalidSyncType) {
         // Arrange
         SyncState syncState = SyncState.builder()
             .syncType(invalidSyncType)
             .enterpriseId(validEnterpriseId)
             .build();
         
-        // Act & Assert
+        // Act y Assert
         IllegalStateException exception = assertThrows(
             IllegalStateException.class,
             () -> syncState.validateForUpdate()
@@ -500,20 +500,10 @@ public class SyncStateUnitTest {
         assertEquals("Cannot update sync state without sync type", exception.getMessage());
     }
     
-    // ==================== validateDateConsistency() ====================
-    @Test
-    @DisplayName("Should validate date consistency successfully")
-    void testValidateDateConsistency_ValidDates_NoException() {
-        // Arrange
-        SyncState syncState = SyncState.createForProductSync(validEnterpriseId, validSyncDate);
-        
-        // Act & Assert
-        assertDoesNotThrow(() -> syncState.validateDateConsistency());
-    }
     
     @Test
-    @DisplayName("Should throw exception when updated date is before created date")
-    void testValidateDateConsistency_UpdatedBeforeCreated_ThrowsException() {
+    @DisplayName("throw exception when updated date is before created date")
+    void testValidateDateConsistency_UpdatedBeforeCreated() {
         // Arrange
         Instant createdAt = Instant.now();
         Instant updatedAt = createdAt.minus(1, ChronoUnit.HOURS);
@@ -525,7 +515,7 @@ public class SyncStateUnitTest {
             .updatedAt(updatedAt)
             .build();
         
-        // Act & Assert
+        // Act y Assert
         IllegalStateException exception = assertThrows(
             IllegalStateException.class,
             () -> syncState.validateDateConsistency()
@@ -535,8 +525,8 @@ public class SyncStateUnitTest {
     }
     
     @Test
-    @DisplayName("Should throw exception when last sync date is before created date")
-    void testValidateDateConsistency_LastSyncBeforeCreated_ThrowsException() {
+    @DisplayName("throw exception when last sync date is before created date")
+    void testValidateDateConsistency_LastSyncBeforeCreated() {
         // Arrange
         Instant createdAt = Instant.now();
         Instant lastSyncDate = createdAt.minus(1, ChronoUnit.HOURS);
@@ -548,7 +538,7 @@ public class SyncStateUnitTest {
             .lastSyncDate(lastSyncDate)
             .build();
         
-        // Act & Assert
+        // Act y Assert
         IllegalStateException exception = assertThrows(
             IllegalStateException.class,
             () -> syncState.validateDateConsistency()
@@ -557,9 +547,9 @@ public class SyncStateUnitTest {
         assertEquals("Last sync date cannot be before created date", exception.getMessage());
     }
     
-    // ==================== resetToInitialState() ====================
+ 
     @Test
-    @DisplayName("Should reset to initial state")
+    @DisplayName("reset to initial state")
     void testResetToInitialState_ResetsDateToDefault() {
         // Arrange
         SyncState syncState = SyncState.createForProductSync(validEnterpriseId, validSyncDate);
@@ -576,19 +566,19 @@ public class SyncStateUnitTest {
         );
     }
     
-    // ==================== equals() ====================
+
     @Test
-    @DisplayName("Should be equal when same instance")
+    @DisplayName("be equal when same instance")
     void testEquals_SameInstance_ReturnsTrue() {
         // Arrange
         SyncState syncState = SyncState.createForProductSync(validEnterpriseId, validSyncDate);
         
-        // Act & Assert
+        // Act y Assert
         assertEquals(syncState, syncState);
     }
     
     @Test
-    @DisplayName("Should be equal when same ID")
+    @DisplayName("be equal when same ID")
     void testEquals_SameId_ReturnsTrue() {
         // Arrange
         SyncState syncState1 = SyncState.builder()
@@ -603,23 +593,23 @@ public class SyncStateUnitTest {
             .enterpriseId("ENT-002")
             .build();
         
-        // Act & Assert
+        // Act y Assert
         assertEquals(syncState1, syncState2);
     }
     
     @Test
-    @DisplayName("Should not be equal when different IDs")
+    @DisplayName("not be equal when different IDs")
     void testEquals_DifferentIds_ReturnsFalse() {
         // Arrange
         SyncState syncState1 = SyncState.builder().id(1L).build();
         SyncState syncState2 = SyncState.builder().id(2L).build();
         
-        // Act & Assert
+        // Act y Assert
         assertNotEquals(syncState1, syncState2);
     }
     
     @Test
-    @DisplayName("Should not be equal to null")
+    @DisplayName("not be equal to null")
     void testEquals_NullObject_ReturnsFalse() {
         // Arrange
         SyncState syncState = SyncState.createForProductSync(validEnterpriseId, validSyncDate);
@@ -627,21 +617,20 @@ public class SyncStateUnitTest {
         // Act & Assert
         assertNotEquals(syncState, null);
     }
-    
-    // ==================== hashCode() ====================
+
     @Test
-    @DisplayName("Should return same hashCode for equal objects")
+    @DisplayName("return same hashCode for equal objects")
     void testHashCode_EqualObjects_ReturnsSameHash() {
         // Arrange
         SyncState syncState1 = SyncState.builder().id(1L).build();
         SyncState syncState2 = SyncState.builder().id(1L).build();
         
-        // Act & Assert
+        // Act y Assert
         assertEquals(syncState1.hashCode(), syncState2.hashCode());
     }
     
     @Test
-    @DisplayName("Should return consistent hashCode")
+    @DisplayName("return consistent hashCode")
     void testHashCode_MultipleInvocations_ReturnsConsistent() {
         // Arrange
         SyncState syncState = SyncState.createForProductSync(validEnterpriseId, validSyncDate);
@@ -659,9 +648,8 @@ public class SyncStateUnitTest {
         );
     }
     
-    // ==================== toString() ====================
     @Test
-    @DisplayName("Should return formatted string with all details")
+    @DisplayName("return formatted string with all details")
     void testToString_ValidState_ReturnsFormattedString() {
         // Arrange
         SyncState syncState = SyncState.createForProductSync(validEnterpriseId, validSyncDate);
@@ -681,11 +669,11 @@ public class SyncStateUnitTest {
         );
     }
     
-    // ==================== Builder Pattern Tests ====================
+
     @Test
-    @DisplayName("Should create sync state using builder")
+    @DisplayName("Screate sync state using builder")
     void testBuilder_ValidValues_CreatesSyncState() {
-        // Arrange & Act
+        // Arrange y Act
         SyncState syncState = SyncState.builder()
             .id(1L)
             .syncType("products")
