@@ -16,7 +16,7 @@ import lombok.Setter;
 @Builder
 public class DetailOutput {
     private Long idDetailOutput;
-    private int amountUsed;
+    private int quantityUsed;
     private BigDecimal unitPrice;
     private Kardex movementSale;
     private Kardex movementOrigin;
@@ -32,7 +32,7 @@ public class DetailOutput {
         validateFIFORule(movementOrigin, movementSale);
         
         DetailOutput detail = new DetailOutput();
-        detail.setAmountUsed(amountUsed);
+        detail.setQuantityUsed(amountUsed);
         detail.setUnitPrice(unitPrice);
         detail.setMovementSale(movementSale);
         detail.setMovementOrigin(movementOrigin);
@@ -41,7 +41,7 @@ public class DetailOutput {
     }
 
     public BigDecimal getTotalValue() {
-        return this.unitPrice.multiply(BigDecimal.valueOf(this.amountUsed));
+        return this.unitPrice.multiply(BigDecimal.valueOf(this.quantityUsed));
     }
 
     public boolean belongsToSaleMovement(Kardex saleMovement) {
@@ -70,7 +70,7 @@ public class DetailOutput {
         if (!belongsToSameProduct()) {
             throw new IllegalArgumentException("Origin and sale movements must belong to the same product");
         }
-        if (!movementOrigin.canReduceQuantity(amountUsed)) {
+        if (!movementOrigin.canReduceQuantity(quantityUsed)) {
             throw new IllegalArgumentException("Origin movement does not have enough available quantity");
         }
     }
@@ -111,7 +111,7 @@ public class DetailOutput {
     @Override
     public String toString() {
         return String.format("DetailOutput{id=%d, amountUsed=%d, unitPrice=%s}", 
-            idDetailOutput, amountUsed, unitPrice);
+            idDetailOutput, quantityUsed, unitPrice);
     }
     
 
