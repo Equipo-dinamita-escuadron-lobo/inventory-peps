@@ -159,7 +159,7 @@ public class Kardex {
         this.availableQuantity -= amountToReduce;
     }
 
-      public void restoreAvailableQuantity(int amountToRestore) {
+    public void restoreAvailableQuantity(int amountToRestore) {
         if (amountToRestore <= 0) {
             throw new IllegalArgumentException("Amount to restore must be positive");
         }
@@ -180,7 +180,7 @@ public class Kardex {
         return this.availableQuantity > 0;
     }
 
-     public boolean isPurchase() {
+    public boolean isPurchase() {
         return this.type == MovementType.PURCHASE;
     }
     

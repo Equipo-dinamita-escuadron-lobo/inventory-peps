@@ -2,14 +2,11 @@ package kardex.PEPS.InventoryPEPS.application.service.command;
 
 
 import java.math.BigDecimal;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import kardex.PEPS.InventoryPEPS.application.ports.input.IKardexCommandPort;
-import kardex.PEPS.InventoryPEPS.domain.enums.MovementType;
 import kardex.PEPS.InventoryPEPS.domain.model.DetailOutput;
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
@@ -178,7 +175,7 @@ public class KardexCommandService implements IKardexCommandPort {
             }
             
             // Cantidad a devolver de este lote específico
-            int amountFromThisLot = Math.min(remainingToReturn, detail.getAmountUsed());
+            int amountFromThisLot = Math.min(remainingToReturn, detail.getQuantityUsed());
             
             // Restaurar cantidad en lote original
             Kardex originalPurchaseLot = detail.getMovementOrigin();
@@ -201,13 +198,13 @@ public class KardexCommandService implements IKardexCommandPort {
             createdReturnMovements.add(createdReturn);
             
             //Actualizar o eliminar el detalle original
-            if (amountFromThisLot == detail.getAmountUsed()) {
+            if (amountFromThisLot == detail.getQuantityUsed()) {
                 // Se devolvió todo el lote
                 detailQueryOutPutPort.deleteById(detail.getIdDetailOutput());
             } else {
                 // Devolución parcial
-                int newAmount = detail.getAmountUsed() - amountFromThisLot;
-                detail.setAmountUsed(newAmount);
+                int newAmount = detail.getQuantityUsed() - amountFromThisLot;
+                detail.setQuantityUsed(newAmount);
                 detail.setUnitPrice(detail.getUnitPrice().multiply(BigDecimal.valueOf(newAmount)));
                 detailQueryOutPutPort.update(detail); 
             }
@@ -347,7 +344,7 @@ public class KardexCommandService implements IKardexCommandPort {
             if (shouldProcessReturnDetail(kardexRequest, originalSale, detail)) {
                 //Restaurar cantidad en lote original usando método de dominio
                 Kardex originalPurchaseLot = detail.getMovementOrigin();
-                originalPurchaseLot.restoreAvailableQuantity(detail.getAmountUsed());
+                originalPurchaseLot.restoreAvailableQuantity(detail.getQuantityUsed());
                 kardexCommandOutputPort.updateAvaliableAmount(
                     originalPurchaseLot.getIdKardex(), 
                     originalPurchaseLot.getAvailableQuantity()
@@ -357,7 +354,7 @@ public class KardexCommandService implements IKardexCommandPort {
                 Kardex returnMovement = Kardex.createSaleReturn(
                     originalSale.getFactCode(),
                     kardexRequest.getDetails(),
-                    detail.getAmountUsed(),
+                    detail.getQuantityUsed(),
                     detail.getUnitPrice(),
                     product
                 );
@@ -378,7 +375,7 @@ public class KardexCommandService implements IKardexCommandPort {
      * Determina si se debe procesar un detalle de devolución
      */
     private boolean shouldProcessReturnDetail(Kardex kardexRequest, Kardex originalSale, DetailOutput detail) {
-        return kardexRequest.getQuantity() == detail.getAmountUsed() 
+        return kardexRequest.getQuantity() == detail.getQuantityUsed() 
             && kardexRequest.getFactCode().equals(originalSale.getFactCode());
     }
 
