@@ -26,8 +26,8 @@ public class DetailOutputEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idDetailOutput;
 
-    @Column(name = "amountUsed", nullable = false)
-    private int amountUsed;
+    @Column(name = "quantityUsed", nullable = false)
+    private int quantityUsed;
 
     @Column(name="unit_value", nullable = false)
     private BigDecimal unitPrice;

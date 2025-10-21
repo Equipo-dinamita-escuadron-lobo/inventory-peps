@@ -56,7 +56,7 @@ public class KardexCommandAdapter implements IKardexCommandOutputPort {
         //Guardar detalles de la venta
         for(DetailOutput detail:kardex.getDetailsOutput()){
             DetailOutputEntity detailEntity=new DetailOutputEntity();
-            detailEntity.setAmountUsed(detail.getQuantityUsed());
+            detailEntity.setQuantityUsed(detail.getQuantityUsed());
             detailEntity.setUnitPrice(detail.getUnitPrice());
 
             //movimientos de venta
@@ -122,7 +122,7 @@ public class KardexCommandAdapter implements IKardexCommandOutputPort {
         //Guardar detalles de la venta
         for(DetailOutput detail:kardex.getDetailsOutput()){
             DetailOutputEntity detailEntity=new DetailOutputEntity();
-            detailEntity.setAmountUsed(detail.getQuantityUsed());
+            detailEntity.setQuantityUsed(detail.getQuantityUsed());
             detailEntity.setUnitPrice(detail.getUnitPrice());
 
             //movimientos de venta

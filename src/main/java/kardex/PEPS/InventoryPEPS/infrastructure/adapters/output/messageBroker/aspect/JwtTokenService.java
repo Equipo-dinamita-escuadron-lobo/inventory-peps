@@ -6,6 +6,12 @@ import org.springframework.stereotype.Service;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.security.IJwtUtils;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @brief Unified service for managing JWT tokens from both HTTP and RabbitMQ contexts
+ * 
+ * Provides seamless token access across different execution contexts,
+ * handling both web requests and message processing scenarios.
+ */
 @Service
 @Slf4j
 public class JwtTokenService {
@@ -96,10 +102,5 @@ public class JwtTokenService {
     public boolean isInRabbitContext() {
         return rabbitJwtToken.get() != null;
     }
-
-
-
-
-
 
 }
