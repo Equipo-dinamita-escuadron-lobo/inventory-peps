@@ -1,6 +1,7 @@
 package kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -25,6 +26,14 @@ public interface IProductRepository extends JpaRepository<ProductEntity, Long> {
 
     // Find all products by enterprise ID
     Collection<ProductEntity> findAllByEnterpriseId(String enterpriseId);
+
+
+    // Delete methods
+    @Modifying
+    int deleteByProductIdAndEnterpriseId(Long productId, String enterpriseId);
+    
+    @Modifying
+    int deleteByEnterpriseId(String enterpriseId);
 
     
 }

@@ -12,6 +12,7 @@ import kardex.PEPS.InventoryPEPS.application.ports.input.IKardexQueryPort;
 import kardex.PEPS.InventoryPEPS.domain.model.Balance;
 import kardex.PEPS.InventoryPEPS.domain.model.InventoryQueue;
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
+import kardex.PEPS.InventoryPEPS.domain.model.KardexMigration;
 import kardex.PEPS.InventoryPEPS.domain.model.KardexReport;
 import kardex.PEPS.InventoryPEPS.domain.model.SaleDetail;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexQueryOutputPort;
@@ -151,6 +152,23 @@ public class KardexQueryService implements IKardexQueryPort {
         List<KardexReport> pagedList = fullReport.subList(startItem, toIndex);
 
         return new PageImpl<>(pagedList, pageable, fullReport.size());
+    }
+
+    private void validateEnterpriseId(String enterpriseId) {
+        if (enterpriseId == null || enterpriseId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Enterprise ID cannot be null or empty");
+        }
+    }
+
+    @Override
+    public List<Kardex> getKardexAvailableQuantityByProduct(Long productId) {
+        return kardexQueryOutputPort.findAvailablePurchasesOrderedByDate(productId);
+    }
+
+    @Override
+    public List<KardexMigration> findLastKardexForAllProducts(String enterpriseId) {
+        validateEnterpriseId(enterpriseId);
+        return kardexQueryOutputPort.findLastKardexForAllProducts(enterpriseId);
     }
 
     

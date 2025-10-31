@@ -23,7 +23,7 @@ public class KardexRecordsDTOResponse {
 
     private List<SaleDetailDTO> outputDetails;  
     
-    private List<BanlanceDTO> balance;
+    private List<BalanceDTO> balance;
 
 
 }

@@ -75,6 +75,7 @@ public class KardexReport {
             .build();
         
         return report;
+    
     }
 
     //Establecer entrada

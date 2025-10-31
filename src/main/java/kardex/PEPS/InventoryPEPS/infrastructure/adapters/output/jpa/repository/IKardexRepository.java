@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import jakarta.transaction.Transactional;
+import kardex.PEPS.InventoryPEPS.domain.model.KardexMigration;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity.KardexEntity;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -69,4 +70,37 @@ public interface  IKardexRepository extends JpaRepository<KardexEntity, Long>{
 
      
 
-   }
+      @Query("""
+        SELECT new kardex.PEPS.InventoryPEPS.domain.model.KardexMigration(
+            p.productId,
+            CAST(COUNT(DISTINCT CASE 
+                WHEN k.availableQuantity > 0 THEN k.idKardex 
+                ELSE NULL 
+            END) AS long),
+            CAST(p.reference AS string),
+            COALESCE(
+                SUM(k.availableQuantity * k.unitPrice) / 
+                NULLIF(SUM(k.availableQuantity), 0), 
+                0
+            ),
+            CONCAT(p.name, ' - ', p.presentation),
+            kardex.PEPS.InventoryPEPS.domain.enums.MovementType.PURCHASE,
+            CAST(COALESCE(SUM(k.availableQuantity), 0) AS long),
+            COALESCE(
+                SUM(k.availableQuantity * k.unitPrice) / 
+                NULLIF(SUM(k.availableQuantity), 0), 
+                0
+            ),
+            COALESCE(SUM(k.availableQuantity * k.unitPrice), 0)
+        )
+        FROM ProductEntity p
+        LEFT JOIN p.recordsKardex k
+        WHERE p.enterpriseId = :enterpriseId
+            AND p.state = true
+            AND (k.availableQuantity > 0 OR k.availableQuantity IS NULL)
+        GROUP BY p.productId, p.name, p.reference, p.presentation
+        ORDER BY p.name ASC
+        """)
+      List<KardexMigration> findLastKardexForAllProductsByEnterpriseId(@Param("enterpriseId") String enterpriseId);
+
+}

@@ -18,6 +18,7 @@ public final class MessageKeys {
     public static final String ERROR_NO_ORIGINAL_MOVEMENT = "kardex.error.no.original.movement";
     public static final String ERROR_NO_PREVIOUS_KARDEX = "kardex.error.no.previous.kardex";
     public static final String ERROR_INVALID_MOVEMENT_TYPE = "kardex.error.invalid.movement.type";
+    public static final String ERROR_NOT_FOUND = "kardex.error.not.found";
     
 
     // Mensajes de log

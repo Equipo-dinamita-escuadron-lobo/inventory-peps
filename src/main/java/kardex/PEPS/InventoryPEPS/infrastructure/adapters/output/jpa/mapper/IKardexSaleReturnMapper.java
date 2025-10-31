@@ -10,8 +10,10 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity.Karde
 public interface IKardexSaleReturnMapper {
 
     @Mapping(target = "detailsOrigin", ignore=true)
-    @Mapping(target = "detailsOutput", ignore=true)
-    @Mapping(target = "product", ignore=true)
+   @Mapping(target = "detailsOutput", ignore=true)
+   @Mapping(target = "product", ignore=true)
     Kardex toDomain(KardexEntity kardexEntity);
+
+
     
 }
