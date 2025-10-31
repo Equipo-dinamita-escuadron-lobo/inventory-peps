@@ -266,6 +266,18 @@ public class KardexCommandService implements IKardexCommandPort {
         return kardexCommandOutputPort.registerNonCommercialEntry(nonCommercialEntry);
     }
 
+    @Override
+    public void deleteAll() {
+       log.info("Deleting all kardex records");
+        try {
+            kardexCommandOutputPort.deleteAll();
+            log.info("All kardex records deleted successfully");
+        } catch (Exception e) {
+            log.error("Error deleting all kardex records: {}", e.getMessage());
+        }
+
+    }
+
 
     /**
      * Obtiene y valida un producto usando el dominio
@@ -382,7 +394,6 @@ public class KardexCommandService implements IKardexCommandPort {
     //Record para resultado FIFO
     private record FIFOResult(List<DetailOutput> detailsToCreate, List<Kardex> lotsToUpdate) {}
 
+   
 
-  
-    
 }

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
+import kardex.PEPS.InventoryPEPS.domain.model.KardexMigration;
 
 public interface IKardexQueryOutputPort {
    List<Kardex> getAllKardex(Long idProduct);
@@ -21,5 +22,8 @@ public interface IKardexQueryOutputPort {
 
     Optional<Kardex> findById(Long id);
 
+    List<KardexMigration> findLastKardexForAllProducts(String enterpriseId);
+
+   
 
 }

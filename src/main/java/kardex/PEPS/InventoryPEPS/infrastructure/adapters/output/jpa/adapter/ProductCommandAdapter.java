@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import jakarta.transaction.Transactional;
+
 import java.util.function.Function;
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IProductCommandOutPutPort;
@@ -116,6 +118,38 @@ public class ProductCommandAdapter implements IProductCommandOutPutPort {
         productRepository.saveAll(existingEntities);
         log.info("Updated {} existing products", existingProducts.size());
         return existingProducts.size();
+    }
+
+    @Transactional
+    @Override
+    public String deleteById(Long productId, String enterpriseId) {
+        try {
+            int deletedCount = productRepository.deleteByProductIdAndEnterpriseId(productId, enterpriseId);
+            if (deletedCount > 0) {
+                log.info("Product with ID {} deleted successfully for enterprise {}", productId, enterpriseId);
+                return "Product deleted successfully.";
+            } else {
+                log.warn("Product with ID {} not found for enterprise {}", productId, enterpriseId);
+                return "Product not found.";
+            }
+        } catch (Exception e) {
+            log.error("Error deleting product with ID {} for enterprise {}: {}", productId, enterpriseId, e.getMessage());
+            return "An error occurred while deleting the product: " + e.getMessage();
+        }
+
+    }
+
+    @Override
+    public String deleteAllByEnterpriseId(String enterpriseId) {
+        try {
+            int deletedCount = productRepository.deleteByEnterpriseId(enterpriseId);
+            log.info("Deleted {} products for enterprise {}", deletedCount, enterpriseId);
+            return String.format("Deleted %d products successfully.", deletedCount);
+        } catch (Exception e) {
+            log.error("Error deleting all products for enterprise {}: {}", enterpriseId, e.getMessage());
+            return "An error occurred while deleting products: " + e.getMessage();
+        }
+
     }
 
 

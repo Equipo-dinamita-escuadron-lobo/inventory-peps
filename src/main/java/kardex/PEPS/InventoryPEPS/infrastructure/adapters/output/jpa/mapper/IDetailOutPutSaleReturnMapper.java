@@ -11,6 +11,9 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity.Detai
 @Mapper(componentModel="spring", uses={IKardexSaleReturnMapperImpl.class})
 public interface IDetailOutPutSaleReturnMapper {
 
+
+
+    
     DetailOutput toDomain(DetailOutputEntity entity);
     
     List<DetailOutput> toDomainList(List<DetailOutputEntity> entities);

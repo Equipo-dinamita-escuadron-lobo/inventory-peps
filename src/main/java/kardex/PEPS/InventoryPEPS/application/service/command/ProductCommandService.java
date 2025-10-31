@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import kardex.PEPS.InventoryPEPS.application.ports.input.IProductCommandPort;
 import kardex.PEPS.InventoryPEPS.application.ports.input.IProductSyncCommandPort;
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
 import kardex.PEPS.InventoryPEPS.domain.model.SyncState;
@@ -24,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-public class ProductCommandService implements IProductSyncCommandPort {
+public class ProductCommandService implements IProductSyncCommandPort,IProductCommandPort {
     private final IProductCommandOutPutPort productCommandOutPutPort;
     private final IProductClientPort productClient;
     private final ISyncStateRepositoryPort syncStateRepository;
@@ -273,6 +274,19 @@ public class ProductCommandService implements IProductSyncCommandPort {
         List<Product> newProducts, 
         List<Product> updatedProducts
     ) {}
+
+    @Override
+    public String deleteById(Long productId, String enterpriseId) {
+        log.info("Deleting product with ID {} for enterprise {}", productId, enterpriseId);
+        return productCommandOutPutPort.deleteById(productId, enterpriseId); 
+    }
+
+
+    @Override
+    public String deleteAllByEnterpriseId(String enterpriseId) {
+        log.info("Deleting all products for enterprise {}", enterpriseId);
+        return productCommandOutPutPort.deleteAllByEnterpriseId(enterpriseId);
+    }
 
 
     

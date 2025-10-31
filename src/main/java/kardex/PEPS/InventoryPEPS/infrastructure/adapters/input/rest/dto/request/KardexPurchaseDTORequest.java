@@ -16,6 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class KardexPurchaseDTORequest {
 
+    @NotNull(message = "The field 'details' cannot be null")
     private String details;
     @NotNull(message = "The field 'quantity' cannot be null")
     @Positive(message = "The quantity must be positive")

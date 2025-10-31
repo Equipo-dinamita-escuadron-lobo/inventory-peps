@@ -14,6 +14,9 @@ public interface  IKardexCommandOutputPort {
      Kardex registerNonCommercialEntry(Kardex kardex);
      int updateAvaliableAmount(Long idKardex, int newAmount);
      
-    
+     /**
+     * @brief Deletes all kardex records
+     */
+     void deleteAll();
     
 }

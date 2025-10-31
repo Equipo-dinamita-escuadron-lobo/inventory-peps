@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BanlanceDTO {
+public class BalanceDTO {
     private int quantity;
     private BigDecimal unitPrice;
     private BigDecimal totalPrice;

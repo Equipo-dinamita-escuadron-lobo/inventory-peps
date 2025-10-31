@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
+import kardex.PEPS.InventoryPEPS.domain.model.KardexMigration;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexQueryOutputPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity.KardexEntity;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.mapper.IKardexEntityQueryMapper;
@@ -74,5 +75,17 @@ public class KardexQueryAdapter implements IKardexQueryOutputPort{
         return kardexRepository.findById(id)
         .map(kardexEntityQueryMapper::toDomain);
     }
+
+
+
+
+
+    @Override
+    public List<KardexMigration> findLastKardexForAllProducts(String enterpriseId) {
+       List<KardexMigration> kardexMigrations=kardexRepository.findLastKardexForAllProductsByEnterpriseId(enterpriseId);
+       return kardexMigrations;
+    }
+
+  
     
 }

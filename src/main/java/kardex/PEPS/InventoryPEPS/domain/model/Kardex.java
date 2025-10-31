@@ -132,7 +132,7 @@ public class Kardex {
         
         return kardex;
     }
-     public static Kardex createSaleReturn(Long factCode, String details, int quantity, 
+    public static Kardex createSaleReturn(Long factCode, String details, int quantity, 
                                          BigDecimal unitPrice, Product product) {
         Kardex kardex = new Kardex();
         kardex.setFactCode(factCode);
@@ -148,6 +148,31 @@ public class Kardex {
         
         return kardex;
     }
+
+       
+    public static Kardex createPurchaseAdjustment(String details, int quantity, 
+                                       BigDecimal unitPrice, Product product) {
+        validateProduct(product);
+        validateQuantity(quantity);
+        validateUnitPrice(unitPrice);
+       
+        
+        Kardex kardex = new Kardex();
+
+        kardex.setDate(ZonedDateTime.now());
+        kardex.setDetails(details);
+        kardex.setQuantity(quantity);
+        kardex.setUnitPrice(unitPrice);
+        kardex.setType(MovementType.PURCHASE);
+        kardex.setAvailableQuantity(quantity);
+        kardex.setProduct(product);
+        kardex.setDetailsOutput(new ArrayList<>());
+        kardex.setDetailsOrigin(new ArrayList<>());
+        
+        return kardex;
+    }
+
+
     public void reduceAvailableQuantity(int amountToReduce) {
         if (amountToReduce <= 0) {
             throw new IllegalArgumentException("Amount to reduce must be positive");

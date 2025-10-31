@@ -16,9 +16,11 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.repository.I
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.repository.IKardexRepository;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.repository.IProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class KardexCommandAdapter implements IKardexCommandOutputPort {
     private final IKardexEntityCommandMapper kardexEntityCommandMapper;
     private final IKardexRepository kardexRepository;
@@ -146,6 +148,13 @@ public class KardexCommandAdapter implements IKardexCommandOutputPort {
         KardexEntity kardexEntity=kardexEntityCommandMapper.toEntity(kardex);
         kardexEntity.setProduct(productEntity);
        return kardexEntityCommandMapper.toDomain(kardexRepository.save(kardexEntity));
+    }
+
+    @Override
+    public void deleteAll() {
+        log.info("Deleting all kardex records from database");
+        kardexRepository.deleteAll();
+        log.info("All kardex records deleted from database");
     }
     
    
