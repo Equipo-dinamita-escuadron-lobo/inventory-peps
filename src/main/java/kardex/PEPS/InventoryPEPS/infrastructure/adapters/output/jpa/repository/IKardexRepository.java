@@ -69,14 +69,10 @@ public interface  IKardexRepository extends JpaRepository<KardexEntity, Long>{
       List<KardexEntity> findAvailablePurchasesOrderedByDate(@Param("productId") Long productId);
 
      
-
-      @Query("""
+    @Query("""
         SELECT new kardex.PEPS.InventoryPEPS.domain.model.KardexMigration(
             p.productId,
-            CAST(COUNT(DISTINCT CASE 
-                WHEN k.availableQuantity > 0 THEN k.idKardex 
-                ELSE NULL 
-            END) AS long),
+            CAST(COALESCE(SUM(k.availableQuantity), 0) AS long),
             CAST(p.reference AS string),
             COALESCE(
                 SUM(k.availableQuantity * k.unitPrice) / 
@@ -101,6 +97,7 @@ public interface  IKardexRepository extends JpaRepository<KardexEntity, Long>{
         GROUP BY p.productId, p.name, p.reference, p.presentation
         ORDER BY p.name ASC
         """)
-      List<KardexMigration> findLastKardexForAllProductsByEnterpriseId(@Param("enterpriseId") String enterpriseId);
+    List<KardexMigration> findLastKardexForAllProductsByEnterpriseId(@Param("enterpriseId") String enterpriseId);
+
 
 }
