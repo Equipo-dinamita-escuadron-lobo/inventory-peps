@@ -34,6 +34,11 @@ public class ProductCommandService implements IProductSyncCommandPort,IProductCo
     
     private static final String SYNC_TYPE_PRODUCTS = "products";
 
+    /**
+     * @brief Synchronizes products for an enterprise from external API
+     * @param enterpriseId Enterprise identifier to sync products for
+     * @return Status message with sync results
+     */
     @Override
     public String syncProductsByEnterpriseId(String enterpriseId) {
         log.info(messageService.getMessage(MessageKeys.LOG_SYNC_STARTED, enterpriseId));
