@@ -24,8 +24,8 @@ public class ClientConfig {
     /**
      * Método factory privado y genérico para crear cualquier cliente proxy.
      * Centraliza la lógica de construcción del WebClient y el HttpServiceProxyFactory.
-     */
-      private <T> T createWebClientProxy(WebClient.Builder webClientBuilder, String baseUrl, Class<T> clientInterface) {
+    */
+    private <T> T createWebClientProxy(WebClient.Builder webClientBuilder, String baseUrl, Class<T> clientInterface) {
         // Validar que baseUrl no sea null o vacío
         if (baseUrl == null || baseUrl.trim().isEmpty()) {
             throw new IllegalArgumentException("BaseURL cannot be null or empty for client: " + clientInterface.getSimpleName());
@@ -59,11 +59,25 @@ public class ClientConfig {
         return createWebClientProxy(webClientBuilder, baseUrl, IProductClient.class);
     }
 
+      @Bean
+    IConfigClient configClient(WebClient.Builder webClientBuilder, ClientProperties properties) {
+        String baseUrl = properties.getConfig().getBaseUrl();
+        return createWebClientProxy(webClientBuilder, baseUrl, IConfigClient.class);
+    }
+
+    @Bean
+    IKardexExternalClient kardexExternalClient(WebClient.Builder webClientBuilder, ClientProperties properties) {
+        String baseUrl = properties.getKardexExternal().getBaseUrl();
+        return createWebClientProxy(webClientBuilder, baseUrl, IKardexExternalClient.class);
+    }
+
+
+
     /**
      * Filtro para propagar el token JWT en las peticiones HTTP.
      * Funciona tanto para contexto HTTP como para contexto RabbitMQ.
     */
-     private ExchangeFilterFunction jwtPropagationFilter() {
+    private ExchangeFilterFunction jwtPropagationFilter() {
         return (clientRequest, next) -> {
             try {
                 String tokenValue = jwtTokenService.getToken();
