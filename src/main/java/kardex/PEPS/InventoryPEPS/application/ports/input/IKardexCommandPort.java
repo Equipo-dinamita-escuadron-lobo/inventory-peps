@@ -11,6 +11,8 @@ public interface  IKardexCommandPort {
      List<Kardex> registerSaleReturn(Kardex kardex);
      Kardex registerNonCommercialExit(Kardex kardex);
      Kardex registerNonCommercialEntry(Kardex kardex);
+     Kardex registerAdjustmentExit(Kardex kardex);
+     Kardex registerAdjustmentEntry(Kardex kardex);
      
      /**
      * @brief Deletes all kardex records

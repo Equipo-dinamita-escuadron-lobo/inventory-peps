@@ -12,6 +12,7 @@ import kardex.PEPS.InventoryPEPS.domain.model.KardexMigration;
 import kardex.PEPS.InventoryPEPS.domain.model.KardexReport;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.ResponseDTO;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.request.KardexByDateDTORequest;
+import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexAvailableQuantityDTOResponse;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexPurchaseDTOResponse;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexRecordsDTOResponse;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.ListLastProductKardexDtoResponse;
@@ -63,13 +64,13 @@ public class KardexPEPSQueryController {
     }
 
     @GetMapping("/kardex-available-quantity/{productId}")
-    public ResponseEntity<ResponseDTO<List<KardexPurchaseDTOResponse>>> getAvailable(@PathVariable Long productId) {
+    public ResponseEntity<ResponseDTO<List<KardexAvailableQuantityDTOResponse>>> getAvailable(@PathVariable Long productId) {
 
         List<Kardex> listResponse=kardexQueryPort.getKardexAvailableQuantityByProduct(productId);
 
 
-        List<KardexPurchaseDTOResponse> listKardexPurchaseDTOResponse=kardexRestMapper.toKardexDTO(listResponse);
-        ResponseDTO<List<KardexPurchaseDTOResponse>> listResponseDTO=ResponseDTO.<List<KardexPurchaseDTOResponse>>builder()
+        List<KardexAvailableQuantityDTOResponse> listKardexPurchaseDTOResponse=kardexRestMapper.toKardexDTO(listResponse);
+        ResponseDTO<List<KardexAvailableQuantityDTOResponse>> listResponseDTO=ResponseDTO.<List<KardexAvailableQuantityDTOResponse>>builder()
         .data(listKardexPurchaseDTOResponse)
         .status(200)
         .message("kardex purchase registered sucesfully").build();

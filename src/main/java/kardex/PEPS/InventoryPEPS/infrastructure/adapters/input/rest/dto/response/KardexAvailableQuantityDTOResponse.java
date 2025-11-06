@@ -12,12 +12,12 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class KardexSaleDTOResponse {
+public class KardexAvailableQuantityDTOResponse {
      private Long idKardex;
-     private ZonedDateTime date;
-     private String details;
-     private int quantity;
-     private BigDecimal unitPrice;
-     private String type;
-     private Long factCode;
+    private ZonedDateTime date;
+    private String details;
+    private int availableQuantity;
+    private BigDecimal unitPrice;
+    private String type;
+    private Long factCode;
 }

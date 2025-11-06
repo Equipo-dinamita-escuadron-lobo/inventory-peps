@@ -1,6 +1,7 @@
 package kardex.PEPS.InventoryPEPS.domain.model;
 
 import java.math.BigDecimal;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -150,16 +151,16 @@ public class Kardex {
     }
 
        
-    public static Kardex createPurchaseAdjustment(String details, int quantity, 
-                                       BigDecimal unitPrice, Product product) {
+    public static Kardex createPurchaseAdjustment(Long factCode,String details, int quantity, 
+                                       BigDecimal unitPrice, Product product, ZonedDateTime date) {
         validateProduct(product);
         validateQuantity(quantity);
         validateUnitPrice(unitPrice);
-       
+         validateFactCode(factCode);
         
         Kardex kardex = new Kardex();
 
-        kardex.setDate(ZonedDateTime.now());
+        kardex.setDate(date);
         kardex.setDetails(details);
         kardex.setQuantity(quantity);
         kardex.setUnitPrice(unitPrice);
@@ -171,7 +172,30 @@ public class Kardex {
         
         return kardex;
     }
+     public static Kardex createSaleAdjustment(Long factCode, String details, int quantity, 
+                                   BigDecimal unitPrice, Product product,ZonedDateTime date) {
+        validateProduct(product);
+        validateQuantity(quantity);
+        validateFactCode(factCode);
+        
+        Kardex kardex = new Kardex();
+        kardex.setFactCode(factCode);
+        kardex.setDate(date);
+        kardex.setDetails(details);
+        kardex.setQuantity(quantity);
+        kardex.setUnitPrice(unitPrice);
+        kardex.setType(MovementType.SALE);
+        kardex.setAvailableQuantity(0);
+        kardex.setProduct(product);
+        kardex.setDetailsOutput(new ArrayList<>());
+        kardex.setDetailsOrigin(new ArrayList<>());
+        
+        return kardex;
+    }
 
+    public void addDate(){
+        this.date = ZonedDateTime.now(ZoneId.of("America/Bogota"));
+    }
 
     public void reduceAvailableQuantity(int amountToReduce) {
         if (amountToReduce <= 0) {
@@ -358,5 +382,6 @@ public class Kardex {
         return String.format("Kardex{id=%d, type=%s, quantity=%d, available=%d}", 
             idKardex, type, quantity, availableQuantity);
     }
+   
     
 }

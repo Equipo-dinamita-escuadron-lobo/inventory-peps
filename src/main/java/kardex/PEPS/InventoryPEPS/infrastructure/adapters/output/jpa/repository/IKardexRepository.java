@@ -15,7 +15,11 @@ import java.util.Optional;
 
 
 public interface  IKardexRepository extends JpaRepository<KardexEntity, Long>{
-   List<KardexEntity> findByProductId(Long idProduct);
+   
+    List<KardexEntity> findByProductId(Long idProduct);
+
+    // Find the latest Kardex entry by product ID
+    KardexEntity findTopByProductIdOrderByDateDesc(Long productId);
 
       @Query("SELECT SUM(k.availableQuantity) "+
          "FROM KardexEntity k "+
