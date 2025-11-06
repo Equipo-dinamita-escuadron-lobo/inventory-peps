@@ -28,6 +28,7 @@ public class KardexCommandService implements IKardexCommandPort {
     private final IKardexQueryOutputPort kardexQueryOutputPort;
     private final IDetailQueryOutPutPort detailQueryOutPutPort;
     private final IFormatterResultOutputPort formatterResultOutputPort;
+    private final KardexAdjustmentValidationService kardexAdjustmentValidationService;
     
 
 
@@ -266,6 +267,65 @@ public class KardexCommandService implements IKardexCommandPort {
         return kardexCommandOutputPort.registerNonCommercialEntry(nonCommercialEntry);
     }
 
+     @Override
+    public Kardex registerAdjustmentEntry(Kardex kardexRequest) {
+        Product product = getValidatedProduct(kardexRequest.getProduct().getProductId());
+        
+        kardexAdjustmentValidationService.validateDateForAdjustment(kardexRequest,product.getEnterpriseId());
+
+        String detail=kardexRequest.getDetails()+" Factura:"+kardexRequest.getFactCode();
+
+        Kardex purchaseAdjustment = Kardex.createPurchaseAdjustment(
+            kardexRequest.getFactCode(),
+            detail,
+            kardexRequest.getQuantity(),
+            kardexRequest.getUnitPrice(),
+            product,
+            kardexRequest.getDate()
+        );
+        
+        return kardexCommandOutputPort.registerPurchase(purchaseAdjustment);
+    }
+
+    @Override
+    public Kardex registerAdjustmentExit(Kardex kardex) {
+        // Obtener y validar producto
+        Product product = getValidatedProduct(kardex.getProduct().getProductId());
+        
+        // Obtener lotes disponibles
+        List<Kardex> availablePurchases = kardexQueryOutputPort
+            .findAvailablePurchasesOrderedByDate(product.getProductId());
+        
+        //Validar stock total disponible usando el dominio
+        validateSufficientStock(availablePurchases, kardex.getQuantity());
+        
+         kardexAdjustmentValidationService.validateDateForAdjustment(kardex,product.getEnterpriseId());
+    
+         String detail=kardex.getDetails()+" Factura:"+kardex.getFactCode();
+
+        //Crear movimiento de venta usando 
+        Kardex saleMovement = Kardex.createSaleAdjustment(
+            kardex.getFactCode(),
+            detail,
+            kardex.getQuantity(),
+            kardex.getUnitPrice(),
+            product,
+            kardex.getDate()
+        );
+        
+        //Procesar lógica FIFO usando métodos de dominio
+        FIFOResult fifoResult = processFIFOLogic(availablePurchases, saleMovement);
+        
+        // Agregar detalles al movimiento de venta usando método de dominio
+        fifoResult.detailsToCreate.forEach(saleMovement::addOutputDetail);
+        
+        return kardexCommandOutputPort.registerSale(saleMovement, fifoResult.lotsToUpdate);
+
+
+    }
+
+  
+
     @Override
     public void deleteAll() {
        log.info("Deleting all kardex records");
@@ -344,55 +404,18 @@ public class KardexCommandService implements IKardexCommandPort {
         return new FIFOResult(detailsToCreate, lotsToUpdate);
     }
 
-    /**
-     * Procesa los detalles de devolución de venta
-     */
-    private List<Kardex> processSaleReturnDetails(Kardex kardexRequest, Kardex originalSale, 
-                                                 List<DetailOutput> detailsOfSale) {
-        List<Kardex> createdReturnMovements = new ArrayList<>();
-        Product product = getValidatedProduct(kardexRequest.getProduct().getProductId());
+   
 
-        for (DetailOutput detail : detailsOfSale) {
-            if (shouldProcessReturnDetail(kardexRequest, originalSale, detail)) {
-                //Restaurar cantidad en lote original usando método de dominio
-                Kardex originalPurchaseLot = detail.getMovementOrigin();
-                originalPurchaseLot.restoreAvailableQuantity(detail.getQuantityUsed());
-                kardexCommandOutputPort.updateAvaliableAmount(
-                    originalPurchaseLot.getIdKardex(), 
-                    originalPurchaseLot.getAvailableQuantity()
-                );
-
-                //Crear devolución usando Factory Method
-                Kardex returnMovement = Kardex.createSaleReturn(
-                    originalSale.getFactCode(),
-                    kardexRequest.getDetails(),
-                    detail.getQuantityUsed(),
-                    detail.getUnitPrice(),
-                    product
-                );
-
-                
-                Kardex createdReturn = kardexCommandOutputPort.registerSaleReturn(returnMovement);
-                createdReturnMovements.add(createdReturn);
-
-                // Eliminar el detalle original
-                detailQueryOutPutPort.deleteById(detail.getIdDetailOutput());
-            }
-        }
-
-        return createdReturnMovements;
-    }
-
-    /**
-     * Determina si se debe procesar un detalle de devolución
-     */
-    private boolean shouldProcessReturnDetail(Kardex kardexRequest, Kardex originalSale, DetailOutput detail) {
-        return kardexRequest.getQuantity() == detail.getQuantityUsed() 
-            && kardexRequest.getFactCode().equals(originalSale.getFactCode());
-    }
+ 
 
     //Record para resultado FIFO
     private record FIFOResult(List<DetailOutput> detailsToCreate, List<Kardex> lotsToUpdate) {}
+
+
+
+
+
+   
 
    
 

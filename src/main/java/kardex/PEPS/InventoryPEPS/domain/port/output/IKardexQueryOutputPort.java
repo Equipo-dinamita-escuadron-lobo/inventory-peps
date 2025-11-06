@@ -25,5 +25,5 @@ public interface IKardexQueryOutputPort {
     List<KardexMigration> findLastKardexForAllProducts(String enterpriseId);
 
    
-
+    Kardex getLatestKardexByProductId(Long productId);
 }

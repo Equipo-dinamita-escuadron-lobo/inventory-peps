@@ -86,6 +86,14 @@ public class KardexQueryAdapter implements IKardexQueryOutputPort{
        return kardexMigrations;
     }
 
+    @Override
+    public Kardex getLatestKardexByProductId(Long productId) {
+      
+        KardexEntity kardexEntity=kardexRepository.findTopByProductIdOrderByDateDesc(productId);
+        return kardexEntity != null ? kardexEntityQueryMapper.toDomain(kardexEntity):null;
+
+    }
+
   
     
 }

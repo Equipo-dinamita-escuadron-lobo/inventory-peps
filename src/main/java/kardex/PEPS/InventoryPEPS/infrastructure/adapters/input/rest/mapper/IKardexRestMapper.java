@@ -13,6 +13,7 @@ import kardex.PEPS.InventoryPEPS.domain.model.Product;
 import kardex.PEPS.InventoryPEPS.domain.model.SaleDetail;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.request.KardexPurchaseDTORequest;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.request.KardexSaleDTORequest;
+import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexAvailableQuantityDTOResponse;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexPurchaseDTOResponse;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexRecordsDTOResponse;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexSaleDTOResponse;
@@ -53,7 +54,7 @@ public interface IKardexRestMapper {
     List<KardexRecordsDTOResponse> toDTORenponseRecords(List<KardexReport> kardex);
 
     List<KardexPurchaseDTOResponse> toDTOSaleReturn(List<Kardex> sales);
-    List<KardexPurchaseDTOResponse> toKardexDTO(List<Kardex> listKardex);
+    List<KardexAvailableQuantityDTOResponse> toKardexDTO(List<Kardex> listKardex);
 
     KardexRecordsDTOResponse toDTORecord(KardexReport kardexReport);
     

@@ -10,6 +10,12 @@ public final class MessageKeys {
         // Clase de constantes, no debe ser instanciada
     }
 
+
+    //Generic Error Messages
+    public static final String DATE_CANNOT_BE_FUTURE = "kardex.error.date.cannot.be.future";
+    public static final String DATE_CANNOT_BE_BEFORE_LAST_RECORD = "kardex.error.date.cannot.be.before.last.record";
+
+
     // Mensajes de error
     public static final String ERROR_PRODUCT_NOT_FOUND = "kardex.error.product.not.found";
     public static final String ERROR_BALANCE_UNIT_PRICE_ZERO = "kardex.error.balance.unit.price.zero";
