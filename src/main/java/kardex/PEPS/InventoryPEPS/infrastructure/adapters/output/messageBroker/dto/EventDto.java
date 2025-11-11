@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EventDto<T,U> {
-    private U type;
     private T data;
+    private U type;
+    
 }
