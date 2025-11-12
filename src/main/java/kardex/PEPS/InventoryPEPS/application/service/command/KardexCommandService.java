@@ -37,6 +37,7 @@ public class KardexCommandService implements IKardexCommandPort {
        
         Product product = getValidatedProduct(kardexRequest.getProduct().getProductId());
         
+        
         Kardex purchase = Kardex.createPurchase(
             kardexRequest.getFactCode(),
             kardexRequest.getDetails(),
@@ -44,6 +45,12 @@ public class KardexCommandService implements IKardexCommandPort {
             kardexRequest.getUnitPrice(),
             product
         );
+        /* 
+
+        if(!kardexQueryOutputPort.existsByProduct_ProductId(product.getProductId())){
+
+        }
+        */
         
         return kardexCommandOutputPort.registerPurchase(purchase);
     
@@ -273,11 +280,10 @@ public class KardexCommandService implements IKardexCommandPort {
         
         kardexAdjustmentValidationService.validateDateForAdjustment(kardexRequest,product.getEnterpriseId());
 
-        String detail=kardexRequest.getDetails()+" Factura:"+kardexRequest.getFactCode();
-
+       
         Kardex purchaseAdjustment = Kardex.createPurchaseAdjustment(
             kardexRequest.getFactCode(),
-            detail,
+            kardexRequest.getDetails(),
             kardexRequest.getQuantity(),
             kardexRequest.getUnitPrice(),
             product,
@@ -301,12 +307,11 @@ public class KardexCommandService implements IKardexCommandPort {
         
          kardexAdjustmentValidationService.validateDateForAdjustment(kardex,product.getEnterpriseId());
     
-         String detail=kardex.getDetails()+" Factura:"+kardex.getFactCode();
 
         //Crear movimiento de venta usando 
         Kardex saleMovement = Kardex.createSaleAdjustment(
             kardex.getFactCode(),
-            detail,
+            kardex.getDetails(),
             kardex.getQuantity(),
             kardex.getUnitPrice(),
             product,

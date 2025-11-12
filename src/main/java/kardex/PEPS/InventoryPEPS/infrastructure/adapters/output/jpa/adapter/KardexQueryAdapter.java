@@ -94,6 +94,11 @@ public class KardexQueryAdapter implements IKardexQueryOutputPort{
 
     }
 
+    @Override
+    public boolean existsByProduct_ProductId(Long productId) {
+      return kardexRepository.existsByProduct_ProductId(productId);
+    }
+
   
     
 }

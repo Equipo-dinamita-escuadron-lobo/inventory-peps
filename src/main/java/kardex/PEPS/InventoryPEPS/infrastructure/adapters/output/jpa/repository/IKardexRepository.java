@@ -104,4 +104,6 @@ public interface  IKardexRepository extends JpaRepository<KardexEntity, Long>{
     List<KardexMigration> findLastKardexForAllProductsByEnterpriseId(@Param("enterpriseId") String enterpriseId);
 
 
+    boolean existsByProduct_ProductId(Long productId);
+
 }

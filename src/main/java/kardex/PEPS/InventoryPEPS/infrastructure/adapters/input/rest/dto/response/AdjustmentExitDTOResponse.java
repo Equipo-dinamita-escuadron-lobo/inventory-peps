@@ -12,7 +12,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class KardexSaleDTOResponse {
+public class AdjustmentExitDTOResponse {
      private Long idKardex;
      private ZonedDateTime date;
      private String details;

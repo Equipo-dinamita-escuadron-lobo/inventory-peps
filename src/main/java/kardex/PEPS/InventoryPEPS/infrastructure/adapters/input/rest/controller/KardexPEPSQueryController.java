@@ -13,7 +13,6 @@ import kardex.PEPS.InventoryPEPS.domain.model.KardexReport;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.ResponseDTO;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.request.KardexByDateDTORequest;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexAvailableQuantityDTOResponse;
-import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexPurchaseDTOResponse;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexRecordsDTOResponse;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.ListLastProductKardexDtoResponse;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.mapper.IKardexRestMapper;
@@ -38,7 +37,6 @@ public class KardexPEPSQueryController {
 
     private final IKardexQueryPort kardexQueryPort;
     private final IKardexRestMapper kardexRestMapper;
-
 
     @GetMapping("/kardexlist")
     public ResponseDTO<Page<KardexRecordsDTOResponse>>getKardexListPEPSByDate(

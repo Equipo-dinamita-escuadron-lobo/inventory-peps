@@ -26,4 +26,6 @@ public interface IKardexQueryOutputPort {
 
    
     Kardex getLatestKardexByProductId(Long productId);
+
+    boolean existsByProduct_ProductId(Long productId);
 }

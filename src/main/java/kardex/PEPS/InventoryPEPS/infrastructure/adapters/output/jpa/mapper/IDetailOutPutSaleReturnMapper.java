@@ -12,7 +12,6 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity.Detai
 public interface IDetailOutPutSaleReturnMapper {
 
 
-
     
     DetailOutput toDomain(DetailOutputEntity entity);
     

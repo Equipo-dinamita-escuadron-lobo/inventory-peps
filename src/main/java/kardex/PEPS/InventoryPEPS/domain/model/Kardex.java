@@ -161,7 +161,7 @@ public class Kardex {
         Kardex kardex = new Kardex();
 
         kardex.setDate(date);
-        kardex.setDetails(details);
+        kardex.setDetails(details+" Factura:"+factCode);
         kardex.setQuantity(quantity);
         kardex.setUnitPrice(unitPrice);
         kardex.setType(MovementType.PURCHASE);
@@ -181,7 +181,7 @@ public class Kardex {
         Kardex kardex = new Kardex();
         kardex.setFactCode(factCode);
         kardex.setDate(date);
-        kardex.setDetails(details);
+        kardex.setDetails(details+" Factura:"+factCode);
         kardex.setQuantity(quantity);
         kardex.setUnitPrice(unitPrice);
         kardex.setType(MovementType.SALE);

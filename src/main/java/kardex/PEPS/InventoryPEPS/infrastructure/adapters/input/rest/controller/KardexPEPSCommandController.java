@@ -10,10 +10,10 @@ import jakarta.validation.Valid;
 import kardex.PEPS.InventoryPEPS.application.ports.input.IKardexCommandPort;
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.ResponseDTO;
-import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.request.KardexPurchaseDTORequest;
-import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.request.KardexSaleDTORequest;
-import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexPurchaseDTOResponse;
-import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexSaleDTOResponse;
+import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.request.AdjustmentEntryDTORequest;
+import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.request.AdjustmentExitDTORequest;
+import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.AdjustmentEntryDTOResponse;
+import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.AdjustmentExitDTOResponse;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.mapper.IKardexRestMapper;
 import lombok.RequiredArgsConstructor;
 
@@ -27,11 +27,11 @@ public class KardexPEPSCommandController {
     private final IKardexRestMapper kardexRestMapper;
 
     @PostMapping("/purchase-adjustment")
-    public ResponseEntity<ResponseDTO<KardexPurchaseDTOResponse>> purchase(@Valid @RequestBody KardexPurchaseDTORequest kardexPurchaseDTORequest) {
-        Kardex response=kardexCommandPort.registerPurchase(kardexRestMapper.toDomain(kardexPurchaseDTORequest));
-        KardexPurchaseDTOResponse kardexPurchaseDTOResponse=kardexRestMapper.toDTOResponse(response);
-        ResponseDTO<KardexPurchaseDTOResponse> responseDTO=ResponseDTO.<KardexPurchaseDTOResponse>builder()
-        .data(kardexPurchaseDTOResponse)
+    public ResponseEntity<ResponseDTO<AdjustmentEntryDTOResponse>> AdjustmentEntry(@Valid @RequestBody AdjustmentEntryDTORequest adjustmentEntryDTORequest) {
+        Kardex response=kardexCommandPort.registerAdjustmentEntry(kardexRestMapper.toDomain(adjustmentEntryDTORequest));
+        AdjustmentEntryDTOResponse adjustmentEntryDTOResponse=kardexRestMapper.toDTOResponse(response);
+        ResponseDTO<AdjustmentEntryDTOResponse> responseDTO=ResponseDTO.<AdjustmentEntryDTOResponse>builder()
+        .data(adjustmentEntryDTOResponse)
         .status(200)
         .message("kardex purchase registered sucesfully").build();
         return  responseDTO.of();
@@ -39,11 +39,11 @@ public class KardexPEPSCommandController {
 
 
     @PostMapping("/sale-adjustment")
-    public ResponseEntity<ResponseDTO<KardexSaleDTOResponse>> sale(@Valid @RequestBody KardexSaleDTORequest kardexSaleDTORequest) {
-        Kardex response=kardexCommandPort.registerSale(kardexRestMapper.toDomain(kardexSaleDTORequest));
-        KardexSaleDTOResponse kardexSaleDTOResponse=kardexRestMapper.toDTOResponseSale(response);
-        ResponseDTO<KardexSaleDTOResponse> responseDTO=ResponseDTO.<KardexSaleDTOResponse>builder()
-        .data(kardexSaleDTOResponse)
+    public ResponseEntity<ResponseDTO<AdjustmentExitDTOResponse>> AdjustmentExit(@Valid @RequestBody AdjustmentExitDTORequest adjustmentExitDTORequest) {
+        Kardex response=kardexCommandPort.registerAdjustmentExit(kardexRestMapper.toDomain(adjustmentExitDTORequest));
+        AdjustmentExitDTOResponse adjustmentExitDTOResponse=kardexRestMapper.toDTOResponseSale(response);
+        ResponseDTO<AdjustmentExitDTOResponse> responseDTO=ResponseDTO.<AdjustmentExitDTOResponse>builder()
+        .data(adjustmentExitDTOResponse)
         .status(200)
         .message("kardex sale registered sucesfullly").build();
         
