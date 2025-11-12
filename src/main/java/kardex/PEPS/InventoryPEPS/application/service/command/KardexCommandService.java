@@ -14,6 +14,7 @@ import kardex.PEPS.InventoryPEPS.domain.port.output.IDetailQueryOutPutPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IFormatterResultOutputPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexCommandOutputPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexQueryOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.IProductEventPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IProductQueryOutputPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +30,7 @@ public class KardexCommandService implements IKardexCommandPort {
     private final IDetailQueryOutPutPort detailQueryOutPutPort;
     private final IFormatterResultOutputPort formatterResultOutputPort;
     private final KardexAdjustmentValidationService kardexAdjustmentValidationService;
-    
+    private final IProductEventPort productEventPort;
 
 
     @Override
@@ -44,10 +45,11 @@ public class KardexCommandService implements IKardexCommandPort {
             kardexRequest.getUnitPrice(),
             product
         );
-        
-        return kardexCommandOutputPort.registerPurchase(purchase);
-    
-      
+
+        //Publicar evento de uso de producto
+        productEventPort.publishUsedProductEvent(kardexRequest.getProduct().getProductId(), 1);
+
+        return kardexCommandOutputPort.registerPurchase(purchase);  
     }
     
     @Override
@@ -264,6 +266,9 @@ public class KardexCommandService implements IKardexCommandPort {
             product
         );
         
+        //Publicar evento de uso de producto
+        productEventPort.publishUsedProductEvent(kardexRequest.getProduct().getProductId(), 1);
+
         return kardexCommandOutputPort.registerNonCommercialEntry(nonCommercialEntry);
     }
 
@@ -283,6 +288,9 @@ public class KardexCommandService implements IKardexCommandPort {
             product,
             kardexRequest.getDate()
         );
+
+        //Publicar evento de uso de producto
+        productEventPort.publishUsedProductEvent(kardexRequest.getProduct().getProductId(), 1);
         
         return kardexCommandOutputPort.registerPurchase(purchaseAdjustment);
     }
