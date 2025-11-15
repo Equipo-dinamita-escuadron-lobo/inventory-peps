@@ -54,8 +54,8 @@ public class KardexCommandService implements IKardexCommandPort {
         */ 
       
 
-        //Publicar evento de uso de producto
-        productEventPort.publishUsedProductEvent(kardexRequest.getProduct().getProductId(), 1);
+     //Publicar evento de uso de producto
+      productEventPort.publishUsedProductEvent(kardexRequest.getProduct().getProductId(), 1);
 
         return kardexCommandOutputPort.registerPurchase(purchase);  
     }
