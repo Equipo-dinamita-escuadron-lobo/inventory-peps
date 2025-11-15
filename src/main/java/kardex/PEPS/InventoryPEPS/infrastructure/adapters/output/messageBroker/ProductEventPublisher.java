@@ -8,7 +8,7 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.config.rabbitConfig.Rab
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.dto.EventDto;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.dto.ProductUsageEventDto;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.enums.EventUsageType;
-import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.security.IJwtUtils;
+import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.aspect.JwtTokenService;
 
 
 
@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ProductEventPublisher implements IProductEventPort{
 
     private final RabbitTemplate rabbitTemplate;
-    private final IJwtUtils jwtUtils;
+    private final JwtTokenService jwtTokenService;
 
     @Override
     public void publishUsedProductEvent(Long productId, Integer quantityUsed) {
@@ -33,7 +33,7 @@ public class ProductEventPublisher implements IProductEventPort{
         log.info("Publishing product created event, productId: {}, quantityUsed: {}", productId, quantityUsed);
 
         rabbitTemplate.convertAndSend(RabbitProductUsedConfig.PRODUCT_USED_EXCHANGE, "", eventDto, message -> {
-            message.getMessageProperties().setHeader("x-jwt-token", jwtUtils.getToken());
+            message.getMessageProperties().setHeader("x-jwt-token", jwtTokenService.getToken());
             return message;
         });
     }
