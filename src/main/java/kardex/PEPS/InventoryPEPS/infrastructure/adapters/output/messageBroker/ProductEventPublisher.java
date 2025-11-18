@@ -3,7 +3,7 @@ package kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
-import kardex.PEPS.InventoryPEPS.domain.port.output.IProductEventPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.external.IProductEventPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.config.rabbitConfig.RabbitProductUsedConfig;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.dto.EventDto;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.dto.ProductUsageEventDto;

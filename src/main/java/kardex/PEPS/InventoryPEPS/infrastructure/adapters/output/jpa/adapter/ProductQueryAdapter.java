@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IProductQueryOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IProductQueryOutputPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.mapper.IProductEntityMapper;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.repository.IProductRepository;
 import lombok.RequiredArgsConstructor;

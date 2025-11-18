@@ -1,15 +1,16 @@
 package kardex.PEPS.InventoryPEPS.application.service.command;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 import org.springframework.stereotype.Service;
 
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IConfigClientPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IFormatterResultOutputPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexQueryOutputPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IMessageServicePort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.external.IConfigClientPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IKardexQueryOutputPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.config.i18n.MessageKeys;
 import lombok.RequiredArgsConstructor;
 
@@ -52,6 +53,12 @@ public class KardexAdjustmentValidationService {
                 }
             }
 
+        }
+
+        LocalDate kardexLocalDate = kardex.getDate().toLocalDate();
+        if(!configClientPort.isValidAccountingDate(enterpriseId, kardexLocalDate)){
+            String errorMessage =messageServicePort.getMessage(MessageKeys.INVALID_ACCOUNTING_DATE );
+            formatterResultOutputPort.returnErrorGenericResponse(400, errorMessage);
         }
 
 

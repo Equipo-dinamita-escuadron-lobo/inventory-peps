@@ -2,7 +2,7 @@ package kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.adapter;
 
 import org.springframework.stereotype.Repository;
 
-import kardex.PEPS.InventoryPEPS.domain.port.output.IMessageProcessingErrorCommandOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.command.IMessageProcessingErrorCommandOutputPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.repository.IMessageProcessingErrorRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

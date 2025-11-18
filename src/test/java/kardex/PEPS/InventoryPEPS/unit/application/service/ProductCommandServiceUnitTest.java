@@ -40,9 +40,10 @@ import kardex.PEPS.InventoryPEPS.domain.model.Product;
 import kardex.PEPS.InventoryPEPS.domain.model.SyncState;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IFormatterResultOutputPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IMessageServicePort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IProductClientPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IProductCommandOutPutPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.ISyncStateRepositoryPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.command.IProductCommandOutPutPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.external.IProductClientPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.external.ISyncStateRepositoryPort;
+
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 

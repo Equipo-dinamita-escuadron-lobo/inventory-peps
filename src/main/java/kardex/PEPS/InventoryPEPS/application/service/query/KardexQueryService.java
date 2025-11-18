@@ -15,7 +15,7 @@ import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.domain.model.KardexMigration;
 import kardex.PEPS.InventoryPEPS.domain.model.KardexReport;
 import kardex.PEPS.InventoryPEPS.domain.model.SaleDetail;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexQueryOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IKardexQueryOutputPort;
 import lombok.RequiredArgsConstructor;
 
 @Service

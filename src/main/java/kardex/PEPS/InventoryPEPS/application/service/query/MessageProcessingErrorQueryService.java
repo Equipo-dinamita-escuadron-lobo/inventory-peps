@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import kardex.PEPS.InventoryPEPS.application.ports.input.IMessageProcessingErrorQueryPort;
 import kardex.PEPS.InventoryPEPS.domain.model.MessageProcessingError;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IFormatterResultOutputPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IMessageProcessingErrorQueryOutputPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IMessageServicePort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IMessageProcessingErrorQueryOutputPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.config.i18n.MessageKeys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +42,15 @@ public class MessageProcessingErrorQueryService implements  IMessageProcessingEr
         if (!messageProcessingError.isPresent()) {
             formatterResultOutputPort.returnEntityDoesNotExistErrorResponse(404, 
                 messageService.getMessage(MessageKeys.ERROR_NOT_FOUND, "Message processing error with id: " + id));
+        }else{
+            try {
+                messageProcessingError.get().requireValid();
+            } catch (IllegalArgumentException ex) {
+                log.warn("MPE {} has invalid state: {}", id, ex.getMessage());
+            
+            }
+            log.debug("MPE found: {}", messageProcessingError.get().summary(180));
+            
         }
         return messageProcessingError;
     }
@@ -57,6 +66,14 @@ public class MessageProcessingErrorQueryService implements  IMessageProcessingEr
         if (!messageProcessingError.isPresent()) {
             formatterResultOutputPort.returnEntityDoesNotExistErrorResponse(404, 
                 messageService.getMessage(MessageKeys.ERROR_NOT_FOUND, "No message processing errors found"));
+        }else{
+            try {
+                messageProcessingError.get().requireValid();
+            } catch (IllegalArgumentException ex) {
+                log.warn("Latest MPE has invalid state: {}", ex.getMessage());
+            
+            }
+            log.debug("Latest MPE found: {}", messageProcessingError.get().summary(180));
         }
         return messageProcessingError;
     }

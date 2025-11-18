@@ -12,7 +12,7 @@ import jakarta.transaction.Transactional;
 
 import java.util.function.Function;
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IProductCommandOutPutPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.command.IProductCommandOutPutPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity.ProductEntity;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.mapper.IProductEntityMapper;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.record.ProductPartition;

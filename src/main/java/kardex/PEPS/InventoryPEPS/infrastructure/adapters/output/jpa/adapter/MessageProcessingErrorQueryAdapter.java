@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import kardex.PEPS.InventoryPEPS.domain.model.MessageProcessingError;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IMessageProcessingErrorQueryOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IMessageProcessingErrorQueryOutputPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity.MessageProcessingErrorEntity;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.mapper.IMessageProcessingErrorEntityMapper;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.repository.IMessageProcessingErrorRepository;

@@ -1,4 +1,4 @@
-package kardex.PEPS.InventoryPEPS.domain.port.output;
+package kardex.PEPS.InventoryPEPS.domain.port.output.query;
 
 import java.time.LocalDate;
 import java.util.List;

@@ -10,12 +10,15 @@ import kardex.PEPS.InventoryPEPS.application.ports.input.IKardexCommandPort;
 import kardex.PEPS.InventoryPEPS.domain.model.DetailOutput;
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IDetailQueryOutPutPort;
+import kardex.PEPS.InventoryPEPS.domain.model.Stock;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IFormatterResultOutputPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexCommandOutputPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexQueryOutputPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IProductEventPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IProductQueryOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.IMessageServicePort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.command.IKardexCommandOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.external.IProductEventPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IDetailQueryOutPutPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IKardexQueryOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IProductQueryOutputPort;
+import kardex.PEPS.InventoryPEPS.infrastructure.adapters.config.i18n.MessageKeys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,6 +35,9 @@ public class KardexCommandService implements IKardexCommandPort {
     private final KardexAdjustmentValidationService kardexAdjustmentValidationService;
     private final IProductEventPort productEventPort;
 
+    private final StockIntegrationService stockIntegrationService;
+    private final IMessageServicePort messageService;
+    private final KardexDateValidationService kardexDateValidationService;
 
     @Override
     public Kardex registerPurchase(Kardex kardexRequest) {
@@ -46,6 +52,11 @@ public class KardexCommandService implements IKardexCommandPort {
             kardexRequest.getUnitPrice(),
             product
         );
+        kardexDateValidationService.validateAndSetDate(purchase, product.getEnterpriseId());
+
+        Stock stock= stockIntegrationService.createStock(purchase);
+        stockIntegrationService.callApiStockService(stock, true);
+        
         /* 
 
         if(!kardexQueryOutputPort.existsByProduct_ProductId(product.getProductId())){
@@ -81,6 +92,10 @@ public class KardexCommandService implements IKardexCommandPort {
             kardexSaleRequest.getUnitPrice(),
             product
         );
+
+        kardexDateValidationService.validateAndSetDate(saleMovement, product.getEnterpriseId());
+        Stock stock= stockIntegrationService.createStock(saleMovement);
+        stockIntegrationService.callApiStockService(stock, false);
         
         //Procesar lógica FIFO usando métodos de dominio
         FIFOResult fifoResult = processFIFOLogic(availablePurchases, saleMovement);
@@ -101,7 +116,7 @@ public class KardexCommandService implements IKardexCommandPort {
             .findByRefFacture(kardexRequest.getFactCode(), kardexRequest.getProduct().getProductId())
             .orElseThrow(() -> {
                 log.info("Original purchase not found for return");
-                formatterResultOutputPort.returnEntityDoesNotExistErrorResponse(404, "Original purchase not found");
+                formatterResultOutputPort.returnEntityDoesNotExistErrorResponse(404, messageService.getMessage(MessageKeys.ERROR_NOT_FOUND_PURCHASE_ORIGIN,"Original purchase not found for return"));
                 return new IllegalArgumentException("Original purchase not found");
             });
         
@@ -110,7 +125,7 @@ public class KardexCommandService implements IKardexCommandPort {
             originalPurchase.validateForPurchaseReturn(kardexRequest.getFactCode(), kardexRequest.getQuantity());
         } catch (IllegalArgumentException e) {
             log.info("Purchase return validation failed: {}", e.getMessage());
-            formatterResultOutputPort.returnBusinessRuleErrorResponse(400, e.getMessage());
+            formatterResultOutputPort.returnBusinessRuleErrorResponse(400, messageService.getMessage(MessageKeys.ERROR_VALIDATION_PURCHASE_ORIGIN,"Purchase return validation failed"));
             throw e;
         }
         
@@ -128,6 +143,9 @@ public class KardexCommandService implements IKardexCommandPort {
             originalPurchase.getUnitPrice(),
             product
         );
+        kardexDateValidationService.validateAndSetDate(returnMovement, product.getEnterpriseId());
+        Stock stock= stockIntegrationService.createStock(returnMovement);
+        stockIntegrationService.callApiStockService(stock, false);
         
         return kardexCommandOutputPort.registerPurchaseReturn(returnMovement);
     }
@@ -143,7 +161,7 @@ public class KardexCommandService implements IKardexCommandPort {
             .findByRefFacture(kardexRequest.getFactCode(), kardexRequest.getProduct().getProductId())
             .orElseThrow(() -> {
                 log.info("Sale to be returned not found");
-                formatterResultOutputPort.returnBusinessRuleErrorResponse(400, "Sale to be returned not found");
+                formatterResultOutputPort.returnBusinessRuleErrorResponse(400, messageService.getMessage(MessageKeys.ERROR_NOT_FOUND_SALE_ORIGIN,"Sale to be returned not found"));
                 return new IllegalArgumentException("Sale to be returned not found");
             });
         
@@ -152,7 +170,7 @@ public class KardexCommandService implements IKardexCommandPort {
             originalSale.validateForSaleReturn(kardexRequest.getFactCode(), kardexRequest.getQuantity());
         } catch (IllegalArgumentException e) {
             log.info("Sale return validation failed: {}", e.getMessage());
-            formatterResultOutputPort.returnBusinessRuleErrorResponse(400, e.getMessage());
+            formatterResultOutputPort.returnBusinessRuleErrorResponse(400, messageService.getMessage(MessageKeys.ERROR_VALIDATION_SALE_ORIGIN,"Sale return validation failed"));
             throw e;
         }
         
@@ -161,7 +179,7 @@ public class KardexCommandService implements IKardexCommandPort {
         
         if (detailsOfSale.isEmpty()) {
             log.info("Sale has no details to return");
-            formatterResultOutputPort.returnBusinessRuleErrorResponse(400, "Sale has no details to return");
+            formatterResultOutputPort.returnBusinessRuleErrorResponse(400, messageService.getMessage(MessageKeys.ERROR_SALE_NODETAILS_TO_RETURN,"Sale has no details to return"));
             return new ArrayList<>();
         }
         
@@ -204,6 +222,10 @@ public class KardexCommandService implements IKardexCommandPort {
                 detail.getUnitPrice(),
                 product
             );
+
+            kardexDateValidationService.validateAndSetDate(returnMovement, product.getEnterpriseId());
+            Stock stock= stockIntegrationService.createStock(returnMovement);
+            stockIntegrationService.callApiStockService(stock, true);
             
             Kardex createdReturn = kardexCommandOutputPort.registerSaleReturn(returnMovement);
             createdReturnMovements.add(createdReturn);
@@ -248,7 +270,10 @@ public class KardexCommandService implements IKardexCommandPort {
             kardexRequest.getUnitPrice(),
             product
         );
-        
+        kardexDateValidationService.validateAndSetDate(nonCommercialExit, product.getEnterpriseId());
+        Stock stock= stockIntegrationService.createStock(nonCommercialExit);
+        stockIntegrationService.callApiStockService(stock, false);
+
         // Procesar lógica FIFO
         FIFOResult fifoResult = processFIFOLogic(availablePurchases, nonCommercialExit);
         
@@ -273,6 +298,9 @@ public class KardexCommandService implements IKardexCommandPort {
             kardexRequest.getUnitPrice(),
             product
         );
+
+        Stock stock= stockIntegrationService.createStock(nonCommercialEntry);
+        stockIntegrationService.callApiStockService(stock, true);
         
         //Publicar evento de uso de producto
         productEventPort.publishUsedProductEvent(kardexRequest.getProduct().getProductId(), 1);
@@ -295,6 +323,9 @@ public class KardexCommandService implements IKardexCommandPort {
             product,
             kardexRequest.getDate()
         );
+        kardexDateValidationService.validateAndSetDate(purchaseAdjustment, product.getEnterpriseId());
+        Stock stock= stockIntegrationService.createStock(purchaseAdjustment);
+        stockIntegrationService.callApiStockService(stock, true);
 
         //Publicar evento de uso de producto
         productEventPort.publishUsedProductEvent(kardexRequest.getProduct().getProductId(), 1);
@@ -326,6 +357,9 @@ public class KardexCommandService implements IKardexCommandPort {
             product,
             kardex.getDate()
         );
+
+        Stock stock= stockIntegrationService.createStock(saleMovement);
+        stockIntegrationService.callApiStockService(stock, false);
         
         //Procesar lógica FIFO usando métodos de dominio
         FIFOResult fifoResult = processFIFOLogic(availablePurchases, saleMovement);
@@ -357,12 +391,22 @@ public class KardexCommandService implements IKardexCommandPort {
      * Obtiene y valida un producto usando el dominio
      */
     private Product getValidatedProduct(Long productId) {
-        return productQueryOutputPort.getProductByProductId(productId)
+        Product product = productQueryOutputPort.getProductByProductId(productId)
             .orElseThrow(() -> {
                 log.info("Product not found: {}", productId);
-                formatterResultOutputPort.returnEntityDoesNotExistErrorResponse(404, "Product not found");
+                formatterResultOutputPort.returnEntityDoesNotExistErrorResponse(404, messageService.getMessage(MessageKeys.ERROR_NOT_FOUND_PRODUCT,"Product not found: " + productId));
                 return new IllegalArgumentException("Product not found");
             });
+        
+        // Validar que el producto esté activo
+        if (!product.isActive()) {
+            String message = String.format("Product with ID %d is inactive. Cannot perform kardex operations.", productId);
+            log.info(message);
+            formatterResultOutputPort.returnBusinessRuleErrorResponse(400, messageService.getMessage(MessageKeys.ERROR_PRODUCT_NOT_ACTIVE,message));
+            throw new IllegalArgumentException(message);
+        }
+        
+        return product;
     }
 
     /**
@@ -377,7 +421,7 @@ public class KardexCommandService implements IKardexCommandPort {
             String message = String.format("Insufficient stock. Requested: %d, Available: %d", 
                 quantityRequested, totalAvailable);
             log.info(message);
-            formatterResultOutputPort.returnBusinessRuleErrorResponse(400, message);
+            formatterResultOutputPort.returnBusinessRuleErrorResponse(400, messageService.getMessage(MessageKeys.ERROR_INSUFFICIENT_STOCK,message));
             throw new IllegalArgumentException(message);
         }
     }
@@ -418,19 +462,11 @@ public class KardexCommandService implements IKardexCommandPort {
         return new FIFOResult(detailsToCreate, lotsToUpdate);
     }
 
-   
 
  
 
     //Record para resultado FIFO
-    private record FIFOResult(List<DetailOutput> detailsToCreate, List<Kardex> lotsToUpdate) {}
-
-
-
-
-
-   
-
-   
+    private record FIFOResult(List<DetailOutput> detailsToCreate, List<Kardex> lotsToUpdate) {
+    }
 
 }

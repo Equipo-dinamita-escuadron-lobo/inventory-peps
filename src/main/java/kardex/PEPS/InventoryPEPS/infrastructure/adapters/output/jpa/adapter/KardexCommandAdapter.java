@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import jakarta.transaction.Transactional;
 import kardex.PEPS.InventoryPEPS.domain.model.DetailOutput;
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexCommandOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.command.IKardexCommandOutputPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity.DetailOutputEntity;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity.KardexEntity;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity.ProductEntity;

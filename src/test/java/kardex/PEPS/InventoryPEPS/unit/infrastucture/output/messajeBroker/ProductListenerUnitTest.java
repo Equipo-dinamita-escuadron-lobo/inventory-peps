@@ -19,7 +19,7 @@ import org.springframework.amqp.core.Message;
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IEventRecoveryActionPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IMessageErrorHandlingPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IProductCommandOutPutPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.command.IProductCommandOutPutPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.ProductListener;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.dto.EventDto;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.dto.ProductAsyncDto;

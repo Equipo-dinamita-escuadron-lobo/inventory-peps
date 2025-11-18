@@ -14,7 +14,7 @@ public final class MessageKeys {
     //Generic Error Messages
     public static final String DATE_CANNOT_BE_FUTURE = "kardex.error.date.cannot.be.future";
     public static final String DATE_CANNOT_BE_BEFORE_LAST_RECORD = "kardex.error.date.cannot.be.before.last.record";
-
+    public static final String INVALID_ACCOUNTING_DATE = "kardex.error.invalid.accounting.date";
 
     // Mensajes de error
     public static final String ERROR_PRODUCT_NOT_FOUND = "kardex.error.product.not.found";
@@ -25,7 +25,15 @@ public final class MessageKeys {
     public static final String ERROR_NO_PREVIOUS_KARDEX = "kardex.error.no.previous.kardex";
     public static final String ERROR_INVALID_MOVEMENT_TYPE = "kardex.error.invalid.movement.type";
     public static final String ERROR_NOT_FOUND = "kardex.error.not.found";
-    
+    // Mensajes de error para el origen de compras
+    public static final String ERROR_NOT_FOUND_PURCHASE_ORIGIN = "kardex.error.not.found.purchase.origin";
+    public static final String ERROR_VALIDATION_PURCHASE_ORIGIN="kardex.error.validation.purchase.origin";
+     public static final String ERROR_NOT_FOUND_SALE_ORIGIN = "kardex.error.not.found.sale.origin";
+    public static final String ERROR_VALIDATION_SALE_ORIGIN="kardex.error.validation.sale.origin";
+    public static final String ERROR_SALE_NODETAILS_TO_RETURN = "kardex.error.sale.no.details.to.return";
+   public static final String ERROR_NOT_FOUND_PRODUCT="kardex.error.not.found.product";
+    public static final String ERROR_PRODUCT_NOT_ACTIVE="kardex.error.product.not.active";
+    public static final String ERROR_INSUFFICIENT_STOCK="kardex.error.insufficient.stock";
 
     // Mensajes de log
     public static final String LOG_STOCK_REQUEST_SUCCESS = "kardex.log.stock.request.success";

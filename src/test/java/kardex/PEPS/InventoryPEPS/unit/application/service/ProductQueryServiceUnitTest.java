@@ -26,7 +26,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import kardex.PEPS.InventoryPEPS.application.service.query.ProductQueryService;
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IMessageServicePort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IProductQueryOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IProductQueryOutputPort;
+
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 

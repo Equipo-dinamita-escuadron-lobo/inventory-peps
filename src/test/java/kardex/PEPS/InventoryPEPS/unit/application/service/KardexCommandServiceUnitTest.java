@@ -35,11 +35,11 @@ import kardex.PEPS.InventoryPEPS.application.service.command.KardexCommandServic
 import kardex.PEPS.InventoryPEPS.domain.model.DetailOutput;
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IDetailQueryOutPutPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IFormatterResultOutputPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexCommandOutputPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexQueryOutputPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IProductQueryOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.command.IKardexCommandOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IDetailQueryOutPutPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IKardexQueryOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IProductQueryOutputPort;
 
 import static org.mockito.BDDMockito.*;
 

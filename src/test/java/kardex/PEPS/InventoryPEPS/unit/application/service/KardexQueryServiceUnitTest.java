@@ -26,7 +26,8 @@ import kardex.PEPS.InventoryPEPS.application.service.query.KardexQueryService;
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.domain.model.KardexReport;
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexQueryOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IKardexQueryOutputPort;
+
 import static org.mockito.BDDMockito.given;
 
 

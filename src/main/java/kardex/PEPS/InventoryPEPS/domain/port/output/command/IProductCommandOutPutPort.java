@@ -1,4 +1,4 @@
-package kardex.PEPS.InventoryPEPS.domain.port.output;
+package kardex.PEPS.InventoryPEPS.domain.port.output.command;
 
 import java.util.List;
 

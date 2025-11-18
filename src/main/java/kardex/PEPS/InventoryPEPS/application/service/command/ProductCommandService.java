@@ -3,11 +3,8 @@ package kardex.PEPS.InventoryPEPS.application.service.command;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-
 import org.springframework.stereotype.Service;
-
 import jakarta.transaction.Transactional;
 import kardex.PEPS.InventoryPEPS.application.ports.input.IProductCommandPort;
 import kardex.PEPS.InventoryPEPS.application.ports.input.IProductSyncCommandPort;
@@ -15,9 +12,9 @@ import kardex.PEPS.InventoryPEPS.domain.model.Product;
 import kardex.PEPS.InventoryPEPS.domain.model.SyncState;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IFormatterResultOutputPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IMessageServicePort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IProductClientPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IProductCommandOutPutPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.ISyncStateRepositoryPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.command.IProductCommandOutPutPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.external.IProductClientPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.external.ISyncStateRepositoryPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.config.i18n.MessageKeys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

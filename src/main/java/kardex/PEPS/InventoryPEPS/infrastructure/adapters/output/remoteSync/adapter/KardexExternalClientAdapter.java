@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
+import kardex.PEPS.InventoryPEPS.domain.port.output.IFormatterResultOutputPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexExternalClientPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.remoteSync.config.IKardexExternalClient;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.remoteSync.dto.KardexExternalResponseDTO;
@@ -20,6 +21,7 @@ public class KardexExternalClientAdapter implements IKardexExternalClientPort {
 
     private final IKardexExternalClientMapper kardexExternalClientMapper;
     private final IKardexExternalClient kardexExternalClient;
+    private final IFormatterResultOutputPort formatterResultOutputPort;
 
     @Override
     public List<Kardex> findKardexByEnterpriseId(String enterpriseId) {
@@ -32,7 +34,7 @@ public class KardexExternalClientAdapter implements IKardexExternalClientPort {
 
             if (response == null || response.getData() == null) {
                 log.warn("No data received from external kardex service for enterprise: {}", enterpriseId);
-                throw new RuntimeException("No data received from external kardex service");
+                formatterResultOutputPort.returnErrorGenericResponse(500,"No data received from external kardex service");
             }
 
             log.info("Retrieved {} kardex records from external service", response.getData().size());
@@ -45,20 +47,21 @@ public class KardexExternalClientAdapter implements IKardexExternalClientPort {
 
         }catch (WebClientResponseException.ServiceUnavailable e) {
             log.error("Kardex external service is unavailable (503): {}", e.getMessage());
-            throw new RuntimeException("Kardex external service is currently unavailable");
+            formatterResultOutputPort.returnErrorGenericResponse(503, "Kardex external service is unavailable");    
             
         } catch (WebClientResponseException.NotFound e) {
             log.warn("No kardex records found for enterprise: {}", enterpriseId);
-            throw new RuntimeException("No kardex records found for the specified enterprise");
+            formatterResultOutputPort.returnErrorGenericResponse(404, "No kardex records found for the given enterprise ID");
             
         } catch (WebClientResponseException e) {
             log.error("Error calling kardex external service: {} - {}", e.getStatusCode(), e.getStatusText());
-            throw new RuntimeException("Error communicating with kardex external service: " + e.getStatusCode());
+           formatterResultOutputPort.returnErrorGenericResponse(500,"Error communicating with kardex external service");
             
         } catch (Exception e) {
             log.error("Unexpected error calling kardex external service: {}", e.getMessage(), e);
-            throw new RuntimeException("Unexpected error communicating with kardex external service: " + e.getMessage());
-        }
+            formatterResultOutputPort.returnErrorGenericResponse(500,"Unexpected error communicating with kardex external service");    
+        }   
+        return List.of();
     }
     
 }

@@ -3,7 +3,7 @@ package kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import kardex.PEPS.InventoryPEPS.domain.port.output.IProductQueryOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IProductQueryOutputPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.ResponseDTO;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.ProductDTOResponse;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.mapper.IProductResponseMapper;

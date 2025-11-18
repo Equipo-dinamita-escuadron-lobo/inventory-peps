@@ -3,7 +3,7 @@ package kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.adapter;
 import java.util.List;
 import org.springframework.stereotype.Component;
 import kardex.PEPS.InventoryPEPS.domain.model.DetailOutput;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IDetailQueryOutPutPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IDetailQueryOutPutPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity.DetailOutputEntity;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.mapper.IDetailOutPutSaleReturnMapper;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.repository.IDetailOutPutRepository;
