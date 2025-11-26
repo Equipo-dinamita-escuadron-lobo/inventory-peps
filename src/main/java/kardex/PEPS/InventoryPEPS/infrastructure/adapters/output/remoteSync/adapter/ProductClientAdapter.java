@@ -14,6 +14,12 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.remoteSync.mappe
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @brief Adapter for Product Service communication
+ * 
+ * Implements the output port to synchronize product data from an external Product Service.
+ * Used to fetch product updates based on a timestamp.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -22,6 +28,16 @@ public class ProductClientAdapter  implements IProductClientPort {
     private final IProductClient productClient;
     private final IFormatterResultOutputPort formatterResultOutputPort;
 
+    /**
+     * @brief Retrieves all products for an enterprise modified after a specific time
+     * 
+     * Queries the external product service for products associated with the enterprise
+     * that have been created or modified since the provided timestamp.
+     * 
+     * @param enterpriseId The unique identifier of the enterprise
+     * @param since The timestamp to filter products modified after this time
+     * @return List of Product domain objects, or an empty list on error
+     */
     @Override
     public List<Product> findAllProductsByEnterpriseId(String enterpriseId, Instant since) {
         try {

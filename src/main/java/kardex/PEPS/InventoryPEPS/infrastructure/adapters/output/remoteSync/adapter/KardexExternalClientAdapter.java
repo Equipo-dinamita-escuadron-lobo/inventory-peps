@@ -14,6 +14,12 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.remoteSync.mappe
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @brief Adapter for External Kardex Service communication
+ * 
+ * Implements the output port to retrieve Kardex history from an external legacy or backup system.
+ * Handles data mapping and error management during the retrieval process.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -23,6 +29,15 @@ public class KardexExternalClientAdapter implements IKardexExternalClientPort {
     private final IKardexExternalClient kardexExternalClient;
     private final IFormatterResultOutputPort formatterResultOutputPort;
 
+    /**
+     * @brief Retrieves Kardex records for a specific enterprise
+     * 
+     * Fetches historical or external Kardex data associated with the given enterprise ID.
+     * Maps the external DTOs to domain models.
+     * 
+     * @param enterpriseId The unique identifier of the enterprise
+     * @return List of Kardex domain objects, or an empty list if not found or on error
+     */
     @Override
     public List<Kardex> findKardexByEnterpriseId(String enterpriseId) {
        

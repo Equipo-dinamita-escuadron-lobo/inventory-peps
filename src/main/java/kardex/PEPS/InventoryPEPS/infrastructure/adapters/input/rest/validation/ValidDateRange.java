@@ -9,6 +9,11 @@ import java.lang.annotation.Target;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
+/**
+ * @brief Custom annotation for date range validation
+ * 
+ * Applied to KardexByDateDTORequest to enforce consistency between start and end dates.
+ */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy =KardexDateRangeValidator.class )

@@ -25,6 +25,11 @@ public interface IKardexExternalClientMapper {
     @Mapping(target = "date", ignore = true)
     Kardex toDomain(KardexBatchDTORequest dto);
 
+    /**
+     * @brief Maps a product ID to a Product domain object
+     * @param productId The product identifier
+     * @return Product object with the ID set, or null if ID is null
+     */
     @Named("idToProduct")
     default Product mapIdToProduct(Long productId) {
         if (productId == null) {

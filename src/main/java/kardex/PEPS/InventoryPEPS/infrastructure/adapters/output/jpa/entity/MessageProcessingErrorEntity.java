@@ -24,7 +24,7 @@ import lombok.Setter;
 @Entity
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
-@Table(name = "message_processing_errors")
+@Table(name = "message_processing_error")
 public class MessageProcessingErrorEntity {
     
     @Id

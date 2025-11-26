@@ -5,9 +5,9 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
-
 import kardex.PEPS.InventoryPEPS.application.ports.input.IKardexCommandPort;
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
+import kardex.PEPS.InventoryPEPS.domain.port.output.IMessageErrorHandlingPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.config.rabbitConfig.RabbitPEPSConfig;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.base.AbstractMessageListener;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.dto.EventDto;
@@ -19,6 +19,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import com.rabbitmq.client.Channel;
 
+import jakarta.annotation.PostConstruct;
+
+/**
+ * @brief Listener for Facture (Invoice) events from RabbitMQ
+ * 
+ * Handles various invoice-related events such as PURCHASE, SALE, RETURNS, etc.,
+ * and triggers corresponding commands in the Kardex domain.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -26,7 +34,27 @@ public class FactureListener extends AbstractMessageListener<EventDto<KardexRabb
     
     private final IKardexCommandPort kardexCommandPort;
     private final IKardexRabbitMQMapper kardexRabbitMQMapper;
-    
+    private final IMessageErrorHandlingPort messageErrorHandlingPortImpl;
+
+    private String validationErrorMessage = null;
+      
+    /**
+     * @brief Initializes the listener configuration
+     */
+    @PostConstruct
+    private void init() {
+        this.messageErrorHandlingPort = messageErrorHandlingPortImpl;
+        // Implement specific recovery strategy for kardex events if needed
+    }
+
+    /**
+     * @brief Handles incoming facture events from the queue
+     * 
+     * @param event The event data containing Kardex information and event type
+     * @param message The raw AMQP message
+     * @param channel The AMQP channel
+     * @param deliveryTag The delivery tag for manual acknowledgement
+     */
     @RabbitListener(queues = RabbitPEPSConfig.PEPS_QUEUE)
     public void handleFactureEvent( EventDto<KardexRabbitDto, EventFactureType> event,
         Message message, 
@@ -36,6 +64,14 @@ public class FactureListener extends AbstractMessageListener<EventDto<KardexRabb
         handleMessage(event, channel, deliveryTag);
     }
 
+    /**
+     * @brief Processes the specific business logic for the event
+     * 
+     * Maps the DTO to the domain model and executes the appropriate command
+     * based on the event type (PURCHASE, SALE, etc.).
+     * 
+     * @param event The event to process
+     */
     @Override
     protected void processEvent(EventDto<KardexRabbitDto, EventFactureType> event) {
         switch (event.getType()) {
@@ -78,27 +114,87 @@ public class FactureListener extends AbstractMessageListener<EventDto<KardexRabb
 
     }
 
+    /**
+     * @brief Validates the incoming event structure and data
+     * 
+     * Checks for nulls and required fields like quantity, factCode, productId.
+     * Also validates unitPrice for PURCHASE events.
+     * 
+     * @param event The event to validate
+     * @return true if valid, false otherwise
+     */
     @Override
     protected boolean isValidEvent(EventDto<KardexRabbitDto, EventFactureType> event) {
-        return event != null && event.getData() != null;
-    }
-
-    @Override
-    protected String getEntityIdentifierSafely(EventDto<KardexRabbitDto, EventFactureType> event) {
-       if (event == null || event.getData() == null) {
-            return "unknown";
+         validationErrorMessage = null; // Reset error message
+        
+        if (event == null) {
+            validationErrorMessage = "Event is null";
+            log.warn(validationErrorMessage);
+            return false;
         }
-        String factCode = event.getData().getFactCode() != null ? 
-            event.getData().getFactCode().toString() : "unnamed";
-        return factCode;
+
+        if (event.getType() == null) {
+            validationErrorMessage = "Event type is null";
+            log.warn(validationErrorMessage);
+            return false;
+        }
+        
+        if (event.getData() == null) {
+            validationErrorMessage = "Event data is null";
+            log.warn(validationErrorMessage);
+            return false;
+        }
+        
+        KardexRabbitDto data = event.getData();
+        
+        // Validate required fields
+        if (data.getQuantity() == null || data.getQuantity() <= 0) {
+            validationErrorMessage = "Missing or invalid required field: quantity";
+            log.warn("Quantity is null or invalid - required field");
+            return false;
+        }
+        
+        if (data.getFactCode() == null) {
+            validationErrorMessage = "Missing required field: factCode";
+            log.warn("FactCode is null - required field");
+            return false;
+        }
+        
+        if (data.getProductId() == null) {
+            validationErrorMessage = "Missing required field: productId";
+            log.warn("ProductId is null - required field");
+            return false;
+        }
+        
+        // For purchase operations, unitPrice is required
+        if ((event.getType() == EventFactureType.PURCHASE || event.getType() == EventFactureType.NONCOMMERCIALENTRY)
+            && (data.getUnitPrice() == null || data.getUnitPrice().compareTo(java.math.BigDecimal.ZERO) <= 0)) {
+            validationErrorMessage = "Missing or invalid required field for purchase operation: unitPrice";
+            log.warn("UnitPrice is null or invalid for purchase operation - required field");
+            return false;
+        }
+        
+        return true;
+
     }
 
+   
+
+    /**
+     * @brief Gets the entity type name for logging
+     * @return "Kardex"
+     */
     @Override
     protected String getEntityType() {
         return "Kardex";
     }
 
 
+    /**
+     * @brief Extracts the event type as a string
+     * @param event The event object
+     * @return The string representation of the event type
+     */
      @Override
     protected String extractEventType(EventDto<KardexRabbitDto, EventFactureType> event) {
         if (event == null) {
@@ -108,6 +204,11 @@ public class FactureListener extends AbstractMessageListener<EventDto<KardexRabb
         return event.getType() != null ? event.getType().toString() : null;
     }
 
+    /**
+     * @brief Converts the event data to JSON for error logging
+     * @param event The event object
+     * @return JSON string of the event data
+     */
     @Override
     protected String convertEventToJson(EventDto<KardexRabbitDto, EventFactureType> event) {
         if (event == null) {
@@ -122,5 +223,13 @@ public class FactureListener extends AbstractMessageListener<EventDto<KardexRabb
         return JsonUtils.toJsonWithNullHandling(event.getData());
     }
     
+    /**
+     * @brief Gets the last validation error message
+     * @return The error message string
+     */
+     @Override
+    protected String getValidationErrorMessage() {
+        return validationErrorMessage;
+    }
 
 }

@@ -7,6 +7,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief Represents a Kardex record during migration
+ * 
+ * Used to transfer inventory state between systems or versions.
+ */
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 public class KardexMigration {
@@ -31,7 +36,8 @@ public class KardexMigration {
 
 
     /**
-     * Valida que los datos del resumen sean consistentes.
+     * @brief Validates that the migration data is consistent
+     * @throws IllegalStateException if data is invalid
      */
     public void validate() {
         if (productId == null) {
@@ -49,14 +55,16 @@ public class KardexMigration {
     }
 
     /**
-     * Indica si hay stock disponible en el balance.
+     * @brief Checks if there is stock in the balance
+     * @return true if balance quantity > 0
      */
     public boolean hasBalanceStock() {
         return balanceQuantity != null && balanceQuantity > 0;
     }
 
     /**
-     * Calcula el valor total del movimiento original.
+     * @brief Calculates the total value of the original movement
+     * @return Total value (quantity * unit price)
      */
     public BigDecimal calculateMovementValue() {
         if (quantity == null || unitPrice == null) {

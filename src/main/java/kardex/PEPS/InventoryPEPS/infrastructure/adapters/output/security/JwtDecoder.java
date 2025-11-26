@@ -9,17 +9,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @brief Utility for decoding JWT tokens manually
+ * 
+ * Provides methods to parse JWT strings and extract specific claims or the tenant ID
+ * without relying on the full Spring Security context.
+ */
 @Component
 @Slf4j
 public class JwtDecoder {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
      /**
-     * Extrae el tenant ID del token JWT.
-     * Decodifica el payload del JWT y extrae el claim "sub" que contiene el tenant ID.
+     * @brief Extracts the tenant ID from a JWT string
      * 
-     * @param jwtToken el token JWT como string
-     * @return el tenant ID extraído del token, o null si no se puede extraer
+     * Decodes the payload and retrieves the "sub" claim which represents the tenant/user ID.
+     * 
+     * @param jwtToken The raw JWT string (with or without "Bearer " prefix)
+     * @return The extracted tenant ID, or null if invalid/not found
     */
     public String extractTenantId(String jwtToken){
         try {
@@ -60,11 +67,11 @@ public class JwtDecoder {
     }
 
      /**
-     * Extrae cualquier claim del token JWT.
+     * @brief Extracts a specific claim from a JWT string
      * 
-     * @param jwtToken el token JWT como string
-     * @param claimName nombre del claim a extraer
-     * @return el valor del claim como string, o null si no se puede extraer
+     * @param jwtToken The raw JWT string
+     * @param claimName The name of the claim to extract
+     * @return The claim value as string, or null if invalid/not found
     */
     public String extractClaim(String jwtToken, String claimName) {
         try{

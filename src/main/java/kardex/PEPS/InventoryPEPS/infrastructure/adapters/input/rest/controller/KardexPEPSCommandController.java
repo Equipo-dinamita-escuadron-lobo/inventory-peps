@@ -17,7 +17,12 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.mapper.IKardexRestMapper;
 import lombok.RequiredArgsConstructor;
 
-
+/**
+ * @brief REST controller for Kardex PEPS command operations
+ * 
+ * Handles HTTP requests for registering inventory adjustments (entries and exits)
+ * and managing kardex records.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/kardex/peps")
@@ -26,6 +31,12 @@ public class KardexPEPSCommandController {
     private final IKardexCommandPort kardexCommandPort;
     private final IKardexRestMapper kardexRestMapper;
 
+    /**
+     * @brief Registers a purchase adjustment (positive inventory adjustment)
+     * 
+     * @param adjustmentEntryDTORequest DTO containing adjustment details
+     * @return Response with the registered adjustment information
+     */
     @PostMapping("/purchase-adjustment")
     public ResponseEntity<ResponseDTO<AdjustmentEntryDTOResponse>> AdjustmentEntry(@Valid @RequestBody AdjustmentEntryDTORequest adjustmentEntryDTORequest) {
         Kardex response=kardexCommandPort.registerAdjustmentEntry(kardexRestMapper.toDomain(adjustmentEntryDTORequest));
@@ -38,6 +49,12 @@ public class KardexPEPSCommandController {
     }
 
 
+    /**
+     * @brief Registers a sale adjustment (negative inventory adjustment)
+     * 
+     * @param adjustmentExitDTORequest DTO containing adjustment details
+     * @return Response with the registered adjustment information
+     */
     @PostMapping("/sale-adjustment")
     public ResponseEntity<ResponseDTO<AdjustmentExitDTOResponse>> AdjustmentExit(@Valid @RequestBody AdjustmentExitDTORequest adjustmentExitDTORequest) {
         Kardex response=kardexCommandPort.registerAdjustmentExit(kardexRestMapper.toDomain(adjustmentExitDTORequest));

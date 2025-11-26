@@ -6,7 +6,10 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity.Messa
 
 
 /**
- * Repositorio para gestionar los errores de procesamiento de mensajes.
+ * @brief Repository for managing message processing errors
+ * 
+ * Handles database operations for tracking errors that occur during
+ * asynchronous message processing.
  */
 public interface IMessageProcessingErrorRepository extends JpaRepository<MessageProcessingErrorEntity, Long> {
       /**

@@ -7,11 +7,20 @@ import org.mapstruct.Named;
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.dto.KardexRabbitDto;
-
+/**
+ * @brief Mapper for Kardex RabbitMQ DTOs
+ * 
+ * Handles conversion between KardexRabbitDto and Kardex domain model.
+ */
 
 @Mapper(componentModel = "spring")
 public interface IKardexRabbitMQMapper {
 
+    /**
+     * @brief Converts RabbitMQ DTO to domain model
+     * @param kardexRabbitDto The DTO received from RabbitMQ
+     * @return Kardex domain object
+     */
     @Mapping(target = "product.productId", source = "productId")
     @Mapping(target = "date", ignore = true)
     @Mapping(target = "type", ignore = true)
@@ -19,6 +28,11 @@ public interface IKardexRabbitMQMapper {
     Kardex toDomain(KardexRabbitDto kardexRabbitDto);
 
 
+    /**
+     * @brief Helper method to map product ID to Product object
+     * @param productId The product ID
+     * @return Product object with ID set
+     */
     @Named("idToProduct")
     default Product mapIdToProduct(Long productId) {
         if (productId == null) {

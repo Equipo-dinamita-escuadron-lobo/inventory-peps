@@ -8,6 +8,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief DTO for adjustment entry response
+ * 
+ * Represents the details of a registered positive inventory adjustment.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

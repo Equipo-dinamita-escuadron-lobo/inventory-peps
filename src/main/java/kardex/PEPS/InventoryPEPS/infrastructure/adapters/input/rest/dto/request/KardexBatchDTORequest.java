@@ -10,6 +10,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief DTO for batch kardex processing request
+ * 
+ * Represents a single kardex movement record within a batch processing request.
+ */
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 public class KardexBatchDTORequest {

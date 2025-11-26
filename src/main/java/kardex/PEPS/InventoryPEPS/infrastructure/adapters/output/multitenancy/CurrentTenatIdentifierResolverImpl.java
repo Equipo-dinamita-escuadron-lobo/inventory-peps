@@ -17,12 +17,10 @@ import java.util.Map;
 public class CurrentTenatIdentifierResolverImpl  implements CurrentTenantIdentifierResolver, HibernatePropertiesCustomizer {
 
      /**
-     * Resuelve el identificador de inquilino actual.
+     * @brief Resolves the current tenant identifier.
      * 
-     * @return el identificador de inquilino actual del TenantContext si está
-     *         disponible;
-     *         de lo contrario, devuelve "BOOTSTRAP" para permitir la inicialización
-     *         del EntityManagerFactory.
+     * @return The current tenant identifier from TenantContext if available;
+     *         otherwise returns "BOOTSTRAP" to allow EntityManagerFactory initialization.
      */
     @Override
     public String resolveCurrentTenantIdentifier() {
@@ -38,10 +36,9 @@ public class CurrentTenatIdentifierResolverImpl  implements CurrentTenantIdentif
 
     
     /**
-     * Valida las sesiones actuales existentes.
+     * @brief Validates existing current sessions.
      * 
-     * @return true siempre, ya que las sesiones actuales son consideradas válidas
-     *         por defecto.
+     * @return true always, as current sessions are considered valid by default.
      */
     @Override
     public boolean validateExistingCurrentSessions() {
@@ -49,12 +46,12 @@ public class CurrentTenatIdentifierResolverImpl  implements CurrentTenantIdentif
     }
 
     /**
-     * Personaliza las propiedades de Hibernate dadas agregando el resolutor de
-     * identificador
-     * de inquilino actual como el valor de la configuración
-     * {@link AvailableSettings#MULTI_TENANT_IDENTIFIER_RESOLVER}.
+     * @brief Customizes the given Hibernate properties.
      * 
-     * @param hibernateProperties las propiedades a personalizar
+     * Adds the current tenant identifier resolver as the value for the
+     * {@link AvailableSettings#MULTI_TENANT_IDENTIFIER_RESOLVER} setting.
+     * 
+     * @param hibernateProperties The properties to customize
      */
     @Override
     public void customize(Map<String, Object> hibernateProperties) {

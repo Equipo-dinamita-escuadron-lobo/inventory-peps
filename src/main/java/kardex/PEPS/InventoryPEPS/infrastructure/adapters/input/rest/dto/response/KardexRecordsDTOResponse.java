@@ -8,6 +8,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief DTO for a kardex record report
+ * 
+ * Represents a complete kardex movement entry, including entry/exit details and balance.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

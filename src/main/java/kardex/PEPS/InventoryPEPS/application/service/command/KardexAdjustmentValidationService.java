@@ -14,6 +14,12 @@ import kardex.PEPS.InventoryPEPS.domain.port.output.query.IKardexQueryOutputPort
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.config.i18n.MessageKeys;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * @brief Service for validating kardex adjustments
+ * 
+ * Provides validation logic for adjustment dates, ensuring they comply with
+ * business rules and accounting periods.
+ */
 @Service
 @RequiredArgsConstructor
 public class KardexAdjustmentValidationService {
@@ -22,6 +28,15 @@ public class KardexAdjustmentValidationService {
     private final IMessageServicePort messageServicePort;
     private final IKardexQueryOutputPort kardexQueryOutputPort;
 
+    /**
+     * @brief Validates the date for a kardex adjustment
+     * 
+     * Checks if the date is in the future, if it's before the last record,
+     * and if it falls within a valid accounting period.
+     * 
+     * @param kardex Kardex record to validate
+     * @param enterpriseId Enterprise identifier
+     */
     public void validateDateForAdjustment(Kardex kardex, String enterpriseId){
         // 1. Si no viene fecha, asignar fecha actual
         if(kardex.getDate()==null){

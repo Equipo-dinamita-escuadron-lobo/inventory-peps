@@ -9,6 +9,12 @@ import java.util.List;
 import java.util.Optional;
 
 
+/**
+ * @brief Manages the inventory queue for FIFO valuation
+ * 
+ * Maintains a list of balances (lots) and provides methods to consume
+ * stock according to First-In-First-Out principles.
+ */
 public class InventoryQueue {
    private final LinkedList<Balance> balances;
     
@@ -17,7 +23,10 @@ public class InventoryQueue {
         this.balances = new LinkedList<>();
     }
     
-    // Agregar balance al final (FIFO)
+    /**
+     * @brief Adds a balance to the end of the queue (Purchase)
+     * @param balance Balance to add
+     */
     public void addBalance(Balance balance) {
         if (balance == null) {
             throw new IllegalArgumentException("Balance cannot be null");
@@ -28,7 +37,10 @@ public class InventoryQueue {
         this.balances.add(balance);
     }
     
-    // Agregar al inicio (para devoluciones)
+    /**
+     * @brief Adds a balance to the start of the queue (Sales Return)
+     * @param balance Balance to add
+     */
     public void addBalanceFirst(Balance balance) {
         if (balance == null) {
             throw new IllegalArgumentException("Balance cannot be null");
@@ -36,7 +48,11 @@ public class InventoryQueue {
         this.balances.addFirst(balance);
     }
     
-    //Consumir cantidad usando FIFO
+    /**
+     * @brief Consumes a quantity from the queue using FIFO logic
+     * @param quantityToConsume Quantity to remove
+     * @return List of sale details describing which lots were consumed
+     */
     public List<SaleDetail> consumeQuantity(int quantityToConsume) {
         if (quantityToConsume <= 0) {
             throw new IllegalArgumentException("Quantity to consume must be positive");
@@ -52,6 +68,15 @@ public class InventoryQueue {
         return consumeQuantityInternal(quantityToConsume);
     }
 
+    /**
+     * @brief Consumes a quantity for reporting purposes
+     * 
+     * Similar to consumeQuantity but may have different validation strictness
+     * for report generation.
+     * 
+     * @param quantityToConsume Quantity to remove
+     * @return List of sale details
+     */
     public List<SaleDetail> consumeQuantityForReport(int quantityToConsume) {
         if (quantityToConsume <= 0) {
             throw new IllegalArgumentException("Quantity to consume must be positive");
@@ -90,7 +115,15 @@ public class InventoryQueue {
     }
 
     
-    //  Remover cantidad específica por precio
+    /**
+     * @brief Removes a specific quantity from lots with a matching unit price
+     * 
+     * Used for purchase returns where specific lots must be identified by price.
+     * 
+     * @param quantityToRemove Quantity to remove
+     * @param unitPrice Unit price to match
+     * @return List of details of removed items
+     */
     public List<SaleDetail> removeByUnitPrice(int quantityToRemove, BigDecimal unitPrice) {
         if (quantityToRemove <= 0) {
             throw new IllegalArgumentException("Quantity to remove must be positive");
@@ -122,31 +155,47 @@ public class InventoryQueue {
         return details;
     }
     
-    // Verificar si hay suficiente stock
+    /**
+     * @brief Checks if there is enough total stock
+     * @param requiredQuantity Quantity needed
+     * @return true if total quantity >= required
+     */
     public boolean hasEnoughStock(int requiredQuantity) {
         return getTotalQuantity() >= requiredQuantity;
     }
     
-    //Obtener cantidad total
+    /**
+     * @brief Gets the total quantity across all balances
+     * @return Total quantity
+     */
     public int getTotalQuantity() {
         return balances.stream()
             .mapToInt(Balance::getQuantity)
             .sum();
     }
     
-    // Obtener valor total
+    /**
+     * @brief Gets the total value of the inventory
+     * @return Sum of total prices of all balances
+     */
     public BigDecimal getTotalValue() {
         return balances.stream()
             .map(Balance::getTotalPrice)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
     
-    // Verificar si está vacío
+    /**
+     * @brief Checks if the queue is empty
+     * @return true if no balances exist
+     */
     public boolean isEmpty() {
         return balances.isEmpty();
     }
     
-    //Obtener copia de balances
+    /**
+     * @brief Creates a deep copy of the current balances
+     * @return List of copied balances
+     */
     public List<Balance> getBalancesCopy() {
         return balances.stream()
             .map(Balance::copy)

@@ -44,8 +44,7 @@ import kardex.PEPS.InventoryPEPS.domain.port.output.command.IProductCommandOutPu
 import kardex.PEPS.InventoryPEPS.domain.port.output.external.IProductClientPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.external.ISyncStateRepositoryPort;
 
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
+
 
 
 @ExtendWith(MockitoExtension.class)
@@ -101,7 +100,7 @@ public class ProductCommandServiceUnitTest {
         // Arrange
         when(syncStateRepository.findBySyncTypeAndEnterpriseId("products", enterpriseId))
             .thenReturn(Optional.empty());
-        // ✅ CORRECCIÓN: save() es void - no usar thenReturn ni thenAnswer
+    
         doNothing().when(syncStateRepository).save(any(SyncState.class));
         
         when(productClient.findAllProductsByEnterpriseId(eq(enterpriseId), any(Instant.class)))

@@ -9,6 +9,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief Represents the detail of an output movement
+ * 
+ * Links a sale movement to the specific origin movement (purchase) 
+ * that supplied the goods, enforcing FIFO logic.
+ */
 @Getter
 @Setter
 @AllArgsConstructor
@@ -23,6 +29,14 @@ public class DetailOutput {
 
 
     
+    /**
+     * @brief Creates a new output detail
+     * @param amountUsed Quantity consumed from the origin movement
+     * @param unitPrice Unit price of the origin movement
+     * @param movementSale The sale movement
+     * @param movementOrigin The origin movement (purchase)
+     * @return New DetailOutput instance
+     */
      public static DetailOutput create(int amountUsed, BigDecimal unitPrice, 
                                     Kardex movementSale, Kardex movementOrigin) {
         validateAmountUsed(amountUsed);
@@ -40,20 +54,37 @@ public class DetailOutput {
         return detail;
     }
 
+    /**
+     * @brief Calculates the total value of this detail
+     * @return Total value (quantity * unit price)
+     */
     public BigDecimal getTotalValue() {
         return this.unitPrice.multiply(BigDecimal.valueOf(this.quantityUsed));
     }
 
+    /**
+     * @brief Checks if this detail belongs to a specific sale movement
+     * @param saleMovement Movement to check
+     * @return true if it belongs to the sale
+     */
     public boolean belongsToSaleMovement(Kardex saleMovement) {
         return this.movementSale != null && this.movementSale.equals(saleMovement);
     }
 
+    /**
+     * @brief Validates FIFO compliance
+     * @return true if origin date is before or equal to sale date
+     */
     public boolean isValidFIFO() {
         if (movementOrigin == null || movementSale == null) return false;
         return this.movementOrigin.getDate().isBefore(this.movementSale.getDate()) ||
                this.movementOrigin.getDate().isEqual(this.movementSale.getDate());
     }
 
+    /**
+     * @brief Checks if origin and sale movements belong to the same product
+     * @return true if product IDs match
+     */
     public boolean belongsToSameProduct() {
         if (movementOrigin == null || movementSale == null) return false;
         if (movementOrigin.getProduct() == null || movementSale.getProduct() == null) return false;
@@ -62,7 +93,10 @@ public class DetailOutput {
                .equals(this.movementSale.getProduct().getProductId());
     }
 
-    // ✅ COMPORTAMIENTO - Validar que el detalle es consistente
+    /**
+     * @brief Validates consistency of the detail
+     * @throws IllegalArgumentException if validation fails
+     */
     public void validateConsistency() {
         if (!isValidFIFO()) {
             throw new IllegalArgumentException("FIFO violation: origin movement is newer than sale movement");

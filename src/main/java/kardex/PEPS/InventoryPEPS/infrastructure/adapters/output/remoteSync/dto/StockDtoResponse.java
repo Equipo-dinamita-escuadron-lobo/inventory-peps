@@ -7,6 +7,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief DTO for stock service response
+ * 
+ * Represents the stock information returned by the Stock Service.
+ */
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter @Setter

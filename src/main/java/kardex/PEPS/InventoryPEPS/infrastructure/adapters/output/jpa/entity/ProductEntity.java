@@ -14,6 +14,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief JPA Entity representing a Product
+ * 
+ * Maps to the 'product' table. Stores product reference data needed
+ * for inventory management.
+ */
 @Entity
 @Table(name="product")
 @AllArgsConstructor

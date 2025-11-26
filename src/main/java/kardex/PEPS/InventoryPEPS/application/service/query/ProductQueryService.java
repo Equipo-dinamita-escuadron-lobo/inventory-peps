@@ -12,6 +12,11 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.config.i18n.MessageKeys
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @brief Service implementation for Product query operations
+ * 
+ * Handles retrieval of product information, specifically filtering by enterprise.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -19,6 +24,12 @@ public class ProductQueryService implements IProductQueryPort {
     private final IProductQueryOutputPort productQueryOutputPort;
     private final IMessageServicePort messageServicePort;
     
+    /**
+     * @brief Retrieves all products for a specific enterprise
+     * 
+     * @param enterpriseId Identifier of the enterprise
+     * @return List of products belonging to the enterprise
+     */
     @Override
     public List<Product> findAll(String enterpriseId) {
         log.info(messageServicePort.getMessage(MessageKeys.LOG_PRODUCT_QUERY_ALL, enterpriseId));

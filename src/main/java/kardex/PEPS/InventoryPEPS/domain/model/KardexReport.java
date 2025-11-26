@@ -12,6 +12,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief Represents a line item in a Kardex report
+ * 
+ * Contains details about a movement (entry or output) and the resulting
+ * inventory balance state.
+ */
 @Getter
 @Setter
 @AllArgsConstructor
@@ -31,7 +37,12 @@ public class KardexReport {
     private List<Balance> balance;
 
 
-    //  Crear reporte de entrada
+    /**
+     * @brief Creates a report for an entry movement
+     * @param movement The entry movement
+     * @param currentBalance The state of inventory balances after the movement
+     * @return New KardexReport
+     */
     public static KardexReport createEntryReport(Kardex movement, List<Balance> currentBalance) {
         validateMovement(movement);
         
@@ -50,7 +61,13 @@ public class KardexReport {
         return report;
     }
 
-    //Crear reporte de salida
+    /**
+     * @brief Creates a report for an output movement
+     * @param movement The output movement
+     * @param saleDetails Details of which lots were consumed
+     * @param currentBalance The state of inventory balances after the movement
+     * @return New KardexReport
+     */
     public static KardexReport createOutputReport(Kardex movement, List<SaleDetail> saleDetails, 
                                                  List<Balance> currentBalance) {
         validateMovement(movement);
@@ -66,7 +83,12 @@ public class KardexReport {
         return report;
     }
 
-    //Crear reporte de saldo inicial
+    /**
+     * @brief Creates a report for the initial balance
+     * @param date Date of the balance
+     * @param initialBalance Initial inventory state
+     * @return New KardexReport
+     */
     public static KardexReport createInitialBalanceReport(ZonedDateTime date, List<Balance> initialBalance) {
         KardexReport report = KardexReport.builder()
             .date(date)
@@ -78,7 +100,11 @@ public class KardexReport {
     
     }
 
-    //Establecer entrada
+    /**
+     * @brief Sets entry data manually
+     * @param quantity Quantity entered
+     * @param unitPrice Unit price of entry
+     */
     public void setEntryData(int quantity, BigDecimal unitPrice) {
         if (quantity <= 0) {
             throw new IllegalArgumentException("Entry quantity must be positive");

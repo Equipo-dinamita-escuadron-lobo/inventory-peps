@@ -8,6 +8,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief DTO for batch processing result
+ * 
+ * Summarizes the outcome of a batch kardex processing operation.
+ */
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @Builder

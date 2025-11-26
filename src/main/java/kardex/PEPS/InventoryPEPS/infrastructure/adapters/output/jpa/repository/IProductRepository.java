@@ -12,28 +12,76 @@ import java.util.List;
 import java.util.Optional;
 
 
+/**
+ * @brief Repository for Product entities
+ * 
+ * Handles database operations for product management, including
+ * retrieval by ID, enterprise, and batch operations.
+ */
 public interface IProductRepository extends JpaRepository<ProductEntity, Long> {
 
+    /**
+     * @brief Finds a product by its business ID
+     * @param productId The product business ID
+     * @return Optional containing the product if found
+     */
     Optional<ProductEntity> findByProductId(Long productId);
 
-    // Return a list of product IDs
+    /**
+     * @brief Finds existing product IDs from a list of candidates
+     * @param ids List of product IDs to check
+     * @return List of IDs that exist in the database
+     */
     @Query("SELECT p.productId FROM ProductEntity p WHERE p.productId IN :ids")
     List<Long> findProductsIdByProductIdIn(@Param("ids") List<Long> ids);
 
-    // Find all products by ID
+    /**
+     * @brief Finds all products matching a list of IDs
+     * @param list List of product IDs
+     * @return List of matching product entities
+     */
     List<ProductEntity> findByProductIdIn(List<Long> list);
 
 
-    // Find all products by enterprise ID
+    /**
+     * @brief Finds all products for a specific enterprise
+     * @param enterpriseId The enterprise ID
+     * @return Collection of products
+     */
     Collection<ProductEntity> findAllByEnterpriseId(String enterpriseId);
 
 
-    // Delete methods
-    @Modifying
-    int deleteByProductIdAndEnterpriseId(Long productId, String enterpriseId);
-    
+
+    /**
+     * @brief Deletes all products for an enterprise
+     * @param enterpriseId The enterprise ID
+     * @return Number of deleted records
+     */
     @Modifying
     int deleteByEnterpriseId(String enterpriseId);
 
+
+    /**
+     * @brief Deletes a product by its business ID
+     * @param productId The product business ID
+     * @return Number of deleted records
+     */
+    @Modifying
+    int deleteByProductId(Long productId);
+
+
+    /**
+     * @brief Checks if a product exists by its business ID
+     * @param id The product business ID
+     * @return True if exists, false otherwise
+     */
+    boolean existsByProductId(Long id);
+
+    /**
+     * @brief Gets a reference to a product entity by its business ID
+     * @param productId The product business ID
+     * @return The product entity reference
+     */
+    ProductEntity getReferenceByProductId(Long productId);
     
 }

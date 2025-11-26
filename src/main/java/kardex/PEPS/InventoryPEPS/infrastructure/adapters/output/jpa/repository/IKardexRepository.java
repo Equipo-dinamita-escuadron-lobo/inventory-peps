@@ -14,19 +14,44 @@ import java.util.Optional;
 
 
 
+/**
+ * @brief Repository for Kardex entities
+ * 
+ * Handles database operations for Kardex records, including FIFO logic queries,
+ * balance calculations, and movement history retrieval.
+ */
 public interface  IKardexRepository extends JpaRepository<KardexEntity, Long>{
    
+    /**
+     * @brief Finds all Kardex entries for a product
+     * @param idProduct The product ID
+     * @return List of Kardex entries
+     */
     List<KardexEntity> findByProductId(Long idProduct);
 
-    // Find the latest Kardex entry by product ID
+    /**
+     * @brief Finds the latest Kardex entry by product ID
+     * @param productId The product ID
+     * @return The latest Kardex entry
+     */
     KardexEntity findTopByProductIdOrderByDateDesc(Long productId);
 
+      /**
+       * @brief Calculates total available amount for a product
+       * @param productId The product ID
+       * @return Total available quantity
+       */
       @Query("SELECT SUM(k.availableQuantity) "+
          "FROM KardexEntity k "+
          "WHERE k.product.productId = :productId")
       int sumAvailableAmountByProduct(@Param("productId") Long productId);
 
 
+      /**
+       * @brief Finds the first record with available amount (FIFO)
+       * @param productId The product ID
+       * @return Optional containing the first available lot
+       */
       @Query("SELECT k "+
           "FROM KardexEntity k "+
           "WHERE k.product.productId = :productId "+
@@ -35,44 +60,85 @@ public interface  IKardexRepository extends JpaRepository<KardexEntity, Long>{
       Optional<KardexEntity> findFirstByAvailableAmount(@Param("productId") Long productId);
 
 
+      /**
+       * @brief Updates the available amount of a Kardex entry
+       * @param idKardex The ID of the Kardex entry
+       * @param newAmount The new available amount
+       * @return Number of rows affected
+       */
       @Modifying
       @Transactional
       @Query("UPDATE KardexEntity k SET k.availableQuantity = :newAmount WHERE k.idKardex = :idKardex")
       int updateAvaliableAmount(@Param("idKardex") Long idKardex, @Param("newAmount") int newAmount);
 
 
-      //Obtiene los movimientos para el reporte(dentro del rango)
-      @Query("SELECT k "+
+      /**
+       * @brief Finds movements within a date range
+       * @param productId The product ID
+       * @param startDate Start date
+       * @param endDate End date
+       * @return List of movements in range
+       */
+      @Query("SELECT DISTINCT k "+
       "FROM KardexEntity k "+ 
+      "JOIN FETCH k.product "+
       "LEFT JOIN FETCH k.detailsOutput "+
       "WHERE k.product.productId = :productId AND k.date >= :startDate AND k.date <= :endDate ORDER BY k.date ASC")
       List<KardexEntity> findMovementsInDateRange(Long productId, ZonedDateTime startDate, ZonedDateTime endDate);
    
 
-      //obtiene el saldo inicial antes del rango
-      @Query("SELECT k "+
+      /**
+       * @brief Finds movements before a specific date
+       * @param productId The product ID
+       * @param startDate The cutoff date
+       * @return List of movements before the date
+       */
+      @Query("SELECT DISTINCT k "+
       "FROM KardexEntity k "+
+      "JOIN FETCH k.product "+
       "LEFT JOIN FETCH k.detailsOutput "+
       "WHERE k.product.productId = :productId AND k.date < :startDate ORDER BY k.date ASC")
       List<KardexEntity> findMovementsBeforeDate(Long productId, ZonedDateTime startDate);
 
 
-      //para buscar el poducto que se va devolver
+      /**
+       * @brief Finds a Kardex entry by invoice code and product
+       * @param factCode Invoice code
+       * @param product Product ID
+       * @return Optional containing the Kardex entry
+       */
       @Query("SELECT k FROM KardexEntity k WHERE k.factCode = :factCode AND k.product.id = :productId")
       Optional<KardexEntity> findByFactCode(@Param("factCode") long factCode, @Param("productId")long product);
 
       /**
-     * Busca un registro de Kardex por su factCode y por el ID de negocio (productId) del producto asociado.
+     * @brief Finds a Kardex record by invoice code and product ID
+     * 
+     * In case of multiple records, returns the oldest one (first by date).
+     * 
+     * @param factCode Invoice code
+     * @param productId Product ID
+     * @return Optional with the first record found ordered by date ascending
      */
-     Optional<KardexEntity> findByFactCodeAndProduct_ProductId(Long factCode, Long productId);
+     Optional<KardexEntity> findFirstByFactCodeAndProduct_ProductIdOrderByDateAsc(Long factCode, Long productId);
 
+      /**
+       * @brief Finds available purchases ordered by date (FIFO)
+       * @param productId The product ID
+       * @return List of available purchase entries
+       */
       @Query("SELECT k FROM KardexEntity k " +
+           "JOIN FETCH k.product " +
            "WHERE k.product.productId = :productId " +
            "AND k.availableQuantity > 0 " +
            "ORDER BY k.date ASC")
       List<KardexEntity> findAvailablePurchasesOrderedByDate(@Param("productId") Long productId);
 
      
+    /**
+     * @brief Calculates the last Kardex state for all products of an enterprise
+     * @param enterpriseId The enterprise ID
+     * @return List of migration data with calculated balances
+     */
     @Query("""
         SELECT new kardex.PEPS.InventoryPEPS.domain.model.KardexMigration(
             p.productId,
@@ -104,6 +170,11 @@ public interface  IKardexRepository extends JpaRepository<KardexEntity, Long>{
     List<KardexMigration> findLastKardexForAllProductsByEnterpriseId(@Param("enterpriseId") String enterpriseId);
 
 
+    /**
+     * @brief Checks if any Kardex entries exist for a product
+     * @param productId The product ID
+     * @return True if exists, false otherwise
+     */
     boolean existsByProduct_ProductId(Long productId);
 
 }

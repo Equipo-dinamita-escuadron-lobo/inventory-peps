@@ -8,6 +8,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief Represents current stock information
+ * 
+ * A simplified view of inventory for a product in an enterprise.
+ */
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter @Setter @Builder

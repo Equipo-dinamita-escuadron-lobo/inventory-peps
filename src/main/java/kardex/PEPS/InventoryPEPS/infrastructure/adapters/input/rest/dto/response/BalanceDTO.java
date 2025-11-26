@@ -7,6 +7,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief DTO for inventory balance
+ * 
+ * Represents the remaining quantity and value of a specific lot or total inventory.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

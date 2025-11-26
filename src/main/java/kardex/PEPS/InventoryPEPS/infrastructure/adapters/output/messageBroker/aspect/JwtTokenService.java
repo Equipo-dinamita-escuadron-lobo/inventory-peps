@@ -24,8 +24,10 @@ public class JwtTokenService {
 
 
     /**
-     * Establece el token JWT para el contexto de RabbitMQ.
-     * Se utiliza cuando se recibe un mensaje de RabbitMQ.
+     * @brief Sets the JWT token for the RabbitMQ context
+     * 
+     * Used when receiving a RabbitMQ message to store the token in ThreadLocal.
+     * @param token The JWT token string
      */
     public void setRabbitJwtToken(String token) {
         rabbitJwtToken.set(token);
@@ -33,8 +35,10 @@ public class JwtTokenService {
     }
 
     /**
-     * Establece el tenant ID para el contexto de RabbitMQ.
-     * Se utiliza cuando se recibe un mensaje de RabbitMQ.
+     * @brief Sets the tenant ID for the RabbitMQ context
+     * 
+     * Used when receiving a RabbitMQ message to store the tenant ID in ThreadLocal.
+     * @param tenantId The tenant identifier
      */
     public void setRabbitTenantId(String tenantId) {
         rabbitTenantId.set(tenantId);
@@ -42,9 +46,13 @@ public class JwtTokenService {
     }
 
     /**
-     * Obtiene el token JWT dependiendo del contexto:
-     * - Si estamos en contexto RabbitMQ (ThreadLocal), devuelve ese token
-     * - Si no, utiliza el contexto HTTP normal (SecurityContext)
+     * @brief Retrieves the JWT token from the current context
+     * 
+     * Checks RabbitMQ context (ThreadLocal) first, then falls back to
+     * standard HTTP SecurityContext.
+     * 
+     * @return The JWT token string
+     * @throws IllegalStateException If no token is available in either context
      */
     public String getToken() {
         String token = rabbitJwtToken.get();
@@ -64,10 +72,14 @@ public class JwtTokenService {
     }
 
     /**
-     * Obtiene el tenant ID dependiendo del contexto:
-     * - Si estamos en contexto RabbitMQ (ThreadLocal), devuelve ese tenant
-     * - Si no, utiliza el contexto HTTP normal (SecurityContext)
-    */
+     * @brief Retrieves the tenant ID from the current context
+     * 
+     * Checks RabbitMQ context (ThreadLocal) first, then falls back to
+     * standard HTTP SecurityContext.
+     * 
+     * @return The tenant identifier
+     * @throws IllegalStateException If no tenant ID is available in either context
+     */
     public String getTenantId() {
         String tenantId = rabbitTenantId.get();
         if (tenantId != null) {
@@ -87,8 +99,10 @@ public class JwtTokenService {
 
 
     /**
-     * Limpia el contexto RabbitMQ para el hilo actual.
-     * Debe llamarse en el finally del aspecto RabbitMQ.
+     * @brief Clears the RabbitMQ context for the current thread
+     * 
+     * Removes token and tenant ID from ThreadLocal storage.
+     * Should be called in the finally block of the RabbitMQ aspect.
      */
     public void clearRabbitContext() {
         rabbitJwtToken.remove();
@@ -97,7 +111,8 @@ public class JwtTokenService {
     }
 
     /**
-     * Verifica si estamos en contexto RabbitMQ
+     * @brief Checks if currently executing within a RabbitMQ context
+     * @return True if a RabbitMQ token is present, false otherwise
      */
     public boolean isInRabbitContext() {
         return rabbitJwtToken.get() != null;

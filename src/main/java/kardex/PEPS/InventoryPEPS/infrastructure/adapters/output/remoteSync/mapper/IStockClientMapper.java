@@ -7,11 +7,33 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.remoteSync.dto.S
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.remoteSync.dto.StockDtoResponse;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.remoteSync.dto.StockSellDtoRequest;
 
+/**
+ * @brief Mapper for Stock service DTOs
+ * 
+ * Handles conversion between Stock domain models and various DTOs
+ * used for communicating with the external Stock Service.
+ */
 @Mapper(componentModel = "spring")
 public interface IStockClientMapper {
+    
+    /**
+     * @brief Converts Stock domain to Buy Request DTO
+     * @param stock The stock domain object
+     * @return DTO for buy request
+     */
     StockBuyDtoRequest toDtoRequest(Stock stock);
 
+    /**
+     * @brief Converts Stock Response DTO to domain model
+     * @param dto The stock response DTO
+     * @return The stock domain object
+     */
     Stock toDomain(StockDtoResponse dto);
 
+    /**
+     * @brief Converts Stock domain to Sell Request DTO
+     * @param stock The stock domain object
+     * @return DTO for sell request
+     */
     StockSellDtoRequest toSellDtoRequest(Stock stock);
 }

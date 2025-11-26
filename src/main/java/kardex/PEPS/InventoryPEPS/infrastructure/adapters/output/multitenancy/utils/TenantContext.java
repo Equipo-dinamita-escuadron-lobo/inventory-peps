@@ -10,12 +10,11 @@ public class TenantContext {
     private static final InheritableThreadLocal<String> currentTenant = new InheritableThreadLocal<>();
     
     /**
-     * Establece el identificador de inquilino en el contexto del hilo actual.
-     * Esto se hace normalmente por el {@link TenantInterceptor} antes de que se
-     * llame
-     * al controlador.
+     * @brief Sets the tenant identifier in the current thread context.
      * 
-     * @param tenantId el identificador del inquilino
+     * Typically called by {@link TenantInterceptor} before the controller is invoked.
+     * 
+     * @param tenantId The tenant identifier
      */
     public static void setTenantId(String tenantId) {
         log.debug("Setting tenantId to " + tenantId);
@@ -23,18 +22,18 @@ public class TenantContext {
     }
 
     /**
-     * Obtiene el identificador de inquilino del contexto del hilo actual.
+     * @brief Gets the tenant identifier from the current thread context.
      * 
-     * @return el identificador del inquilino, o null si no se ha establecido
-     *         ninguno
+     * @return The tenant identifier, or null if none has been set
      */
     public static String getTenantId() {
         return currentTenant.get();
     }
 
     /**
-     * Borra el identificador de inquilino del contexto del hilo actual.
-     * Normalmente se llama despu s de que se llama al controlador.
+     * @brief Clears the tenant identifier from the current thread context.
+     * 
+     * Typically called after the controller execution is complete.
      */
     public static void clear() {
         currentTenant.remove();

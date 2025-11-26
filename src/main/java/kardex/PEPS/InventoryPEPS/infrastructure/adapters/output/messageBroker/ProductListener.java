@@ -5,7 +5,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
-
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IEventRecoveryActionPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IMessageErrorHandlingPort;
@@ -23,6 +22,12 @@ import com.rabbitmq.client.Channel;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * @brief RabbitMQ listener for product synchronization events
+ * 
+ * Handles product lifecycle events (create, update, delete) from message broker
+ * with error handling and recovery mechanisms for reliable data synchronization.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -34,6 +39,8 @@ public class ProductListener extends AbstractMessageListener<EventDto<ProductAsy
     private final IEventRecoveryActionPort<EventDto<ProductAsyncDto, EventProductType>> productRecoveryActionPort;
   
     
+    private String validationErrorMessage = null;
+
     @PostConstruct
     private void init() {
         this.messageErrorHandlingPort = messageErrorHandlingPortImpl;
@@ -84,7 +91,9 @@ public class ProductListener extends AbstractMessageListener<EventDto<ProductAsy
                     break;
                     
                 case DELETED:
-                    log.info("Deleting product: {}", productName);            
+                    log.info("Deleting product: {}", productName);
+                    String deleteResult=productCommandOutPutPort.delete(data.getProductId());
+                    log.info("Product deletion result for: {}", deleteResult);            
                     break;
                     
                 default:
@@ -105,56 +114,68 @@ public class ProductListener extends AbstractMessageListener<EventDto<ProductAsy
     @Override
     protected boolean isValidEvent(EventDto<ProductAsyncDto, EventProductType> event) {
         if (event == null) {
-            log.warn("Event is null");
+            validationErrorMessage = "Event is null";
+            log.warn(validationErrorMessage);
+            return false;
+        }
+
+        if (event.getType() == null) {
+            validationErrorMessage = "Event type is null";
+            log.warn(validationErrorMessage);
             return false;
         }
         
         if (event.getData() == null) {
-            log.warn("Event data is null");
+            validationErrorMessage = "Event data is null";
+            log.warn(validationErrorMessage);
             return false;
         }
         
         ProductAsyncDto data = event.getData();
         
-        // Validar campos obligatorios (todos menos presentation)
+        // Validate required fields (all except presentation)
         if (data.getProductId() == null) {
-            log.warn("ProductId is null - required field");
+            validationErrorMessage = "Missing required field: productId";
+            log.warn(validationErrorMessage);
             return false;
         }
         
         if (data.getName() == null || data.getName().trim().isEmpty()) {
-            log.warn("Name is null or empty - required field");
+            validationErrorMessage = "Name is null or empty - required field";
+            log.warn(validationErrorMessage);
             return false;
         }
         
         if (data.getReference() == null || data.getReference().trim().isEmpty()) {
-            log.warn("Reference is null or empty - required field");
+            validationErrorMessage = "Reference is null or empty - required field";
+            log.warn(validationErrorMessage);
             return false;
         }
         
         if (data.getEnterpriseId() == null || data.getEnterpriseId().trim().isEmpty()) {
-            log.warn("EnterpriseId is null or empty - required field");
+            validationErrorMessage = "EnterpriseId is null or empty - required field";
+            log.warn(validationErrorMessage);
             return false;
         }
         
         return true;
     }
 
+    /**
+     * @brief Gets the entity type name for logging
+     * @return "Product"
+     */
     @Override
     protected String getEntityType() {
         return "Product";
     }
 
-    @Override
-    protected String getEntityIdentifierSafely(EventDto<ProductAsyncDto, EventProductType> event) {
-        if (event == null || event.getData() == null) {
-            return "unknown";
-        }
-        
-        String name = event.getData().getName();
-        return name != null ? name : "unnamed";
-    }
 
+    /**
+     * @brief Extracts the event type as a string
+     * @param event The event object
+     * @return The string representation of the event type
+     */
     @Override
     protected String extractEventType(EventDto<ProductAsyncDto, EventProductType> event) {
         if (event == null) {
@@ -164,6 +185,11 @@ public class ProductListener extends AbstractMessageListener<EventDto<ProductAsy
         return event.getType() != null ? event.getType().toString() : null;
     }
 
+    /**
+     * @brief Converts the event data to JSON for error logging
+     * @param event The event object
+     * @return JSON string of the event data
+     */
     @Override
     protected String convertEventToJson(EventDto<ProductAsyncDto, EventProductType> event) {
         if (event == null) {
@@ -177,4 +203,14 @@ public class ProductListener extends AbstractMessageListener<EventDto<ProductAsy
         
         return JsonUtils.toJsonWithNullHandling(event.getData());
     }
+
+    /**
+     * @brief Gets the last validation error message
+     * @return The error message string
+     */
+     @Override
+    protected String getValidationErrorMessage() {
+        return validationErrorMessage;
+    }
+
 }

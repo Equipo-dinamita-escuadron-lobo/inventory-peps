@@ -9,6 +9,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief Represents details of a sale transaction
+ * 
+ * Captures the quantity and price information for a specific part of a sale,
+ * typically corresponding to a specific lot consumed.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,7 +25,12 @@ public class SaleDetail {
     private BigDecimal unitPrice;
     private BigDecimal totalPrice;
     
-    //Crear detalle desde consumo de lote
+    /**
+     * @brief Creates a sale detail from lot consumption
+     * @param quantityUsed Quantity consumed
+     * @param unitPrice Unit price of the lot
+     * @return New SaleDetail
+     */
     public static SaleDetail fromLotConsumption(int quantityUsed, BigDecimal unitPrice) {
         validateQuantityUsed(quantityUsed);
         validateUnitPrice(unitPrice);
@@ -33,7 +44,12 @@ public class SaleDetail {
             .build();
     }
     
-    //Crear desde Balance
+    /**
+     * @brief Creates a sale detail from a Balance object
+     * @param balance Source balance
+     * @param quantityConsumed Quantity to consume
+     * @return New SaleDetail
+     */
     public static SaleDetail fromBalance(Balance balance, int quantityConsumed) {
         if (!balance.canSatisfyDemand(quantityConsumed)) {
             throw new IllegalArgumentException("Balance cannot satisfy demand");
@@ -41,7 +57,10 @@ public class SaleDetail {
         return fromLotConsumption(quantityConsumed, balance.getUnitPrice());
     }
     
-    // Calcular costo promedio
+    /**
+     * @brief Calculates the average unit price
+     * @return Average price (Total / Quantity)
+     */
     public BigDecimal getAverageUnitPrice() {
         if (quantityUsed <= 0) {
             return BigDecimal.ZERO;
@@ -49,12 +68,17 @@ public class SaleDetail {
         return totalPrice.divide(BigDecimal.valueOf(quantityUsed), 2, java.math.RoundingMode.HALF_UP);
     }
     
-    //Recalcular total
+    /**
+     * @brief Recalculates total price based on quantity and unit price
+     */
     public void recalculateTotal() {
         this.totalPrice = this.unitPrice.multiply(BigDecimal.valueOf(this.quantityUsed));
     }
     
-    //Verificar si es válido
+    /**
+     * @brief Checks if the detail is valid
+     * @return true if quantity > 0 and prices are valid
+     */
     public boolean isValid() {
         return quantityUsed > 0 && 
                unitPrice != null && 

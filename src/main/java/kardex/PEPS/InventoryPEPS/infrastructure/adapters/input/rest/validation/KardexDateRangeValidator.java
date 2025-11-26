@@ -10,11 +10,25 @@ import kardex.PEPS.InventoryPEPS.domain.port.output.IMessageServicePort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.request.KardexByDateDTORequest;
 
 
+/**
+ * @brief Validator for date range consistency
+ * 
+ * Implements the logic for the @ValidDateRange annotation.
+ * Ensures that start and end dates are either both null or both present,
+ * and that the end date is not before the start date.
+ */
 public class KardexDateRangeValidator implements ConstraintValidator<ValidDateRange,KardexByDateDTORequest> {
 
      @Autowired
     private IMessageServicePort messageService;
     
+    /**
+     * @brief Validates the date range in the DTO
+     * 
+     * @param value The DTO containing start and end dates
+     * @param context Context for custom constraint violations
+     * @return true if valid, false otherwise
+     */
     @Override
     public boolean isValid(KardexByDateDTORequest value, ConstraintValidatorContext context) {
         if (value == null) return true;

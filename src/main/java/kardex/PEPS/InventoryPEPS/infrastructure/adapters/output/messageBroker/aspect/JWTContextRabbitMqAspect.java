@@ -14,6 +14,12 @@ import com.rabbitmq.client.LongString;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.multitenancy.utils.TenantContext;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.security.JwtDecoder;
 
+/**
+ * @brief Aspect for handling JWT context in RabbitMQ listeners
+ * 
+ * Intercepts RabbitMQ messages to extract authentication tokens and
+ * establish the tenant context for message processing.
+ */
 @Aspect
 @Component
 public class JWTContextRabbitMqAspect {
@@ -28,10 +34,14 @@ public class JWTContextRabbitMqAspect {
     private JwtDecoder jwtDecoder;
 
     /**
-     * Este "advice" se ejecuta alrededor de cualquier método anotado con @RabbitListener.
-     * Su función es extraer el token JWT de las cabeceras del mensaje, decodificarlo
-     * para obtener el tenantId, establecerlo en el TenantContext, ejecutar el método 
-     * listener y finalmente limpiar el contexto.
+     * @brief Intercepts RabbitListener methods to set up tenant context
+     * 
+     * Extracts the JWT token from message headers, decodes the tenant ID,
+     * sets it in the TenantContext, executes the listener, and ensures cleanup.
+     * 
+     * @param joinPoint The proceeding join point
+     * @return The result of the method execution
+     * @throws Throwable If an error occurs during execution
      */
     @Around("@annotation(org.springframework.amqp.rabbit.annotation.RabbitListener)")
     public Object setTenantContext(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -79,8 +89,10 @@ public class JWTContextRabbitMqAspect {
         }
     }
 
-     /**
-     * Método de utilidad para encontrar el argumento de tipo Message.
+    /**
+     * @brief Helper to find the Message argument in method arguments
+     * @param args Array of method arguments
+     * @return The Message object if found, null otherwise
      */
     private Message findMessageArgument(Object[] args) {
         for (Object arg : args) {
@@ -93,7 +105,9 @@ public class JWTContextRabbitMqAspect {
 
 
     /**
-     * Extrae el token JWT del objeto header que puede ser String o LongString.
+     * @brief Extracts JWT token string from header object
+     * @param tokenObject The header object (String or LongString)
+     * @return The token string or null
      */
      private String extractTokenFromObject(Object tokenObject) {
         if (tokenObject instanceof LongString) {

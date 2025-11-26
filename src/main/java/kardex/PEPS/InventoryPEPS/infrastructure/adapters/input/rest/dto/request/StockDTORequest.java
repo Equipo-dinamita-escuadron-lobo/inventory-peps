@@ -7,6 +7,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief DTO for stock update request
+ * 
+ * Represents the data for updating stock information.
+ */
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter

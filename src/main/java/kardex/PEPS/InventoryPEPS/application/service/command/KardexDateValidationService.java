@@ -9,6 +9,12 @@ import kardex.PEPS.InventoryPEPS.domain.port.output.external.IConfigClientPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.config.i18n.MessageKeys;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * @brief Service for validating kardex dates
+ * 
+ * Ensures kardex dates are valid according to accounting rules
+ * and assigns default dates when missing.
+ */
 @Service
 @RequiredArgsConstructor
 public class KardexDateValidationService {
@@ -20,7 +26,7 @@ public class KardexDateValidationService {
     /**
      * @brief Assigns current date if not present and validates against accounting calendar
      * @param kardex Kardex object with optional date
-     * @param enterpriseId Enterprise identifier for calendar validation
+     * @param enterpiseId Enterprise identifier for calendar validation
      */
     public void validateAndSetDate(Kardex kardex,String enterpiseId){
 

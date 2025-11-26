@@ -11,6 +11,12 @@ import org.springframework.context.annotation.Profile;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @brief Configuration for PEPS (FIFO) specific RabbitMQ messaging
+ * 
+ * Defines the exchanges, queues, and bindings required for
+ * PEPS inventory movement events.
+ */
 @Configuration
 @Slf4j
 @Profile("!test")
@@ -20,19 +26,30 @@ public class RabbitPEPSConfig {
 
    
   
-
+   /**
+    * @brief Creates the durable queue for PEPS operations
+    * @return Configured durable Queue instance
+    */
    @Bean
     Queue pepsQueue() {
         return QueueBuilder.durable(PEPS_QUEUE).build();
     }
 
 
+    /**
+     * @brief Creates the fanout exchange for PEPS events
+     * @return Configured FanoutExchange instance
+     */
     @Bean
     FanoutExchange pepsExchange() {
         return new FanoutExchange(PEPS_EXCHANGE, true, false);
     }
 
 
+    /**
+     * @brief Binds the PEPS queue to the PEPS exchange
+     * @return Binding configuration between queue and exchange
+     */
     @Bean
     Binding pepsBinding() {
         return BindingBuilder.bind(pepsQueue()).to(pepsExchange());

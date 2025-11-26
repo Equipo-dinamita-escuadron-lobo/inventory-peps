@@ -5,6 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief DTO for product synchronization
+ * 
+ * Represents the product data structure received from the external Product Service.
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

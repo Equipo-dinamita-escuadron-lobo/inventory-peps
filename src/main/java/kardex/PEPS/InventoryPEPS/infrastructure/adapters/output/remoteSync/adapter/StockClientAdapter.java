@@ -14,6 +14,12 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.remoteSync.mappe
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @brief Adapter for Stock Service communication
+ * 
+ * Implements the output port to synchronize inventory changes with an external Stock Service.
+ * Handles operations for increasing (buy) and decreasing (sell) stock levels.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -22,6 +28,14 @@ public class StockClientAdapter implements IStockClientPort{
     private final IStockClientMapper stockClientMapper;
     private final IFormatterResultOutputPort formatterResultOutputPort;
 
+    /**
+     * @brief Updates external stock for a purchase or entry
+     * 
+     * Sends a request to the external stock service to increase the stock quantity
+     * based on a purchase or positive adjustment.
+     * 
+     * @param stock The stock domain object containing quantity and product details
+     */
     @Override
     public void buyStock(Stock stock) {
 
@@ -44,6 +58,14 @@ public class StockClientAdapter implements IStockClientPort{
        
     }
 
+    /**
+     * @brief Updates external stock for a sale or exit
+     * 
+     * Sends a request to the external stock service to decrease the stock quantity
+     * based on a sale or negative adjustment.
+     * 
+     * @param stock The stock domain object containing quantity and product details
+     */
     @Override
     public void sellStock(Stock stock) {
         try {

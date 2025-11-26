@@ -19,6 +19,12 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.config.i18n.MessageKeys
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @brief Service implementation for Product command operations
+ * 
+ * Handles product synchronization with external systems and manages
+ * product lifecycle operations including deletion.
+ */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -78,6 +84,12 @@ public class ProductCommandService implements IProductSyncCommandPort,IProductCo
         }
     }
 
+    /**
+     * @brief Converts product DTOs to domain entities
+     * @param products List of product DTOs
+     * @param enterpriseId Enterprise identifier
+     * @return List of Product domain entities
+     */
     private List<Product> getProductsFromDto(List<Product> products, String enterpriseId) {
         if (products == null || products.isEmpty()) {
             return Collections.emptyList();
@@ -94,6 +106,11 @@ public class ProductCommandService implements IProductSyncCommandPort,IProductCo
             .toList();
     }
 
+    /**
+     * @brief Updates the synchronization state
+     * @param enterpriseId Enterprise identifier
+     * @param syncDate Timestamp of successful synchronization
+     */
     private void updateSyncState(String enterpriseId, Instant syncDate) {
         Optional<SyncState> existingState = syncStateRepository
             .findBySyncTypeAndEnterpriseId(SYNC_TYPE_PRODUCTS, enterpriseId);
@@ -116,7 +133,9 @@ public class ProductCommandService implements IProductSyncCommandPort,IProductCo
    
     
     /**
-     * Procesa los productos actualizados 
+     * @brief Processes and persists updated products
+     * @param products List of updated products
+     * @param enterpriseId Enterprise identifier
      */
     private void processUpdatedProducts(List<Product> products, String enterpriseId) {
         try {
@@ -138,6 +157,12 @@ public class ProductCommandService implements IProductSyncCommandPort,IProductCo
     
 
 
+    /**
+     * @brief Creates initial sync state if none exists
+     * @param enterpriseId Enterprise identifier
+     * @param syncDate Initial sync date
+     * @return Optional containing the sync date
+     */
     private Optional<Instant> createSyncStateIfNotExists(String enterpriseId, Instant syncDate) {
         SyncState newState = new SyncState();
         newState.setSyncType(SYNC_TYPE_PRODUCTS);
@@ -151,13 +176,23 @@ public class ProductCommandService implements IProductSyncCommandPort,IProductCo
     
 
 
+    /**
+     * @brief Deletes a product by its ID
+     * @param productId Product identifier
+     * @return Status message
+     */
     @Override
-    public String deleteById(Long productId, String enterpriseId) {
-        log.info("Deleting product with ID {} for enterprise {}", productId, enterpriseId);
-        return productCommandOutPutPort.deleteById(productId, enterpriseId); 
+    public String deleteById(Long productId) {
+        log.info("Deleting product with ID {}", productId);
+        return productCommandOutPutPort.delete(productId); 
     }
 
 
+    /**
+     * @brief Deletes all products for an enterprise
+     * @param enterpriseId Enterprise identifier
+     * @return Status message
+     */
     @Override
     public String deleteAllByEnterpriseId(String enterpriseId) {
         log.info("Deleting all products for enterprise {}", enterpriseId);

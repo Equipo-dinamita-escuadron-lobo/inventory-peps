@@ -10,6 +10,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief DTO for inventory adjustment exit request
+ * 
+ * Represents the data required to register a negative inventory adjustment.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

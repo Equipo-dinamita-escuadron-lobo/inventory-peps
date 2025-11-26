@@ -5,6 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief DTO for product response
+ * 
+ * Represents the product information returned by the API.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

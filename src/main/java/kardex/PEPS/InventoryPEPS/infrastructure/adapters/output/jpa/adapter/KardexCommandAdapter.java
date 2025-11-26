@@ -21,12 +21,23 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+/**
+ * @brief Adapter for Kardex command operations
+ * 
+ * Implements the output port for performing write operations on Kardex entries,
+ * including registration of purchases, sales, returns, and non-commercial movements.
+ */
 public class KardexCommandAdapter implements IKardexCommandOutputPort {
     private final IKardexEntityCommandMapper kardexEntityCommandMapper;
     private final IKardexRepository kardexRepository;
     private final IDetailOutPutRepository detailOutPutRepository;
     private final IProductRepository productRepository;
 
+    /**
+     * @brief Registers a purchase in the Kardex
+     * @param kardex The purchase entry to register
+     * @return The registered Kardex entry
+     */
     @Override
     public Kardex registerPurchase(Kardex kardex) {
         ProductEntity productEntity=productRepository.getReferenceById(kardex.getProduct().getId());
@@ -35,6 +46,12 @@ public class KardexCommandAdapter implements IKardexCommandOutputPort {
        return kardexEntityCommandMapper.toDomain(kardexRepository.save(kardexEntity));
     }
 
+    /**
+     * @brief Registers a sale and updates affected lots
+     * @param kardex The sale entry to register
+     * @param lotsToUpdate List of lots (purchases) to update available amounts
+     * @return The registered sale entry
+     */
     @Override
     @Transactional
     public Kardex registerSale(Kardex kardex, List<Kardex> lotsToUpdate) {
@@ -75,6 +92,11 @@ public class KardexCommandAdapter implements IKardexCommandOutputPort {
         return kardexEntityCommandMapper.toDomain(kardexEntity);
     }
 
+    /**
+     * @brief Registers a purchase return
+     * @param kardex The purchase return entry
+     * @return The registered return entry
+     */
     @Override
     @Transactional
     public Kardex registerPurchaseReturn(Kardex kardex){
@@ -86,6 +108,11 @@ public class KardexCommandAdapter implements IKardexCommandOutputPort {
         
     }
 
+    /**
+     * @brief Registers a sale return
+     * @param kardex The sale return entry
+     * @return The registered return entry
+     */
     @Override
     @Transactional
     public Kardex registerSaleReturn(Kardex kardex) {
@@ -96,11 +123,23 @@ public class KardexCommandAdapter implements IKardexCommandOutputPort {
         return kardexEntityCommandMapper.toDomain(kardexRepository.save(kardexEntity));
     }
 
+    /**
+     * @brief Updates the available amount of a Kardex entry
+     * @param idKardex The ID of the Kardex entry
+     * @param newAmount The new available amount
+     * @return Number of rows affected
+     */
     @Override
     public int updateAvaliableAmount(Long idKardex, int newAmount) {
         return kardexRepository.updateAvaliableAmount(idKardex, newAmount);
     }
 
+    /**
+     * @brief Registers a non-commercial exit
+     * @param kardex The exit entry
+     * @param lotsToUpdate List of lots to update
+     * @return The registered exit entry
+     */
     @Override
     public Kardex registerNonCommercialExit(Kardex kardex,List<Kardex> lotsToUpdate) {
        
@@ -142,6 +181,11 @@ public class KardexCommandAdapter implements IKardexCommandOutputPort {
 
     }
 
+    /**
+     * @brief Registers a non-commercial entry
+     * @param kardex The entry to register
+     * @return The registered entry
+     */
     @Override
     public Kardex registerNonCommercialEntry(Kardex kardex) {
         ProductEntity productEntity=productRepository.getReferenceById(kardex.getProduct().getId());
@@ -150,6 +194,9 @@ public class KardexCommandAdapter implements IKardexCommandOutputPort {
        return kardexEntityCommandMapper.toDomain(kardexRepository.save(kardexEntity));
     }
 
+    /**
+     * @brief Deletes all Kardex records
+     */
     @Override
     public void deleteAll() {
         log.info("Deleting all kardex records from database");

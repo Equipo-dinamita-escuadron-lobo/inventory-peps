@@ -20,6 +20,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.util.List;
 
+/**
+ * @brief JPA Entity representing a Kardex record
+ * 
+ * Maps to the 'kardex' table. Stores information about inventory movements
+ * (purchases, sales, returns) including quantity, price, and balance.
+ */
 @Entity
 @Table(name = "kardex")
 @AllArgsConstructor

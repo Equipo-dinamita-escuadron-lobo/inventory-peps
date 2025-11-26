@@ -26,16 +26,23 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.exception.dto.Er
 import org.springframework.http.HttpStatus;
 
 
+/**
+ * @brief Global exception handler for the application
+ * 
+ * Intercepts exceptions thrown by controllers and converts them into
+ * standardized JSON error responses.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     
 
   /**
-   * Handles exceptions.
-   * Logs the error message and returns a response for this specific exception.
+   * @brief Handles validation exceptions (e.g., @Valid failures)
+   * 
+   * Extracts field-specific error messages and returns them in a map.
    *
-   * @param ex The Exception instance.
-   * @return Response entity containing error details.
+   * @param ex The MethodArgumentNotValidException instance.
+   * @return Response entity containing a map of field names to error messages.
    */
   @ExceptionHandler(MethodArgumentNotValidException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -55,11 +62,14 @@ public class GlobalExceptionHandler {
   }
 
    /**
-   * Handles exceptions.
-   * Logs the error message and returns a response for this specific exception.
+   * @brief Handles custom application exceptions
    * 
-   * @param e The HttpRequestMethodNotSupportedException instance.
-   * @return Response entity containing error details.
+   * Processes exceptions that extend BaseException, using their specific
+   * status codes and messages.
+   * 
+   * @param req The HTTP request that triggered the exception
+   * @param e The custom exception instance
+   * @return Response entity containing standardized error details
    */
    @ExceptionHandler({
       BusinessRuleException.class,
@@ -72,7 +82,13 @@ public class GlobalExceptionHandler {
    }
 
     /**
-     * Handles various bad request exceptions.
+     * @brief Handles various bad request exceptions
+     * 
+     * Maps common Spring and Java exceptions to appropriate HTTP 400/404 responses.
+     * 
+     * @param req The HTTP request
+     * @param ex The exception instance
+     * @return Response entity containing error details
      */
     @ExceptionHandler({
       NoResourceFoundException.class,
@@ -98,7 +114,13 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Handles runtime exceptions.
+     * @brief Handles unexpected runtime exceptions
+     * 
+     * Acts as a catch-all for unhandled errors, returning a 500 Internal Server Error.
+     * 
+     * @param req The HTTP request
+     * @param ex The runtime exception
+     * @return Response entity with generic error message
      */
     @ExceptionHandler(RuntimeException.class)
     @ResponseBody
@@ -110,7 +132,11 @@ public class GlobalExceptionHandler {
 
 
     /**
-     * Helper method to build a consistent error response.
+     * @brief Helper method to build a consistent error response
+     * @param status HTTP status code
+     * @param message Error message
+     * @param req HTTP request to extract metadata
+     * @return Constructed ResponseEntity
      */
     private ResponseEntity<ErrorResponseDTO> buildErrorResponse(int status, String message, HttpServletRequest req) {
       return ErrorResponseDTO.builder()

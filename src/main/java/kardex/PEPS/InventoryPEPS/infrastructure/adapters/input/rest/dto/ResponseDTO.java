@@ -10,6 +10,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief Generic response wrapper for REST APIs
+ * 
+ * Standardizes the structure of HTTP responses, including data, status code, and message.
+ * @param <T> The type of the data payload
+ */
 @Getter
 @Setter
 @Builder
@@ -21,6 +27,10 @@ public class ResponseDTO<T> {
     private Integer status;
     private String message;
 
+    /**
+     * @brief Converts the DTO to a ResponseEntity
+     * @return ResponseEntity containing this DTO
+     */
     public ResponseEntity<ResponseDTO<T>> of() {
         return ResponseEntity.status(this.status).body(this);
     }
