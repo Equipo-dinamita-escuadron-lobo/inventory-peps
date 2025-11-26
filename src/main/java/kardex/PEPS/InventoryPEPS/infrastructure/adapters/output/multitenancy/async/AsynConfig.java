@@ -16,12 +16,12 @@ import java.util.concurrent.Executor;
 public class AsynConfig implements AsyncConfigurer{
     
     /**
-     * Devuelve un ejecutor de grupo de hilos que decora cada tarea con
-     * TenantAwareTaskDecorator. Esto significa que cada tarea tendrá
-     * el identificador de inquilino establecido antes de ser ejecutada y
-     * restablecido después de que termine.
+     * @brief Returns a thread pool executor that decorates each task with TenantAwareTaskDecorator.
      * 
-     * @return un ejecutor que decora tareas con identificador de inquilino
+     * This ensures that each task will have the tenant identifier set before execution
+     * and reset after completion, maintaining tenant context in asynchronous operations.
+     * 
+     * @return An executor that decorates tasks with tenant identifier context
      */
     @Override
     public Executor getAsyncExecutor() {

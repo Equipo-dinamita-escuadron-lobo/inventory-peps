@@ -259,7 +259,7 @@ public class KardexQueryAdapterUnitTest {
         Long factCode = 1001L;
         Long productId = 1L;
         
-        when(kardexRepository.findByFactCodeAndProduct_ProductId(factCode, productId))
+        when(kardexRepository.findFirstByFactCodeAndProduct_ProductIdOrderByDateAsc(factCode, productId))
             .thenReturn(Optional.of(mockEntity));
         when(kardexEntityQueryMapper.toDomain(mockEntity)).thenReturn(mockDomain);
 
@@ -269,7 +269,7 @@ public class KardexQueryAdapterUnitTest {
         // Assert
         assertTrue(result.isPresent());
         assertEquals(1001L, result.get().getFactCode());
-        verify(kardexRepository).findByFactCodeAndProduct_ProductId(factCode, productId);
+        verify(kardexRepository).findFirstByFactCodeAndProduct_ProductIdOrderByDateAsc(factCode, productId);
         verify(kardexEntityQueryMapper).toDomain(mockEntity);
     }
 
@@ -280,7 +280,7 @@ public class KardexQueryAdapterUnitTest {
         Long factCode = 9999L;
         Long productId = 1L;
         
-        when(kardexRepository.findByFactCodeAndProduct_ProductId(factCode, productId))
+        when(kardexRepository.findFirstByFactCodeAndProduct_ProductIdOrderByDateAsc(factCode, productId))
             .thenReturn(Optional.empty());
 
         // Act

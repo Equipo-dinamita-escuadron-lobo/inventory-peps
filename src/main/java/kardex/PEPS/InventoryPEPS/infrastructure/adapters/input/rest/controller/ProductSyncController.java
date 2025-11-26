@@ -12,13 +12,24 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 
-
+/**
+ * @brief REST controller for Product synchronization
+ * 
+ * Handles HTTP requests to trigger manual synchronization of products
+ * from external sources.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/kardex/peps/sync")
 public class ProductSyncController {
     private final IProductSyncCommandPort productCommandPort;
 
+    /**
+     * @brief Triggers product synchronization for an enterprise
+     * 
+     * @param enterpriseId The enterprise identifier
+     * @return Response indicating synchronization status
+     */
     @GetMapping("/products/{enterpriseId}")
     public ResponseEntity<ResponseDTO<String>> syncProducts(@PathVariable String enterpriseId) {
         String result = productCommandPort.syncProductsByEnterpriseId(enterpriseId);

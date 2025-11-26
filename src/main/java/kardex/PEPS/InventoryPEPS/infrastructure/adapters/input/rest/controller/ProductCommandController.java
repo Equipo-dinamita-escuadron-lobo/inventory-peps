@@ -11,6 +11,11 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.Response
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @brief REST controller for Product command operations
+ * 
+ * Handles HTTP requests for managing product lifecycle (deletion).
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/kardex/peps")
@@ -26,13 +31,11 @@ public class ProductCommandController {
      * @param enterpriseId Enterprise identifier
      * @return Response indicating deletion result
      */
-    @DeleteMapping("/products/{enterpriseId}/{productId}")
-    public ResponseEntity<ResponseDTO<String>> deleteProduct(
-            @PathVariable Long productId, 
-            @PathVariable String enterpriseId) {
+    @DeleteMapping("/products/{productId}")
+    public ResponseEntity<ResponseDTO<String>> deleteProduct(@PathVariable Long productId ) {
 
-            log.info("Deleting product with ID {} for enterprise {}", productId, enterpriseId);
-            String result = productCommandPort.deleteById(productId, enterpriseId);
+            log.info("Deleting product with ID {}", productId);
+            String result = productCommandPort.deleteById(productId);
             
             return ResponseEntity.ok(ResponseDTO.<String>builder()
                 .data(result)

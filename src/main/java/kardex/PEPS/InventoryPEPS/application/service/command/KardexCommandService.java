@@ -10,15 +10,24 @@ import kardex.PEPS.InventoryPEPS.application.ports.input.IKardexCommandPort;
 import kardex.PEPS.InventoryPEPS.domain.model.DetailOutput;
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IDetailQueryOutPutPort;
+import kardex.PEPS.InventoryPEPS.domain.model.Stock;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IFormatterResultOutputPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexCommandOutputPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexQueryOutputPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IProductEventPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IProductQueryOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.IMessageServicePort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.command.IKardexCommandOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.external.IProductEventPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IDetailQueryOutPutPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IKardexQueryOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IProductQueryOutputPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @brief Service implementation for Kardex command operations
+ * 
+ * Orchestrates the business logic for inventory movements including purchases,
+ * sales, returns, and adjustments. Implements FIFO (First-In, First-Out)
+ * valuation method and manages stock synchronization.
+ */
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -32,11 +41,24 @@ public class KardexCommandService implements IKardexCommandPort {
     private final KardexAdjustmentValidationService kardexAdjustmentValidationService;
     private final IProductEventPort productEventPort;
 
+    private final StockIntegrationService stockIntegrationService;
+    private final IMessageServicePort messageService;
+    private final KardexDateValidationService kardexDateValidationService;
 
+    /**
+     * @brief Registers a new purchase movement
+     * 
+     * Validates the product, creates a purchase record, updates stock,
+     * and persists the movement.
+     * 
+     * @param kardexRequest Kardex object containing purchase details
+     * @return Registered purchase record
+     */
     @Override
     public Kardex registerPurchase(Kardex kardexRequest) {
        
         Product product = getValidatedProduct(kardexRequest.getProduct().getProductId());
+        
         
         Kardex purchase = Kardex.createPurchase(
             kardexRequest.getFactCode(),
@@ -45,13 +67,34 @@ public class KardexCommandService implements IKardexCommandPort {
             kardexRequest.getUnitPrice(),
             product
         );
+        kardexDateValidationService.validateAndSetDate(purchase, product.getEnterpriseId());
 
-        //Publicar evento de uso de producto
-        productEventPort.publishUsedProductEvent(kardexRequest.getProduct().getProductId(), 1);
+        Stock stock= stockIntegrationService.createStock(purchase);
+        stockIntegrationService.callApiStockService(stock, true);
+        
+        /* 
+
+        if(!kardexQueryOutputPort.existsByProduct_ProductId(product.getProductId())){
+
+        }
+        */ 
+      
+
+     //Publicar evento de uso de producto
+      productEventPort.publishUsedProductEvent(kardexRequest.getProduct().getProductId(), 1);
 
         return kardexCommandOutputPort.registerPurchase(purchase);  
     }
     
+    /**
+     * @brief Registers a new sale movement
+     * 
+     * Validates stock availability, applies FIFO logic to determine cost,
+     * updates affected purchase lots, and persists the sale.
+     * 
+     * @param kardexSaleRequest Kardex object containing sale details
+     * @return Registered sale record
+     */
     @Override
     public Kardex registerSale(Kardex kardexSaleRequest) {
 
@@ -73,6 +116,10 @@ public class KardexCommandService implements IKardexCommandPort {
             kardexSaleRequest.getUnitPrice(),
             product
         );
+
+        kardexDateValidationService.validateAndSetDate(saleMovement, product.getEnterpriseId());
+        Stock stock= stockIntegrationService.createStock(saleMovement);
+        stockIntegrationService.callApiStockService(stock, false);
         
         //Procesar lógica FIFO usando métodos de dominio
         FIFOResult fifoResult = processFIFOLogic(availablePurchases, saleMovement);
@@ -86,6 +133,15 @@ public class KardexCommandService implements IKardexCommandPort {
 
 
 
+    /**
+     * @brief Registers a purchase return
+     * 
+     * Validates the original purchase, updates available quantity of the lot,
+     * and records the return movement.
+     * 
+     * @param kardexRequest Kardex object containing return details
+     * @return Registered return record
+     */
     @Override
     public Kardex registerPurchaseReturn(Kardex kardexRequest) {
         // Obtener compra original
@@ -120,6 +176,9 @@ public class KardexCommandService implements IKardexCommandPort {
             originalPurchase.getUnitPrice(),
             product
         );
+        kardexDateValidationService.validateAndSetDate(returnMovement, product.getEnterpriseId());
+        Stock stock= stockIntegrationService.createStock(returnMovement);
+        stockIntegrationService.callApiStockService(stock, false);
         
         return kardexCommandOutputPort.registerPurchaseReturn(returnMovement);
     }
@@ -128,6 +187,15 @@ public class KardexCommandService implements IKardexCommandPort {
 
 
 
+    /**
+     * @brief Registers a sale return
+     * 
+     * Validates the original sale, restores stock using LIFO (Last-In, First-Out) logic
+     * to reverse the FIFO sale process, and updates inventory records.
+     * 
+     * @param kardexRequest Kardex object containing return details
+     * @return List of created return movements (one per affected lot)
+     */
     @Override
     public List<Kardex> registerSaleReturn(Kardex kardexRequest) {
         // 1. Obtener venta original
@@ -162,7 +230,15 @@ public class KardexCommandService implements IKardexCommandPort {
     }
 
     /**
-     *  Procesa devolución de venta con lógica LIFO
+     * @brief Processes sale return using LIFO logic
+     * 
+     * Iterates through sale details in reverse order (LIFO) to restore
+     * quantities to the original purchase lots.
+     * 
+     * @param kardexRequest Return request details
+     * @param originalSale Original sale record
+     * @param detailsOfSale List of sale details ordered by ID descending
+     * @return List of created return movements
      */
     private List<Kardex> processSaleReturnLIFO(Kardex kardexRequest, Kardex originalSale, 
                                             List<DetailOutput> detailsOfSale) {
@@ -196,6 +272,10 @@ public class KardexCommandService implements IKardexCommandPort {
                 detail.getUnitPrice(),
                 product
             );
+
+            kardexDateValidationService.validateAndSetDate(returnMovement, product.getEnterpriseId());
+            Stock stock= stockIntegrationService.createStock(returnMovement);
+            stockIntegrationService.callApiStockService(stock, true);
             
             Kardex createdReturn = kardexCommandOutputPort.registerSaleReturn(returnMovement);
             createdReturnMovements.add(createdReturn);
@@ -205,11 +285,9 @@ public class KardexCommandService implements IKardexCommandPort {
                 // Se devolvió todo el lote
                 detailQueryOutPutPort.deleteById(detail.getIdDetailOutput());
             } else {
-                // Devolución parcial
+                // Devolución parcial - actualiza solo cantidad, unitPrice se mantiene igual
                 int newAmount = detail.getQuantityUsed() - amountFromThisLot;
-                detail.setQuantityUsed(newAmount);
-                detail.setUnitPrice(detail.getUnitPrice().multiply(BigDecimal.valueOf(newAmount)));
-                detailQueryOutPutPort.update(detail); 
+                detailQueryOutPutPort.updateQuantityAndPrice(detail.getIdDetailOutput(), newAmount, detail.getUnitPrice());
             }
             
             remainingToReturn -= amountFromThisLot;
@@ -220,6 +298,15 @@ public class KardexCommandService implements IKardexCommandPort {
 
 
 
+    /**
+     * @brief Registers a non-commercial exit (e.g., internal consumption, loss)
+     * 
+     * Processes the exit similar to a sale but for non-commercial reasons.
+     * Applies FIFO logic to reduce inventory.
+     * 
+     * @param kardexRequest Kardex object containing exit details
+     * @return Registered exit record
+     */
     @Override
     public Kardex registerNonCommercialExit(Kardex kardexRequest) {
          //Obtener y validar producto
@@ -240,7 +327,10 @@ public class KardexCommandService implements IKardexCommandPort {
             kardexRequest.getUnitPrice(),
             product
         );
-        
+        kardexDateValidationService.validateAndSetDate(nonCommercialExit, product.getEnterpriseId());
+        Stock stock= stockIntegrationService.createStock(nonCommercialExit);
+        stockIntegrationService.callApiStockService(stock, false);
+
         // Procesar lógica FIFO
         FIFOResult fifoResult = processFIFOLogic(availablePurchases, nonCommercialExit);
         
@@ -251,6 +341,14 @@ public class KardexCommandService implements IKardexCommandPort {
 
     }
 
+    /**
+     * @brief Registers a non-commercial entry (e.g., gift, bonus)
+     * 
+     * Records an increase in inventory that is not a purchase.
+     * 
+     * @param kardexRequest Kardex object containing entry details
+     * @return Registered entry record
+     */
     @Override
     public Kardex registerNonCommercialEntry(Kardex kardexRequest) {
        
@@ -265,6 +363,9 @@ public class KardexCommandService implements IKardexCommandPort {
             kardexRequest.getUnitPrice(),
             product
         );
+
+        Stock stock= stockIntegrationService.createStock(nonCommercialEntry);
+        stockIntegrationService.callApiStockService(stock, true);
         
         //Publicar evento de uso de producto
         productEventPort.publishUsedProductEvent(kardexRequest.getProduct().getProductId(), 1);
@@ -272,22 +373,33 @@ public class KardexCommandService implements IKardexCommandPort {
         return kardexCommandOutputPort.registerNonCommercialEntry(nonCommercialEntry);
     }
 
-     @Override
+    /**
+     * @brief Registers an inventory adjustment entry
+     * 
+     * Records a positive adjustment to inventory, treating it as a new purchase lot.
+     * Validates adjustment date against business rules.
+     * 
+     * @param kardexRequest Kardex object containing adjustment details
+     * @return Registered adjustment record
+     */
+    @Override
     public Kardex registerAdjustmentEntry(Kardex kardexRequest) {
         Product product = getValidatedProduct(kardexRequest.getProduct().getProductId());
         
         kardexAdjustmentValidationService.validateDateForAdjustment(kardexRequest,product.getEnterpriseId());
 
-        String detail=kardexRequest.getDetails()+" Factura:"+kardexRequest.getFactCode();
-
+       
         Kardex purchaseAdjustment = Kardex.createPurchaseAdjustment(
             kardexRequest.getFactCode(),
-            detail,
+            kardexRequest.getDetails(),
             kardexRequest.getQuantity(),
             kardexRequest.getUnitPrice(),
             product,
             kardexRequest.getDate()
         );
+        kardexDateValidationService.validateAndSetDate(purchaseAdjustment, product.getEnterpriseId());
+        Stock stock= stockIntegrationService.createStock(purchaseAdjustment);
+        stockIntegrationService.callApiStockService(stock, true);
 
         //Publicar evento de uso de producto
         productEventPort.publishUsedProductEvent(kardexRequest.getProduct().getProductId(), 1);
@@ -295,6 +407,15 @@ public class KardexCommandService implements IKardexCommandPort {
         return kardexCommandOutputPort.registerPurchase(purchaseAdjustment);
     }
 
+    /**
+     * @brief Registers an inventory adjustment exit
+     * 
+     * Records a negative adjustment to inventory, treating it as a sale/exit.
+     * Applies FIFO logic and validates adjustment date.
+     * 
+     * @param kardex Kardex object containing adjustment details
+     * @return Registered adjustment record
+     */
     @Override
     public Kardex registerAdjustmentExit(Kardex kardex) {
         // Obtener y validar producto
@@ -309,17 +430,19 @@ public class KardexCommandService implements IKardexCommandPort {
         
          kardexAdjustmentValidationService.validateDateForAdjustment(kardex,product.getEnterpriseId());
     
-         String detail=kardex.getDetails()+" Factura:"+kardex.getFactCode();
 
         //Crear movimiento de venta usando 
         Kardex saleMovement = Kardex.createSaleAdjustment(
             kardex.getFactCode(),
-            detail,
+            kardex.getDetails(),
             kardex.getQuantity(),
             kardex.getUnitPrice(),
             product,
             kardex.getDate()
         );
+
+        Stock stock= stockIntegrationService.createStock(saleMovement);
+        stockIntegrationService.callApiStockService(stock, false);
         
         //Procesar lógica FIFO usando métodos de dominio
         FIFOResult fifoResult = processFIFOLogic(availablePurchases, saleMovement);
@@ -334,6 +457,12 @@ public class KardexCommandService implements IKardexCommandPort {
 
   
 
+    /**
+     * @brief Deletes all kardex records
+     * 
+     * Removes all inventory movement records from the system.
+     * Use with caution.
+     */
     @Override
     public void deleteAll() {
        log.info("Deleting all kardex records");
@@ -348,19 +477,42 @@ public class KardexCommandService implements IKardexCommandPort {
 
 
     /**
-     * Obtiene y valida un producto usando el dominio
+     * @brief Retrieves and validates a product
+     * 
+     * Checks if the product exists and is active.
+     * 
+     * @param productId Product identifier
+     * @return Validated Product object
+     * @throws IllegalArgumentException if product not found or inactive
      */
     private Product getValidatedProduct(Long productId) {
-        return productQueryOutputPort.getProductByProductId(productId)
+        Product product = productQueryOutputPort.getProductByProductId(productId)
             .orElseThrow(() -> {
                 log.info("Product not found: {}", productId);
                 formatterResultOutputPort.returnEntityDoesNotExistErrorResponse(404, "Product not found");
                 return new IllegalArgumentException("Product not found");
             });
+        
+        // Validar que el producto esté activo
+        if (!product.isActive()) {
+            String message = String.format("Product with ID %d is inactive. Cannot perform kardex operations.", productId);
+            log.info(message);
+            formatterResultOutputPort.returnBusinessRuleErrorResponse(400, message);
+            throw new IllegalArgumentException(message);
+        }
+        
+        return product;
     }
 
     /**
-     * Valida que hay suficiente stock usando lógica de dominio
+     * @brief Validates sufficient stock availability
+     * 
+     * Calculates total available quantity from purchase lots and compares
+     * with requested quantity.
+     * 
+     * @param availablePurchases List of available purchase lots
+     * @param quantityRequested Quantity required
+     * @throws IllegalArgumentException if stock is insufficient
      */
     private void validateSufficientStock(List<Kardex> availablePurchases, int quantityRequested) {
         int totalAvailable = availablePurchases.stream()
@@ -377,7 +529,14 @@ public class KardexCommandService implements IKardexCommandPort {
     }
 
     /**
-     * Procesa la lógica FIFO usando métodos de dominio
+     * @brief Processes FIFO logic for inventory valuation
+     * 
+     * Iterates through available purchase lots (ordered by date) and allocates
+     * quantities to the output movement until the required quantity is met.
+     * 
+     * @param availablePurchases List of available purchase lots
+     * @param outputMovement The output movement (sale/exit) being processed
+     * @return Result containing created details and updated lots
      */
     private FIFOResult processFIFOLogic(List<Kardex> availablePurchases, Kardex outputMovement) {
         List<DetailOutput> detailsToCreate = new ArrayList<>();
@@ -416,7 +575,11 @@ public class KardexCommandService implements IKardexCommandPort {
 
  
 
-    //Record para resultado FIFO
+    /**
+     * @brief Container for FIFO processing results
+     * @param detailsToCreate List of output details to be persisted
+     * @param lotsToUpdate List of purchase lots with updated available quantities
+     */
     private record FIFOResult(List<DetailOutput> detailsToCreate, List<Kardex> lotsToUpdate) {}
 
 

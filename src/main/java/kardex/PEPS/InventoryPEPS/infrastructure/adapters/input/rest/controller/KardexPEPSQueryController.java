@@ -13,9 +13,9 @@ import kardex.PEPS.InventoryPEPS.domain.model.KardexReport;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.ResponseDTO;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.request.KardexByDateDTORequest;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexAvailableQuantityDTOResponse;
-import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexPurchaseDTOResponse;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexRecordsDTOResponse;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.ListLastProductKardexDtoResponse;
+import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.PageResponseDTO;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.mapper.IKardexRestMapper;
 import lombok.RequiredArgsConstructor;
 
@@ -29,8 +29,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 
 
-
-
+/**
+ * @brief REST controller for Kardex PEPS query operations
+ * 
+ * Handles HTTP requests for retrieving kardex records, reports, and inventory status.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/kardex/peps")
@@ -39,30 +42,48 @@ public class KardexPEPSQueryController {
     private final IKardexQueryPort kardexQueryPort;
     private final IKardexRestMapper kardexRestMapper;
 
-
+    /**
+     * @brief Retrieves a paginated list of kardex records filtered by date
+     * 
+     * @param productId The product identifier
+     * @param kardex Filter criteria (start date, end date)
+     * @param pageable Pagination information
+     * @return Response with paginated kardex records
+     */
     @GetMapping("/kardexlist")
-    public ResponseDTO<Page<KardexRecordsDTOResponse>>getKardexListPEPSByDate(
+    public ResponseDTO<PageResponseDTO<KardexRecordsDTOResponse>> getKardexListPEPSByDate(
         @RequestParam @NotNull(message = "The product ID is required.") Long productId,
-        @Valid @ModelAttribute KardexByDateDTORequest kardex,Pageable pageable) {
+        @Valid @ModelAttribute KardexByDateDTORequest kardex, 
+        Pageable pageable) {
 
-        // 1. Llama al servicio (esto ya es correcto)
-        Page<KardexReport> kardexReports = kardexQueryPort.getRecordsKardexByProduct(productId, kardex.getStartDate(), kardex.getEndDate(), pageable);
+        // 1. Llama al servicio
+        Page<KardexReport> kardexReports = kardexQueryPort.getRecordsKardexByProduct(
+            productId, 
+            kardex.getStartDate(), 
+            kardex.getEndDate(), 
+            pageable
+        );
         
-        // 2. Mapea la página usando el método correcto (ahora se llama toDTORecord)
-        // MapStruct aplicará toDTORecord a cada elemento de la página.
-        Page<KardexRecordsDTOResponse> kardexRecords = kardexReports.map(kardexRestMapper::toDTORecord);
+        // 2. Mapea la página a DTOs
+        Page<KardexRecordsDTOResponse> kardexRecordsPage = kardexReports.map(kardexRestMapper::toDTORecord);
 
-        // 3. Construye la respuesta (esto ya es correcto)
-        return  ResponseDTO.<Page<KardexRecordsDTOResponse>>builder() //response = ResponseDTO.<Page<KardexRecordsDTOResponse>>builder()
-                .data(kardexRecords)
+        // 3. Convierte a PageResponseDTO (estructura JSON estable)
+        PageResponseDTO<KardexRecordsDTOResponse> pageResponse = PageResponseDTO.fromPage(kardexRecordsPage);
+
+        // 4. Construye la respuesta
+        return ResponseDTO.<PageResponseDTO<KardexRecordsDTOResponse>>builder()
+                .data(pageResponse)
                 .status(200)
                 .message("Kardex records retrieved successfully")
                 .build();
-        
-        // 4. Devuelve un ResponseEntity con el código de estado OK.
-        //return ResponseEntity.ok(response);
     }
 
+    /**
+     * @brief Retrieves available quantity details for a product (FIFO lots)
+     * 
+     * @param productId The product identifier
+     * @return Response with list of available quantities per lot
+     */
     @GetMapping("/kardex-available-quantity/{productId}")
     public ResponseEntity<ResponseDTO<List<KardexAvailableQuantityDTOResponse>>> getAvailable(@PathVariable Long productId) {
 

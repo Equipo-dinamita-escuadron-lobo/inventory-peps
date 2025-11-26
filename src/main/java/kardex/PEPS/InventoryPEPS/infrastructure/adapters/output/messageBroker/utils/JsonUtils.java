@@ -9,7 +9,10 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.dt
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Utilidad para conversión de objetos a JSON.
+ * @brief Utility class for JSON object conversion
+ * 
+ * Provides static methods to serialize DTOs and objects to JSON strings,
+ * with specific handling for null fields and exception safety.
  */
 @Slf4j
 public class JsonUtils {
@@ -18,7 +21,11 @@ public class JsonUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
-     * Convierte un ProductAsyncDto a JSON, manejando campos nulos apropiadamente.
+     * @brief Converts ProductAsyncDto to JSON with null handling
+     * 
+     * Explicitly handles null fields to ensure valid JSON structure.
+     * @param product The product DTO to convert
+     * @return JSON string representation or error JSON on failure
      */
     public static String toJsonWithNullHandling(ProductAsyncDto product) {
         try {
@@ -69,7 +76,11 @@ public class JsonUtils {
     }
 
     /**
-     * Convierte un KardexRabbitDto a JSON, manejando campos nulos apropiadamente.
+     * @brief Converts KardexRabbitDto to JSON with null handling
+     * 
+     * Explicitly handles null fields to ensure valid JSON structure.
+     * @param kardex The kardex DTO to convert
+     * @return JSON string representation or error JSON on failure
      */
     public static String toJsonWithNullHandling(KardexRabbitDto kardex) {
         try {
@@ -118,7 +129,10 @@ public class JsonUtils {
     }
 
     /**
-     * Convierte cualquier objeto a JSON.
+     * @brief Safely converts any object to JSON
+     * 
+     * @param object The object to convert
+     * @return JSON string representation or error JSON on failure/null input
      */
     public static String toJsonSafely(Object object) {
         try {

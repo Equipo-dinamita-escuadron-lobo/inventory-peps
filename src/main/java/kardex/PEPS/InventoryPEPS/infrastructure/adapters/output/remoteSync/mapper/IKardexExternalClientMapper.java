@@ -2,8 +2,10 @@ package kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.remoteSync.mapp
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
+import kardex.PEPS.InventoryPEPS.domain.model.Product;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.request.KardexBatchDTORequest;
 
 /**
@@ -16,8 +18,25 @@ public interface IKardexExternalClientMapper {
      * @brief Converts external DTO to domain model
      * @param dto External kardex DTO
      * @return Domain kardex model
+     * 
      */
+    @Mapping(target = "product", source = "productId", qualifiedByName = "idToProduct")
     @Mapping(target = "idKardex", ignore = true)
     @Mapping(target = "date", ignore = true)
     Kardex toDomain(KardexBatchDTORequest dto);
+
+    /**
+     * @brief Maps a product ID to a Product domain object
+     * @param productId The product identifier
+     * @return Product object with the ID set, or null if ID is null
+     */
+    @Named("idToProduct")
+    default Product mapIdToProduct(Long productId) {
+        if (productId == null) {
+            return null;
+        }
+        Product product = new Product();
+        product.setProductId(productId); // Asignamos el ID al campo 'id' del producto
+        return product;
+    }
 }

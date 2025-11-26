@@ -7,6 +7,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief DTO for sale detail
+ * 
+ * Represents the specific lot usage details in a sale transaction (FIFO allocation).
+ */
 @Getter
 @Setter
 @NoArgsConstructor

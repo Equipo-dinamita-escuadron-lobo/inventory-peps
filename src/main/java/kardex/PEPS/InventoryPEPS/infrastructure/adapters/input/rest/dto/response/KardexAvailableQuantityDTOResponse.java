@@ -8,6 +8,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief DTO for available quantity in a kardex lot
+ * 
+ * Represents a purchase lot with its current available quantity.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

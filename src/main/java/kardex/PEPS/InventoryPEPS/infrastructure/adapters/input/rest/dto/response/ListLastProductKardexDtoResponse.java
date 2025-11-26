@@ -8,6 +8,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief DTO for the last kardex record of a product
+ * 
+ * Used to display the most recent status of a product's inventory.
+ */
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 public class ListLastProductKardexDtoResponse {

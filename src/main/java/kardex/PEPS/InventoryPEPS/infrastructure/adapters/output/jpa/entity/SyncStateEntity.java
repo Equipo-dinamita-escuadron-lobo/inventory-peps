@@ -13,6 +13,12 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * @brief JPA Entity for synchronization state
+ * 
+ * Maps to the 'sync_state' table. Tracks the last successful synchronization
+ * timestamp for different sync types and enterprises.
+ */
 @Entity
 @Table(name = "sync_state")
 @Getter @Setter

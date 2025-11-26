@@ -14,13 +14,18 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 /**
- * Configuración para la internacionalización (i18n) de la aplicación.
- * Permite el manejo de múltiples idiomas y configuración de locale.
+ * @brief Configuration for application internationalization (i18n)
+ * 
+ * Sets up message sources, locale resolution strategies, and interceptors
+ * to handle multiple languages.
  */
 @Configuration
 public class InternationalizationConfig implements WebMvcConfigurer {
     /**
-     * Configura el MessageSource para cargar los archivos de mensajes
+     * @brief Configures the MessageSource for loading message files
+     * 
+     * Sets the base name to "messages", encoding to UTF-8, and cache duration.
+     * @return The configured MessageSource
     */
     @Bean
      MessageSource messageSource() {
@@ -34,7 +39,11 @@ public class InternationalizationConfig implements WebMvcConfigurer {
     }
 
     /**
-     * Configura el LocaleResolver para determinar el locale actual
+     * @brief Configures the LocaleResolver to determine the current locale
+     * 
+     * Uses SessionLocaleResolver to store the locale in the user's session.
+     * Defaults to English.
+     * @return The configured LocaleResolver
      */
     @Bean
     LocaleResolver localeResolver() {
@@ -44,7 +53,10 @@ public class InternationalizationConfig implements WebMvcConfigurer {
     }
 
     /**
-     * Interceptor para cambiar el locale basado en un parámetro de request
+     * @brief Creates an interceptor to change the locale based on a request parameter
+     * 
+     * Allows changing the language using the "lang" parameter (e.g., ?lang=es).
+     * @return The configured LocaleChangeInterceptor
     */
     @Bean
     LocaleChangeInterceptor localeChangeInterceptor() {
@@ -53,7 +65,10 @@ public class InternationalizationConfig implements WebMvcConfigurer {
         return interceptor;
     }
      /**
-     * Registra el interceptor de cambio de locale
+     * @brief Registers the locale change interceptor
+     * 
+     * Adds the interceptor to the registry so it can process requests.
+     * @param registry The InterceptorRegistry
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {

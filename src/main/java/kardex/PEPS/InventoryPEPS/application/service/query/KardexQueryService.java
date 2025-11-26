@@ -15,34 +15,101 @@ import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.domain.model.KardexMigration;
 import kardex.PEPS.InventoryPEPS.domain.model.KardexReport;
 import kardex.PEPS.InventoryPEPS.domain.model.SaleDetail;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexQueryOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IKardexQueryOutputPort;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * @brief Service implementation for Kardex query operations
+ * 
+ * Handles retrieval and reporting of inventory movements, including
+ * generation of kardex reports with FIFO valuation and balance calculation.
+ */
 @Service
 @RequiredArgsConstructor
 public class KardexQueryService implements IKardexQueryPort {
 
      private final IKardexQueryOutputPort kardexQueryOutputPort;
 
+    /**
+     * @brief Generates a paginated kardex report for a product
+     * 
+     * Reconstructs the inventory state by processing historical movements
+     * to calculate balances and valuations for the requested period.
+     * 
+     * @param productId Product identifier
+     * @param start Start date of the report
+     * @param end End date of the report
+     * @param pageable Pagination parameters
+     * @return Page of kardex reports
+     */
     @Override
     public Page<KardexReport> getRecordsKardexByProduct(Long productId, LocalDate start, LocalDate end, Pageable pageable) {
-        List<Kardex> prevMovements = kardexQueryOutputPort.findMovementsByProductBeforeDate(productId, start);
-        List<Kardex> periodMovements = kardexQueryOutputPort.findMovementsByProductAndDateRange(productId, start, end);
 
+        if(start==null || end==null) {
+            start = LocalDate.of(2000,1,1);
+            end = LocalDate.now();
+
+        }
+
+        // Paso 1: Construir estado inicial de la cola (no se puede paginar)
+        List<Kardex> prevMovements = kardexQueryOutputPort.findMovementsByProductBeforeDate(productId, start);
         InventoryQueue inventoryQueue = new InventoryQueue();
         processInitialMovements(prevMovements, inventoryQueue);
 
-        List<KardexReport> fullReport = generateKardexReports(periodMovements, inventoryQueue);
+        // Paso 2: Obtener TODOS los movimientos del período (necesario para calcular índices correctos)
+        // Nota: No podemos paginar aquí porque cada reporte depende del estado acumulado
+        List<Kardex> periodMovements = kardexQueryOutputPort.findMovementsByProductAndDateRange(productId, start, end);
+        
+        // Paso 3: Calcular índices de paginación
+        int pageSize = pageable.getPageSize();
+        int currentPage = pageable.getPageNumber();
+        int totalElements = periodMovements.size();
+        int startIndex = currentPage * pageSize;
+        
+        // Validar si la página existe
+        if (startIndex >= totalElements && totalElements > 0) {
+            return new PageImpl<>(Collections.emptyList(), pageable, totalElements);
+        }
+        
+        // Paso 4: Procesar SOLO hasta el índice necesario (optimización)
+        int endIndex = Math.min(startIndex + pageSize, totalElements);
+        List<KardexReport> pageReports = new ArrayList<>();
+        
+        // Procesar todos los movimientos hasta el final de la página solicitada
+        for (int i = 0; i < endIndex; i++) {
+            Kardex movement = periodMovements.get(i);
+            KardexReport report = processMovementToReport(movement, inventoryQueue);
+            
+            // Solo agregar al resultado si está en el rango de la página
+            if (i >= startIndex) {
+                pageReports.add(report);
+            }
+        }
 
-        return paginateResults(fullReport, pageable);
+        return new PageImpl<>(pageReports, pageable, totalElements);
     }
 
+    /**
+     * @brief Processes movements prior to the report period
+     * 
+     * Updates the inventory queue state to reflect the starting balance
+     * for the report period.
+     * 
+     * @param movements List of historical movements
+     * @param queue Inventory queue to update
+     */
     private void processInitialMovements(List<Kardex> movements, InventoryQueue queue) {
         for (Kardex movement : movements) {
             processMovementForQueue(movement, queue);
         }
     }
 
+    /**
+     * @brief Generates reports for a list of movements
+     * @param movements List of movements to process
+     * @param queue Current inventory queue state
+     * @return List of generated reports
+     */
     private List<KardexReport> generateKardexReports(List<Kardex> movements, InventoryQueue queue) {
         List<KardexReport> reports = new ArrayList<>();
 
@@ -55,6 +122,15 @@ public class KardexQueryService implements IKardexQueryPort {
     }
 
 
+    /**
+     * @brief Converts a single movement into a report entry
+     * 
+     * Dispatches processing based on movement type (Entry, Output, Return).
+     * 
+     * @param movement Movement to process
+     * @param queue Current inventory queue state
+     * @return Generated kardex report
+     */
     private KardexReport processMovementToReport(Kardex movement, InventoryQueue queue) {
         KardexReport report;
 
@@ -79,6 +155,12 @@ public class KardexQueryService implements IKardexQueryPort {
     }
 
   
+    /**
+     * @brief Handles entry movements (Purchase, Sale Return, etc.)
+     * @param movement Entry movement
+     * @param queue Inventory queue
+     * @return Report for the entry
+     */
     private KardexReport handleEntryMovement(Kardex movement, InventoryQueue queue) {
         Balance balance = Balance.fromMovement(movement.getQuantity(), movement.getUnitPrice());
         
@@ -92,12 +174,24 @@ public class KardexQueryService implements IKardexQueryPort {
         return KardexReport.createEntryReport(movement, queue.getBalancesCopy());
     }
 
+    /**
+     * @brief Handles output movements (Sale, Non-Commercial Exit)
+     * @param movement Output movement
+     * @param queue Inventory queue
+     * @return Report for the output
+     */
     private KardexReport handleOutputMovement(Kardex movement, InventoryQueue queue) {
         List<SaleDetail> details = queue.consumeQuantityForReport(movement.getQuantity());
         return KardexReport.createOutputReport(movement, details, queue.getBalancesCopy());
     }
 
    
+    /**
+     * @brief Handles purchase return movements
+     * @param movement Purchase return movement
+     * @param queue Inventory queue
+     * @return Report for the return
+     */
     private KardexReport handlePurchaseReturnMovement(Kardex movement, InventoryQueue queue) {
         List<SaleDetail> returnDetails = queue.removeByUnitPrice(
             movement.getQuantity(), 
@@ -107,6 +201,12 @@ public class KardexQueryService implements IKardexQueryPort {
     }
 
     
+    /**
+     * @brief Handles unknown movement types as a fallback
+     * @param movement Unknown movement
+     * @param queue Inventory queue
+     * @return Generated report
+     */
     private KardexReport handleUnknownMovement(Kardex movement, InventoryQueue queue) {
         // Determinar por availableQuantity como último recurso
         if (movement.getAvailableQuantity() > 0) {
@@ -119,6 +219,14 @@ public class KardexQueryService implements IKardexQueryPort {
         }
     }
 
+    /**
+     * @brief Updates the inventory queue state without generating a report
+     * 
+     * Used for processing initial movements to establish starting balance.
+     * 
+     * @param movement Movement to process
+     * @param queue Inventory queue to update
+     */
     private void processMovementForQueue(Kardex movement, InventoryQueue queue) {
        
         if (movement.isPurchase() || movement.isNonCommercialEntry()) {
@@ -139,32 +247,32 @@ public class KardexQueryService implements IKardexQueryPort {
         }
     }
 
-    private Page<KardexReport> paginateResults(List<KardexReport> fullReport, Pageable pageable) {
-        int pageSize = pageable.getPageSize();
-        int currentPage = pageable.getPageNumber();
-        int startItem = currentPage * pageSize;
-
-        if (fullReport.size() < startItem) {
-            return new PageImpl<>(Collections.emptyList(), pageable, fullReport.size());
-        }
-
-        int toIndex = Math.min(startItem + pageSize, fullReport.size());
-        List<KardexReport> pagedList = fullReport.subList(startItem, toIndex);
-
-        return new PageImpl<>(pagedList, pageable, fullReport.size());
-    }
-
+    /**
+     * @brief Validates enterprise identifier
+     * @param enterpriseId Enterprise ID to validate
+     * @throws IllegalArgumentException if ID is null or empty
+     */
     private void validateEnterpriseId(String enterpriseId) {
         if (enterpriseId == null || enterpriseId.trim().isEmpty()) {
             throw new IllegalArgumentException("Enterprise ID cannot be null or empty");
         }
     }
 
+    /**
+     * @brief Retrieves available quantity details for a product
+     * @param productId Product identifier
+     * @return List of available purchase lots
+     */
     @Override
     public List<Kardex> getKardexAvailableQuantityByProduct(Long productId) {
         return kardexQueryOutputPort.findAvailablePurchasesOrderedByDate(productId);
     }
 
+    /**
+     * @brief Retrieves the last kardex record for all products of an enterprise
+     * @param enterpriseId Enterprise identifier
+     * @return List of latest kardex records
+     */
     @Override
     public List<KardexMigration> findLastKardexForAllProducts(String enterpriseId) {
         validateEnterpriseId(enterpriseId);

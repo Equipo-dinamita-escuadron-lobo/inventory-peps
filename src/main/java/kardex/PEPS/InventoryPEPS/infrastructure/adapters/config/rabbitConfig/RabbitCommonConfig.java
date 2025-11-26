@@ -12,6 +12,12 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @brief Common configuration for RabbitMQ infrastructure
+ * 
+ * Provides shared beans and settings for RabbitMQ integration,
+ * including JSON message conversion and listener factory configuration.
+ */
 @Configuration
 @Slf4j
 @Profile("!test")

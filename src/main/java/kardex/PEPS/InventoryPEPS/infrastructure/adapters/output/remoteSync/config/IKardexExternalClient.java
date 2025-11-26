@@ -1,6 +1,7 @@
 package kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.remoteSync.config;
 
-import org.springframework.web.bind.annotation.PathVariable;
+
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
 
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.remoteSync.dto.KardexExternalResponseDTO;
@@ -12,6 +13,6 @@ public interface IKardexExternalClient {
      * @param enterpriseId The enterprise identifier
      * @return Response with list of kardex records
      */
-    @GetExchange("/api/kardex/peps/last-kardex-all-products/{enterpriseId}")
-    KardexExternalResponseDTO findKardexByEnterpriseId(@PathVariable String enterpriseId);
+    @GetExchange("/api/kardex/weighted-average/last-kardex-all-products")
+    KardexExternalResponseDTO findKardexByEnterpriseId(@RequestParam String enterpriseId);
 }

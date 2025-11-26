@@ -30,7 +30,8 @@ import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
 import kardex.PEPS.InventoryPEPS.domain.model.Stock;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IMessageServicePort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IStockClientPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.external.IStockClientPort;
+
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 

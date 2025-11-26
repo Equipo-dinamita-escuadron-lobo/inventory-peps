@@ -1,10 +1,10 @@
 package kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.enums;
 
 /**
- * @brief Tipos de eventos de uso de productos
+ * @brief Product usage event types
  *
- * Define los tipos de operaciones de uso que pueden ser recibidas
- * como eventos en el sistema de mensajería.
+ * Defines the types of usage operations that can be received
+ * as events in the messaging system.
  */
 public enum EventUsageType {
     USED

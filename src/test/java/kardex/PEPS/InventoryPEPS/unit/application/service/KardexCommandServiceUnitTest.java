@@ -32,16 +32,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import kardex.PEPS.InventoryPEPS.application.service.command.KardexCommandService ;
+import kardex.PEPS.InventoryPEPS.application.service.command.KardexDateValidationService;
+import kardex.PEPS.InventoryPEPS.application.service.command.StockIntegrationService;
 import kardex.PEPS.InventoryPEPS.domain.model.DetailOutput;
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IDetailQueryOutPutPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IFormatterResultOutputPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexCommandOutputPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexQueryOutputPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IProductQueryOutputPort;
-
-import static org.mockito.BDDMockito.*;
+import kardex.PEPS.InventoryPEPS.domain.port.output.command.IKardexCommandOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IDetailQueryOutPutPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IKardexQueryOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IProductQueryOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.external.IProductEventPort;
 
 @ExtendWith(MockitoExtension.class)
 public class KardexCommandServiceUnitTest {
@@ -60,6 +61,15 @@ public class KardexCommandServiceUnitTest {
     
     @Mock
     private  IFormatterResultOutputPort formatterResultOutputPort;
+
+    @Mock
+    private KardexDateValidationService kardexDateValidationService;
+
+    @Mock
+    private StockIntegrationService stockIntegrationService;
+
+    @Mock
+    private IProductEventPort productEventPort;
 
     @InjectMocks
     private KardexCommandService  kardexCommandService;
@@ -98,7 +108,7 @@ public class KardexCommandServiceUnitTest {
     @Test
     @DisplayName("Should register purchase successfully")
     void testRegisterPurchase_ValidRequest_ReturnsPersistedKardex() {
-        // Given
+        // Arrange
         Kardex expected = Kardex.createPurchase(
             1001L,
             "Purchase",
@@ -107,15 +117,15 @@ public class KardexCommandServiceUnitTest {
             mockProduct
         );
         
-        given(productQueryOutputPort.getProductByProductId(1L))
-            .willReturn(Optional.of(mockProduct));
-        given(kardexCommandOutputPort.registerPurchase(any(Kardex.class)))
-            .willReturn(expected);
+        when(productQueryOutputPort.getProductByProductId(1L))
+            .thenReturn(Optional.of(mockProduct));
+        when(kardexCommandOutputPort.registerPurchase(any(Kardex.class)))
+            .thenReturn(expected);
 
-        // When
+        // Act
         Kardex result = kardexCommandService.registerPurchase(kardexRequest);
 
-        // Then
+        // Assert
         assertNotNull(result);
         assertEquals(1001L, result.getFactCode());
         verify(productQueryOutputPort).getProductByProductId(1L);
@@ -125,11 +135,11 @@ public class KardexCommandServiceUnitTest {
     @Test
     @DisplayName("Should throw exception when product not found for purchase")
     void testRegisterPurchase_ProductNotFound_ThrowsException() {
-        // Given
-        given(productQueryOutputPort.getProductByProductId(1L))
-            .willReturn(Optional.empty());
+        // Arrange
+        when(productQueryOutputPort.getProductByProductId(1L))
+            .thenReturn(Optional.empty());
 
-        // When & Then
+        // Act & Assert
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
             () -> kardexCommandService.registerPurchase(kardexRequest)
@@ -144,18 +154,18 @@ public class KardexCommandServiceUnitTest {
     @Test
     @DisplayName("Should register sale with FIFO processing successfully")
     void testRegisterSale_ValidRequest_ExecutesFIFOAndRegistersSale() {
-        // Given
-        given(productQueryOutputPort.getProductByProductId(1L))
-            .willReturn(Optional.of(mockProduct));
-        given(kardexQueryOutputPort.findAvailablePurchasesOrderedByDate(1L))
-            .willReturn(List.of(purchaseLot));
-        given(kardexCommandOutputPort.registerSale(any(Kardex.class), anyList()))
-            .willAnswer(invocation -> invocation.getArgument(0));
+        // Arrange
+        when(productQueryOutputPort.getProductByProductId(1L))
+            .thenReturn(Optional.of(mockProduct));
+        when(kardexQueryOutputPort.findAvailablePurchasesOrderedByDate(1L))
+            .thenReturn(List.of(purchaseLot));
+        when(kardexCommandOutputPort.registerSale(any(Kardex.class), anyList()))
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
-        // When
+        // Act
         Kardex result = kardexCommandService.registerSale(kardexRequest);
 
-        // Then
+        // Assert
         assertNotNull(result);
         assertEquals(1001L, result.getFactCode());
         assertEquals(100, result.getQuantity());
@@ -166,7 +176,7 @@ public class KardexCommandServiceUnitTest {
     @Test
     @DisplayName("Should throw exception when insufficient stock for sale")
     void testRegisterSale_InsufficientStock_ThrowsException() {
-        // Given
+        // Arrange
         Kardex limitedLot = Kardex.createPurchase(
             1002L,
             "Limited Purchase",
@@ -175,12 +185,12 @@ public class KardexCommandServiceUnitTest {
             mockProduct
         );
         
-        given(productQueryOutputPort.getProductByProductId(1L))
-            .willReturn(Optional.of(mockProduct));
-        given(kardexQueryOutputPort.findAvailablePurchasesOrderedByDate(1L))
-            .willReturn(List.of(limitedLot));
+        when(productQueryOutputPort.getProductByProductId(1L))
+            .thenReturn(Optional.of(mockProduct));
+        when(kardexQueryOutputPort.findAvailablePurchasesOrderedByDate(1L))
+            .thenReturn(List.of(limitedLot));
 
-        // When & Then
+        // Act & Assert
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
             () -> kardexCommandService.registerSale(kardexRequest)
@@ -194,7 +204,7 @@ public class KardexCommandServiceUnitTest {
     @Test
     @DisplayName("Should process FIFO from multiple lots")
     void testRegisterSale_MultipleLots_ProcessesFIFOCorrectly() {
-        // Given
+        // Arrange
         Kardex lot1 = Kardex.createPurchase(1003L, "Lot 1", 60, new BigDecimal("10.00"), mockProduct);
         lot1.setIdKardex(2L);
         lot1.setDate(ZonedDateTime.now().minusDays(2));
@@ -203,17 +213,17 @@ public class KardexCommandServiceUnitTest {
         lot2.setIdKardex(3L);
         lot2.setDate(ZonedDateTime.now().minusDays(1));
         
-        given(productQueryOutputPort.getProductByProductId(1L))
-            .willReturn(Optional.of(mockProduct));
-        given(kardexQueryOutputPort.findAvailablePurchasesOrderedByDate(1L))
-            .willReturn(List.of(lot1, lot2));
-        given(kardexCommandOutputPort.registerSale(any(Kardex.class), anyList()))
-            .willAnswer(invocation -> invocation.getArgument(0));
+        when(productQueryOutputPort.getProductByProductId(1L))
+            .thenReturn(Optional.of(mockProduct));
+        when(kardexQueryOutputPort.findAvailablePurchasesOrderedByDate(1L))
+            .thenReturn(List.of(lot1, lot2));
+        when(kardexCommandOutputPort.registerSale(any(Kardex.class), anyList()))
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
-        // When
+        // Act
         Kardex result = kardexCommandService.registerSale(kardexRequest);
 
-        // Then
+        // Assert
         assertNotNull(result);
         // Verify FIFO logic reduced quantities
         assertEquals(0, lot1.getAvailableQuantity()); // Fully consumed
@@ -228,20 +238,20 @@ public class KardexCommandServiceUnitTest {
     @Test
     @DisplayName("Should register purchase return successfully")
     void testRegisterPurchaseReturn_ValidRequest_ReturnsRegisteredReturn() {
-        // Given
+        // Arrange
         kardexRequest.setQuantity(30);
         
-        given(kardexQueryOutputPort.findByRefFacture(1001L, 1L))
-            .willReturn(Optional.of(purchaseLot));
-        given(productQueryOutputPort.getProductByProductId(1L))
-            .willReturn(Optional.of(mockProduct));
-        given(kardexCommandOutputPort.registerPurchaseReturn(any(Kardex.class)))
-            .willAnswer(invocation -> invocation.getArgument(0));
+        when(kardexQueryOutputPort.findByRefFacture(1001L, 1L))
+            .thenReturn(Optional.of(purchaseLot));
+        when(productQueryOutputPort.getProductByProductId(1L))
+            .thenReturn(Optional.of(mockProduct));
+        when(kardexCommandOutputPort.registerPurchaseReturn(any(Kardex.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
-        // When
+        // Act
         Kardex result = kardexCommandService.registerPurchaseReturn(kardexRequest);
 
-        // Then
+        // Assert
         assertNotNull(result);
         assertEquals(1001L, result.getFactCode());
         verify(kardexCommandOutputPort)
@@ -252,11 +262,11 @@ public class KardexCommandServiceUnitTest {
     @Test
     @DisplayName("Should throw exception when original purchase not found")
     void testRegisterPurchaseReturn_PurchaseNotFound_ThrowsException() {
-        // Given
-        given(kardexQueryOutputPort.findByRefFacture(1001L, 1L))
-            .willReturn(Optional.empty());
+        // Arrange
+        when(kardexQueryOutputPort.findByRefFacture(1001L, 1L))
+            .thenReturn(Optional.empty());
 
-        // When & Then
+        // Act & Assert
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
             () -> kardexCommandService.registerPurchaseReturn(kardexRequest)
@@ -270,13 +280,13 @@ public class KardexCommandServiceUnitTest {
     @Test
     @DisplayName("Should throw exception when return validation fails")
     void testRegisterPurchaseReturn_ValidationFails_ThrowsException() {
-        // Given
+        // Arrange
         kardexRequest.setQuantity(300); // More than purchased
         
-        given(kardexQueryOutputPort.findByRefFacture(1001L, 1L))
-            .willReturn(Optional.of(purchaseLot));
+        when(kardexQueryOutputPort.findByRefFacture(1001L, 1L))
+            .thenReturn(Optional.of(purchaseLot));
 
-        // When & Then
+        // Act & Assert
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
             () -> kardexCommandService.registerPurchaseReturn(kardexRequest)
@@ -290,7 +300,7 @@ public class KardexCommandServiceUnitTest {
     @Test
     @DisplayName("Should register sale return with LIFO processing")
     void testRegisterSaleReturn_ValidRequest_ProcessesLIFOAndReturns() {
-        // Given
+        // Arrange
         Kardex saleMovement = Kardex.createSale(2001L, "Sale", 50, new BigDecimal("10.00"), mockProduct);
         saleMovement.setIdKardex(10L);
         saleMovement.setDate(ZonedDateTime.now());
@@ -307,21 +317,21 @@ public class KardexCommandServiceUnitTest {
         DetailOutput detail2 = DetailOutput.create(20, new BigDecimal("12.00"), saleMovement, purchaseLot);
         detail2.setIdDetailOutput(2L);
         
-        given(kardexQueryOutputPort.findByRefFacture(2001L, 1L))
-            .willReturn(Optional.of(saleMovement));
-        given(detailQueryOutPutPort.findByMovementSaleOrderedDesc(10L))
-            .willReturn(List.of(detail2, detail1)); // LIFO order
-        given(productQueryOutputPort.getProductByProductId(1L))
-            .willReturn(Optional.of(mockProduct));
+        when(kardexQueryOutputPort.findByRefFacture(2001L, 1L))
+            .thenReturn(Optional.of(saleMovement));
+        when(detailQueryOutPutPort.findByMovementSaleOrderedDesc(10L))
+            .thenReturn(List.of(detail2, detail1)); // LIFO order
+        when(productQueryOutputPort.getProductByProductId(1L))
+            .thenReturn(Optional.of(mockProduct));
         
-        given(kardexCommandOutputPort.registerSaleReturn(any(Kardex.class)))
-            .willAnswer(invocation -> invocation.getArgument(0));
+        when(kardexCommandOutputPort.registerSaleReturn(any(Kardex.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
        doNothing().when(detailQueryOutPutPort).deleteById(anyLong());
 
-        // When
+        // Act
         List<Kardex> results = kardexCommandService.registerSaleReturn(kardexRequest);
 
-        // Then
+        // Assert
         assertNotNull(results);
         assertEquals(2, results.size());
         verify(detailQueryOutPutPort, times(2)).deleteById(anyLong());
@@ -332,11 +342,11 @@ public class KardexCommandServiceUnitTest {
     @Test
     @DisplayName("Should throw exception when sale not found for return")
     void testRegisterSaleReturn_SaleNotFound_ThrowsException() {
-        // Given
-        given(kardexQueryOutputPort.findByRefFacture(1001L, 1L))
-            .willReturn(Optional.empty());
+        // Arrange
+        when(kardexQueryOutputPort.findByRefFacture(1001L, 1L))
+            .thenReturn(Optional.empty());
 
-        // When & Then
+        // Act & Assert
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
             () -> kardexCommandService.registerSaleReturn(kardexRequest)
@@ -350,7 +360,7 @@ public class KardexCommandServiceUnitTest {
     @Test
     @DisplayName("Should throw exception when sale has no details")
     void testRegisterSaleReturn_NoDetails_ThrowsException() {
-        // Given
+        // Arrange
         // ✅ CORRECCIÓN: La cantidad a devolver debe ser <= cantidad vendida
         Kardex saleMovement = Kardex.createSale(2001L, "Sale", 50, new BigDecimal("10.00"), mockProduct);
         saleMovement.setIdKardex(10L);
@@ -358,15 +368,15 @@ public class KardexCommandServiceUnitTest {
         kardexRequest.setFactCode(2001L);
         kardexRequest.setQuantity(50); // ✅ Cambiar de 100 a 50 o menos
         
-        given(kardexQueryOutputPort.findByRefFacture(2001L, 1L))
-            .willReturn(Optional.of(saleMovement));
-        given(detailQueryOutPutPort.findByMovementSaleOrderedDesc(10L))
-            .willReturn(new ArrayList<>());
+        when(kardexQueryOutputPort.findByRefFacture(2001L, 1L))
+            .thenReturn(Optional.of(saleMovement));
+        when(detailQueryOutPutPort.findByMovementSaleOrderedDesc(10L))
+            .thenReturn(new ArrayList<>());
 
-        // When
+        // Act
         List<Kardex> results = kardexCommandService.registerSaleReturn(kardexRequest);
 
-        // Then
+        // Assert
         assertTrue(results.isEmpty());
         verify(formatterResultOutputPort)
             .returnBusinessRuleErrorResponse(400, "Sale has no details to return");
@@ -375,7 +385,7 @@ public class KardexCommandServiceUnitTest {
     @Test
     @DisplayName("Should process partial sale return")
     void testRegisterSaleReturn_PartialReturn_UpdatesDetailCorrectly() {
-        // Given
+        // Arrange
         Kardex saleMovement = Kardex.createSale(2001L, "Sale", 50, new BigDecimal("10.00"), mockProduct);
         saleMovement.setIdKardex(10L);
         
@@ -397,19 +407,18 @@ public class KardexCommandServiceUnitTest {
         when(kardexCommandOutputPort.updateAvaliableAmount(anyLong(), anyInt()))
             .thenReturn(1);
         
-        // ✅ CORRECCIÓN: update() retorna DetailOutput
-        when(detailQueryOutPutPort.update(any(DetailOutput.class)))
-            .thenAnswer(invocation -> invocation.getArgument(0));
+      
+        doNothing().when(detailQueryOutPutPort).updateQuantityAndPrice(anyLong(), anyInt(), any(BigDecimal.class));
         
         when(kardexCommandOutputPort.registerSaleReturn(any(Kardex.class)))
             .thenAnswer(invocation -> invocation.getArgument(0));
 
-        // When
+        // Act
         List<Kardex> results = kardexCommandService.registerSaleReturn(kardexRequest);
 
-        // Then
+        // Assert
         assertEquals(1, results.size());
-        verify(detailQueryOutPutPort).update(any(DetailOutput.class));
+        verify(detailQueryOutPutPort).updateQuantityAndPrice(anyLong(), anyInt(), any(BigDecimal.class));
         verify(detailQueryOutPutPort, never()).deleteById(anyLong());
     }
 
@@ -420,18 +429,18 @@ public class KardexCommandServiceUnitTest {
     @Test
     @DisplayName("Should register non-commercial exit successfully")
     void testRegisterNonCommercialExit_ValidRequest_RegistersExit() {
-        // Given
-        given(productQueryOutputPort.getProductByProductId(1L))
-            .willReturn(Optional.of(mockProduct));
-        given(kardexQueryOutputPort.findAvailablePurchasesOrderedByDate(1L))
-            .willReturn(List.of(purchaseLot));
-        given(kardexCommandOutputPort.registerNonCommercialExit(any(Kardex.class), anyList()))
-            .willAnswer(invocation -> invocation.getArgument(0));
+        // Arrange
+        when(productQueryOutputPort.getProductByProductId(1L))
+            .thenReturn(Optional.of(mockProduct));
+        when(kardexQueryOutputPort.findAvailablePurchasesOrderedByDate(1L))
+            .thenReturn(List.of(purchaseLot));
+        when(kardexCommandOutputPort.registerNonCommercialExit(any(Kardex.class), anyList()))
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
-        // When
+        // Act
         Kardex result = kardexCommandService.registerNonCommercialExit(kardexRequest);
 
-        // Then
+        // Assert
         assertNotNull(result);
         assertEquals(1001L, result.getFactCode());
         verify(kardexQueryOutputPort).findAvailablePurchasesOrderedByDate(1L);
@@ -441,15 +450,15 @@ public class KardexCommandServiceUnitTest {
     @Test
     @DisplayName("Should throw exception when insufficient stock for non-commercial exit")
     void testRegisterNonCommercialExit_InsufficientStock_ThrowsException() {
-        // Given
+        // Arrange
         Kardex limitedLot = Kardex.createPurchase(1002L, "Limited", 50, new BigDecimal("10.00"), mockProduct);
         
-        given(productQueryOutputPort.getProductByProductId(1L))
-            .willReturn(Optional.of(mockProduct));
-        given(kardexQueryOutputPort.findAvailablePurchasesOrderedByDate(1L))
-            .willReturn(List.of(limitedLot));
+        when(productQueryOutputPort.getProductByProductId(1L))
+            .thenReturn(Optional.of(mockProduct));
+        when(kardexQueryOutputPort.findAvailablePurchasesOrderedByDate(1L))
+            .thenReturn(List.of(limitedLot));
 
-        // When & Then
+        // Act & Assert
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
             () -> kardexCommandService.registerNonCommercialExit(kardexRequest)
@@ -462,16 +471,16 @@ public class KardexCommandServiceUnitTest {
     @Test
     @DisplayName("Should register non-commercial entry successfully")
     void testRegisterNonCommercialEntry_ValidRequest_RegistersEntry() {
-        // Given
-        given(productQueryOutputPort.getProductByProductId(1L))
-            .willReturn(Optional.of(mockProduct));
-        given(kardexCommandOutputPort.registerNonCommercialEntry(any(Kardex.class)))
-            .willAnswer(invocation -> invocation.getArgument(0));
+        // Arrange
+        when(productQueryOutputPort.getProductByProductId(1L))
+            .thenReturn(Optional.of(mockProduct));
+        when(kardexCommandOutputPort.registerNonCommercialEntry(any(Kardex.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
-        // When
+        // Act
         Kardex result = kardexCommandService.registerNonCommercialEntry(kardexRequest);
 
-        // Then
+        // Assert
         assertNotNull(result);
         assertEquals(1001L, result.getFactCode());
         verify(kardexCommandOutputPort).registerNonCommercialEntry(any(Kardex.class));
@@ -480,11 +489,11 @@ public class KardexCommandServiceUnitTest {
     @Test
     @DisplayName("Should throw exception when product not found for non-commercial entry")
     void testRegisterNonCommercialEntry_ProductNotFound_ThrowsException() {
-        // Given
-        given(productQueryOutputPort.getProductByProductId(1L))
-            .willReturn(Optional.empty());
+        // Arrange
+        when(productQueryOutputPort.getProductByProductId(1L))
+            .thenReturn(Optional.empty());
 
-        // When & Then
+        // Act & Assert
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
             () -> kardexCommandService.registerNonCommercialEntry(kardexRequest)

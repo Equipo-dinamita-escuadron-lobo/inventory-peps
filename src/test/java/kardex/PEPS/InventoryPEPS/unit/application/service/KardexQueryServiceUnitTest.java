@@ -26,8 +26,9 @@ import kardex.PEPS.InventoryPEPS.application.service.query.KardexQueryService;
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.domain.model.KardexReport;
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexQueryOutputPort;
-import static org.mockito.BDDMockito.given;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IKardexQueryOutputPort;
+
+import static org.mockito.Mockito.when;
 
 
 
@@ -62,19 +63,19 @@ public class KardexQueryServiceUnitTest {
     @Test
     @DisplayName("Should generate kardex report with no previous movements")
     void testGetRecordsKardexByProduct_NoPreviousMovements_ReturnsReport() {
-        // Given
+        // Arrange
         List<Kardex> prevMovements = new ArrayList<>();
         List<Kardex> periodMovements = createPurchaseMovements();
 
-        given(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
-            .willReturn(prevMovements);
-        given(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
-            .willReturn(periodMovements);
+        when(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
+            .thenReturn(prevMovements);
+        when(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
+            .thenReturn(periodMovements);
 
-        // When
+        // Act
         Page<KardexReport> result = kardexQueryService.getRecordsKardexByProduct(1L, startDate, endDate, pageable);
 
-        // Then
+        // Assert
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
         verify(kardexQueryOutputPort).findMovementsByProductBeforeDate(1L, startDate);
@@ -84,19 +85,19 @@ public class KardexQueryServiceUnitTest {
     @Test
     @DisplayName("Should process previous movements to calculate initial balance")
     void testGetRecordsKardexByProduct_WithPreviousMovements_CalculatesInitialBalance() {
-        // Given
+        // Arrange
         List<Kardex> prevMovements = createPurchaseMovements();
         List<Kardex> periodMovements = createSaleMovements();
 
-        given(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
-            .willReturn(prevMovements);
-        given(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
-            .willReturn(periodMovements);
+        when(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
+            .thenReturn(prevMovements);
+        when(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
+            .thenReturn(periodMovements);
 
-        // When
+        // Act
         Page<KardexReport> result = kardexQueryService.getRecordsKardexByProduct(1L, startDate, endDate, pageable);
 
-        // Then
+        // Assert
         assertNotNull(result);
         assertFalse(result.isEmpty());
         KardexReport firstReport = result.getContent().get(0);
@@ -107,7 +108,7 @@ public class KardexQueryServiceUnitTest {
     @Test
     @DisplayName("Should handle purchase movement correctly")
     void testGetRecordsKardexByProduct_PurchaseMovement_CreatesEntryReport() {
-        // Given
+        // Arrange
         Kardex purchase = Kardex.createPurchase(
             1001L,
             "Purchase",
@@ -117,15 +118,15 @@ public class KardexQueryServiceUnitTest {
         );
         purchase.setDate(ZonedDateTime.now());
 
-        given(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
-            .willReturn(new ArrayList<>());
-        given(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
-            .willReturn(List.of(purchase));
+        when(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
+            .thenReturn(new ArrayList<>());
+        when(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
+            .thenReturn(List.of(purchase));
 
-        // When
+        // Act
         Page<KardexReport> result = kardexQueryService.getRecordsKardexByProduct(1L, startDate, endDate, pageable);
 
-        // Then
+        // Assert
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
         KardexReport report = result.getContent().get(0);
@@ -136,22 +137,22 @@ public class KardexQueryServiceUnitTest {
     @Test
     @DisplayName("Should handle multiple purchase movements")
     void testGetRecordsKardexByProduct_MultiplePurchases_AccumulatesBalance() {
-        // Given
+        // Arrange
         Kardex purchase1 = Kardex.createPurchase(1001L, "Purchase 1", 100, new BigDecimal("10.00"), mockProduct);
         purchase1.setDate(ZonedDateTime.now().minusDays(2));
         
         Kardex purchase2 = Kardex.createPurchase(1002L, "Purchase 2", 50, new BigDecimal("12.00"), mockProduct);
         purchase2.setDate(ZonedDateTime.now().minusDays(1));
 
-        given(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
-            .willReturn(new ArrayList<>());
-        given(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
-            .willReturn(List.of(purchase1, purchase2));
+        when(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
+            .thenReturn(new ArrayList<>());
+        when(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
+            .thenReturn(List.of(purchase1, purchase2));
 
-        // When
+        // Act
         Page<KardexReport> result = kardexQueryService.getRecordsKardexByProduct(1L, startDate, endDate, pageable);
 
-        // Then
+        // Assert
         assertEquals(2, result.getTotalElements());
         KardexReport lastReport = result.getContent().get(1);
         assertEquals(150, lastReport.getTotalBalanceQuantity()); // 100 + 50
@@ -161,22 +162,22 @@ public class KardexQueryServiceUnitTest {
     @Test
     @DisplayName("handle sale movement with FIFO consumption")
     void testGetRecordsKardexByProduct_SaleMovement_ConsumesFromQueue() {
-        // Given
+        // Arrange
         Kardex purchase = Kardex.createPurchase(1001L, "Purchase", 100, new BigDecimal("10.00"), mockProduct);
         purchase.setDate(ZonedDateTime.now().minusDays(2));
         
         Kardex sale = Kardex.createSale(2001L, "Sale", 30, new BigDecimal("15.00"), mockProduct);
         sale.setDate(ZonedDateTime.now().minusDays(1));
 
-        given(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
-            .willReturn(List.of(purchase));
-        given(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
-            .willReturn(List.of(sale));
+        when(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
+            .thenReturn(List.of(purchase));
+        when(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
+            .thenReturn(List.of(sale));
 
-        // When
+        // Act
         Page<KardexReport> result = kardexQueryService.getRecordsKardexByProduct(1L, startDate, endDate, pageable);
 
-        // Then
+        // Assert
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
         KardexReport report = result.getContent().get(0);
@@ -188,7 +189,7 @@ public class KardexQueryServiceUnitTest {
     @Test
     @DisplayName("Should handle sale consuming from multiple lots")
     void testGetRecordsKardexByProduct_SaleMultipleLots_ProcessesFIFO() {
-        // Given
+        // Arrange
         Kardex purchase1 = Kardex.createPurchase(1001L, "Purchase 1", 50, new BigDecimal("10.00"), mockProduct);
         purchase1.setDate(ZonedDateTime.now().minusDays(3));
         
@@ -198,15 +199,15 @@ public class KardexQueryServiceUnitTest {
         Kardex sale = Kardex.createSale(2001L, "Sale", 80, new BigDecimal("15.00"), mockProduct);
         sale.setDate(ZonedDateTime.now().minusDays(1));
 
-        given(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
-            .willReturn(List.of(purchase1, purchase2));
-        given(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
-            .willReturn(List.of(sale));
+        when(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
+            .thenReturn(List.of(purchase1, purchase2));
+        when(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
+            .thenReturn(List.of(sale));
 
-        // When
+        // Act
         Page<KardexReport> result = kardexQueryService.getRecordsKardexByProduct(1L, startDate, endDate, pageable);
 
-        // Then
+        // Assert
         KardexReport report = result.getContent().get(0);
         assertEquals(20, report.getTotalBalanceQuantity()); // 100 - 80
         assertEquals(2, report.getOutputDetails().size()); // Details from 2 lots
@@ -216,22 +217,22 @@ public class KardexQueryServiceUnitTest {
     @Test
     @DisplayName("Should handle purchase return by removing from queue by price")
     void testGetRecordsKardexByProduct_PurchaseReturn_RemovesByUnitPrice() {
-        // Given
+        // Arrange
         Kardex purchase = Kardex.createPurchase(1001L, "Purchase", 100, new BigDecimal("10.00"), mockProduct);
         purchase.setDate(ZonedDateTime.now().minusDays(2));
         
         Kardex purchaseReturn = Kardex.createPurchaseReturn(1001L, "Return", 20, new BigDecimal("10.00"), mockProduct);
         purchaseReturn.setDate(ZonedDateTime.now().minusDays(1));
 
-        given(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
-            .willReturn(List.of(purchase));
-        given(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
-            .willReturn(List.of(purchaseReturn));
+        when(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
+            .thenReturn(List.of(purchase));
+        when(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
+            .thenReturn(List.of(purchaseReturn));
 
-        // When
+        // Act
         Page<KardexReport> result = kardexQueryService.getRecordsKardexByProduct(1L, startDate, endDate, pageable);
 
-        // Then
+        // Assert
         KardexReport report = result.getContent().get(0);
         assertTrue(report.isOutput());
         assertEquals(80, report.getTotalBalanceQuantity()); // 100 - 20
@@ -241,7 +242,7 @@ public class KardexQueryServiceUnitTest {
     @Test
     @DisplayName("Should handle sale return by adding to beginning of queue")
     void testGetRecordsKardexByProduct_SaleReturn_AddsToQueueFirst() {
-        // Given
+        // Arrange
         Kardex purchase = Kardex.createPurchase(1001L, "Purchase", 100, new BigDecimal("10.00"), mockProduct);
         purchase.setDate(ZonedDateTime.now().minusDays(3));
         
@@ -251,15 +252,15 @@ public class KardexQueryServiceUnitTest {
         Kardex saleReturn = Kardex.createSaleReturn(2001L, "Sale Return", 10, new BigDecimal("10.00"), mockProduct);
         saleReturn.setDate(ZonedDateTime.now().minusDays(1));
 
-        given(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
-            .willReturn(List.of(purchase, sale));
-        given(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
-            .willReturn(List.of(saleReturn));
+        when(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
+            .thenReturn(List.of(purchase, sale));
+        when(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
+            .thenReturn(List.of(saleReturn));
 
-        // When
+        // Act
         Page<KardexReport> result = kardexQueryService.getRecordsKardexByProduct(1L, startDate, endDate, pageable);
 
-        // Then
+        // Assert
         KardexReport report = result.getContent().get(0);
         assertTrue(report.isEntry());
         assertEquals(80, report.getTotalBalanceQuantity()); // 100 - 30 + 10
@@ -269,7 +270,7 @@ public class KardexQueryServiceUnitTest {
     @Test
     @DisplayName("Should handle non-commercial entry as purchase")
     void testGetRecordsKardexByProduct_NonCommercialEntry_CreatesEntryReport() {
-        // Given
+        // Arrange
         Kardex nonCommercialEntry = Kardex.createNonCommercialEntry(
             3001L,
             "Donation received",
@@ -279,15 +280,15 @@ public class KardexQueryServiceUnitTest {
         );
         nonCommercialEntry.setDate(ZonedDateTime.now());
 
-        given(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
-            .willReturn(new ArrayList<>());
-        given(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
-            .willReturn(List.of(nonCommercialEntry));
+        when(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
+            .thenReturn(new ArrayList<>());
+        when(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
+            .thenReturn(List.of(nonCommercialEntry));
 
-        // When
+        // Act
         Page<KardexReport> result = kardexQueryService.getRecordsKardexByProduct(1L, startDate, endDate, pageable);
 
-        // Then
+        // Assert
         KardexReport report = result.getContent().get(0);
         assertTrue(report.isEntry());
         assertEquals(50, report.getTotalBalanceQuantity());
@@ -296,7 +297,7 @@ public class KardexQueryServiceUnitTest {
     @Test
     @DisplayName("Should handle non-commercial exit as sale")
     void testGetRecordsKardexByProduct_NonCommercialExit_ConsumesFromQueue() {
-        // Given
+        // Arrange
         Kardex purchase = Kardex.createPurchase(1001L, "Purchase", 100, new BigDecimal("10.00"), mockProduct);
         purchase.setDate(ZonedDateTime.now().minusDays(2));
         
@@ -309,15 +310,15 @@ public class KardexQueryServiceUnitTest {
         );
         nonCommercialExit.setDate(ZonedDateTime.now().minusDays(1));
 
-        given(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
-            .willReturn(List.of(purchase));
-        given(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
-            .willReturn(List.of(nonCommercialExit));
+        when(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
+            .thenReturn(List.of(purchase));
+        when(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
+            .thenReturn(List.of(nonCommercialExit));
 
-        // When
+        // Act
         Page<KardexReport> result = kardexQueryService.getRecordsKardexByProduct(1L, startDate, endDate, pageable);
 
-        // Then
+        // Assert
         KardexReport report = result.getContent().get(0);
         assertTrue(report.isOutput());
         assertEquals(75, report.getTotalBalanceQuantity()); // 100 - 25
@@ -327,7 +328,7 @@ public class KardexQueryServiceUnitTest {
     @Test
     @DisplayName("Should paginate results correctly")
     void testGetRecordsKardexByProduct_Pagination_ReturnsCorrectPage() {
-        // Given
+        // Arrange
         List<Kardex> movements = new ArrayList<>();
         for (int i = 1; i <= 25; i++) {
             Kardex purchase = Kardex.createPurchase(
@@ -343,15 +344,15 @@ public class KardexQueryServiceUnitTest {
 
         Pageable pageRequest = PageRequest.of(1, 10); // Second page, 10 items
 
-        given(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
-            .willReturn(new ArrayList<>());
-        given(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
-            .willReturn(movements);
+        when(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
+            .thenReturn(new ArrayList<>());
+        when(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
+            .thenReturn(movements);
 
-        // When
+        // Act
         Page<KardexReport> result = kardexQueryService.getRecordsKardexByProduct(1L, startDate, endDate, pageRequest);
 
-        // Then
+        // Assert
         assertEquals(25, result.getTotalElements());
         assertEquals(3, result.getTotalPages()); // 25 / 10 = 3 pages
         assertEquals(10, result.getContent().size());
@@ -361,19 +362,19 @@ public class KardexQueryServiceUnitTest {
     @Test
     @DisplayName("Should return empty page when page exceeds total")
     void testGetRecordsKardexByProduct_PageExceedsTotal_ReturnsEmptyPage() {
-        // Given
+        // Arrange
         List<Kardex> movements = createPurchaseMovements();
         Pageable pageRequest = PageRequest.of(10, 10); // Page way beyond available data
 
-        given(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
-            .willReturn(new ArrayList<>());
-        given(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
-            .willReturn(movements);
+        when(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
+            .thenReturn(new ArrayList<>());
+        when(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
+            .thenReturn(movements);
 
-        // When
+        // Act
         Page<KardexReport> result = kardexQueryService.getRecordsKardexByProduct(1L, startDate, endDate, pageRequest);
 
-        // Then
+        // Assert
         assertTrue(result.getContent().isEmpty());
         assertEquals(0, result.getNumberOfElements());
     }
@@ -382,7 +383,7 @@ public class KardexQueryServiceUnitTest {
     @Test
     @DisplayName("Should handle mixed movement types in correct order")
     void testGetRecordsKardexByProduct_MixedMovements_ProcessesInOrder() {
-        // Given
+        // Arrange
         Kardex purchase1 = Kardex.createPurchase(1001L, "Purchase 1", 100, new BigDecimal("10.00"), mockProduct);
         purchase1.setDate(ZonedDateTime.now().minusDays(5));
         
@@ -395,15 +396,15 @@ public class KardexQueryServiceUnitTest {
         Kardex sale2 = Kardex.createSale(2002L, "Sale 2", 40, new BigDecimal("15.00"), mockProduct);
         sale2.setDate(ZonedDateTime.now().minusDays(2));
 
-        given(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
-            .willReturn(new ArrayList<>());
-        given(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
-            .willReturn(List.of(purchase1, sale1, purchase2, sale2));
+        when(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
+            .thenReturn(new ArrayList<>());
+        when(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
+            .thenReturn(List.of(purchase1, sale1, purchase2, sale2));
 
-        // When
+        // Act
         Page<KardexReport> result = kardexQueryService.getRecordsKardexByProduct(1L, startDate, endDate, pageable);
 
-        // Then
+        // Assert
         assertEquals(4, result.getTotalElements());
         KardexReport lastReport = result.getContent().get(3);
         assertEquals(80, lastReport.getTotalBalanceQuantity()); // 100 - 30 + 50 - 40
@@ -412,16 +413,16 @@ public class KardexQueryServiceUnitTest {
     @Test
     @DisplayName("Should handle empty movements list")
     void testGetRecordsKardexByProduct_EmptyMovements_ReturnsEmptyPage() {
-        // Given
-        given(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
-            .willReturn(new ArrayList<>());
-        given(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
-            .willReturn(new ArrayList<>());
+        // Arrange
+        when(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
+            .thenReturn(new ArrayList<>());
+        when(kardexQueryOutputPort.findMovementsByProductAndDateRange(1L, startDate, endDate))
+            .thenReturn(new ArrayList<>());
 
-        // When
+        // Act
         Page<KardexReport> result = kardexQueryService.getRecordsKardexByProduct(1L, startDate, endDate, pageable);
 
-        // Then
+        // Assert
         assertNotNull(result);
         assertTrue(result.getContent().isEmpty());
         assertEquals(0, result.getTotalElements());

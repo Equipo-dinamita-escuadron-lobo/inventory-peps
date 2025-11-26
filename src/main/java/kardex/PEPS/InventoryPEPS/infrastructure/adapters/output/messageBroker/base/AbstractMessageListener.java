@@ -8,6 +8,7 @@ import com.rabbitmq.client.Channel;
 
 import kardex.PEPS.InventoryPEPS.domain.port.output.IEventRecoveryActionPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IMessageErrorHandlingPort;
+import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.exception.customized.BaseException;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -25,20 +26,27 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class AbstractMessageListener<T,U> {
     /**
-     * Puerto para el manejo de errores de procesamiento.
-     * Debe ser inyectado por las clases hijas.
+     * @brief Port for handling processing errors
+     * 
+     * Must be injected by child classes to enable error persistence.
      */
     protected IMessageErrorHandlingPort messageErrorHandlingPort;
 
     /**
-     * Puerto para ejecutar acciones de recuperación cuando falla el procesamiento.
-     * Opcional - puede ser inyectado por las clases hijas si necesitan recuperación automática.
+     * @brief Port for executing recovery actions
+     * 
+     * Optional - can be injected by child classes if automatic recovery is needed.
      */
     protected IEventRecoveryActionPort<T> eventRecoveryActionPort;
 
     /**
-     * Método principal para manejar mensajes entrantes.
-     * Implementa la lógica común de validación, procesamiento y acknowledgment.
+     * @brief Main method for handling incoming messages
+     * 
+     * Implements common logic for validation, processing, and acknowledgment.
+     * 
+     * @param event The event data
+     * @param channel The RabbitMQ channel
+     * @param deliveryTag The delivery tag for acknowledgment
      */
     protected void handleMessage(T event, Channel channel, long deliveryTag) {
         try {
@@ -61,31 +69,49 @@ public abstract class AbstractMessageListener<T,U> {
     }
 
     /**
-     * Procesa el evento específico. Debe ser implementado por cada listener.
+     * @brief Processes the specific event
+     * 
+     * Must be implemented by each listener to define business logic.
+     * @param event The event to process
      */
     protected abstract void processEvent(T event);
 
     /**
-     * Valida si el evento es válido para procesamiento.
+     * @brief Validates if the event is valid for processing
+     * @param event The event to validate
+     * @return True if valid, false otherwise
      */
     protected abstract boolean isValidEvent(T event);
 
     /**
-     * Retorna el tipo de entidad que maneja este listener (para logging).
+     * @brief Returns the entity type handled by this listener
+     * 
+     * Used for logging purposes.
+     * @return String representing the entity type
      */
     protected abstract String getEntityType();
 
     /**
-     * Maneja errores durante el procesamiento del mensaje.
+     * @brief Handles errors during message processing
+     * 
+     * Logs the error, attempts recovery, saves error details to DB,
+     * and acknowledges the message to prevent infinite loops.
      */
     private void handleProcessingError(Exception e, T event, Channel channel, long deliveryTag) {
         try {
-            log.error("Error processing {} message: {}", getEntityType(), e.getMessage(), e);
+             // Log differently based on exception type
+            if (e instanceof BaseException) {
+                // For business exceptions, only show message without stack trace
+                log.error("Error processing {} message: {}", getEntityType(), e.getMessage());
+            } else {
+                // For other exceptions, show full stack trace
+                log.error("Error processing {} message: {}", getEntityType(), e.getMessage(), e);
+            }
             
-            // Intentar ejecutar acción de recuperación si está disponible
+            // Attempt recovery action if available
             boolean recoveryExecuted = attemptRecovery(event);
             
-            // Guardar error en base de datos
+            // Save error to database
             if (messageErrorHandlingPort != null) {
                 String eventType = extractEventType(event);
                 String messageData = convertEventToJson(event);
@@ -96,14 +122,16 @@ public abstract class AbstractMessageListener<T,U> {
                 messageErrorHandlingPort.saveProcessingError(eventType, errorDescription, messageData, getEntityType());
             }
             
-            acknowledgeMessage(channel, deliveryTag); // ACK para evitar reenvío
+            acknowledgeMessage(channel, deliveryTag); // ACK to prevent redelivery
         } catch (Exception ackException) {
             log.error("Error acknowledging message: {}", ackException.getMessage());
         }
     }
 
     /**
-     * Maneja errores de validación de eventos.
+     * @brief Handles event validation errors
+     * 
+     * Saves validation failure details to the database.
      */
     private void handleValidationError(T event) {
         try {
@@ -120,10 +148,10 @@ public abstract class AbstractMessageListener<T,U> {
     }
 
     /**
-     * Intenta ejecutar una acción de recuperación cuando falla el procesamiento del evento.
+     * @brief Attempts to execute a recovery action when event processing fails
      * 
-     * @param event El evento que falló al procesarse
-     * @return true si se ejecutó una acción de recuperación, false en caso contrario
+     * @param event The event that failed processing
+     * @return true if a recovery action was executed, false otherwise
      */
     private boolean attemptRecovery(T event) {
         if (eventRecoveryActionPort == null) {
@@ -155,7 +183,7 @@ public abstract class AbstractMessageListener<T,U> {
     }
 
     /**
-     * Envía acknowledgment del mensaje.
+     * @brief Sends message acknowledgment
      */
     private void acknowledgeMessage(Channel channel, long deliveryTag) {
         try {
@@ -166,15 +194,18 @@ public abstract class AbstractMessageListener<T,U> {
     }
 
     /**
-     * Obtiene un identificador seguro de la entidad para logging.
-     * Método opcional que puede ser sobrescrito por listeners específicos.
+     * @brief Gets a safe entity identifier for logging
+     * 
+     * Optional method that can be overridden by specific listeners.
+     * @param event The event object
+     * @return String representation of the event or "unknown"
      */
     protected String getEntityIdentifierSafely(T event) {
         return event != null ? event.toString() : "unknown";
     }
 
     /**
-     * Método de utilidad para extraer contenido del mensaje como String.
+     * @brief Utility method to extract message body as String
      */
     protected String getMessageBodyAsString(Message message) {
         try {
@@ -186,17 +217,29 @@ public abstract class AbstractMessageListener<T,U> {
     }
 
     /**
-     * Extrae el tipo de evento del mensaje. Debe ser implementado por cada listener.
-     * @param event El evento del cual extraer el tipo
-     * @return String representando el tipo de evento, o null si no se puede determinar
+     * @brief Extracts the event type from the message
+     * 
+     * Must be implemented by each listener.
+     * @param event The event to extract type from
+     * @return String representing event type, or null if undetermined
      */
     protected abstract String extractEventType(T event);
 
     /**
-     * Convierte el evento a JSON para almacenamiento en BD. Debe ser implementado por cada listener.
-     * @param event El evento a convertir
-     * @return String en formato JSON con los datos del evento
+     * @brief Converts event to JSON for DB storage
+     * 
+     * Must be implemented by each listener.
+     * @param event The event to convert
+     * @return JSON formatted string of event data
      */
     protected abstract String convertEventToJson(T event);
+
+     /**
+     * @brief Gets specific validation error message if available
+     * @return String with specific error message, or null if default
+     */
+    protected String getValidationErrorMessage() {
+        return null; // Default implementation
+    }
     
 }

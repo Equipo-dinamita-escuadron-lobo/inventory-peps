@@ -4,11 +4,17 @@ import java.math.BigDecimal;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import kardex.PEPS.InventoryPEPS.domain.enums.MovementType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief DTO for batch kardex processing request
+ * 
+ * Represents a single kardex movement record within a batch processing request.
+ */
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 public class KardexBatchDTORequest {
@@ -26,4 +32,9 @@ public class KardexBatchDTORequest {
     @NotNull(message = "The field 'productId' cannot be null")
     @Positive(message = "The productId must be positive")
     private Long productId; 
+
+     
+    @NotNull(message = "Type cannot be null")
+    private MovementType type;
+    
 }

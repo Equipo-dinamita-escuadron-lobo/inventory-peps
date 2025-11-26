@@ -10,8 +10,28 @@ import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.domain.model.KardexMigration;
 import kardex.PEPS.InventoryPEPS.domain.model.KardexReport;
 
+/**
+ * @brief Input port for Kardex query operations
+ * 
+ * Provides query capabilities for retrieving inventory movement records
+ * and generating reports.
+ */
 public interface IKardexQueryPort {
+    /**
+     * @brief Retrieves paginated kardex reports for a specific product within a date range
+     * @param productId Product identifier
+     * @param start Start date filter
+     * @param end End date filter
+     * @param pageable Pagination parameters
+     * @return Page of kardex reports
+     */
     Page<KardexReport> getRecordsKardexByProduct(Long productId, LocalDate start, LocalDate end,Pageable pageable);
+
+    /**
+     * @brief Retrieves available quantity details for a product (FIFO lots)
+     * @param productId Product identifier
+     * @return List of kardex records representing available stock lots
+     */
     List<Kardex> getKardexAvailableQuantityByProduct(Long productId);
 
     /**

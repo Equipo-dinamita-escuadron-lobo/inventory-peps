@@ -10,6 +10,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief Data Transfer Object for error responses
+ * 
+ * Standardizes the structure of error responses returned by the API,
+ * including status, message, and request details.
+ */
 @Getter
 @Setter
 @Builder
@@ -22,6 +28,10 @@ public class ErrorResponseDTO {
     private String url;
     private String method;
 
+    /**
+     * @brief Converts the DTO into a ResponseEntity
+     * @return ResponseEntity containing this DTO with the appropriate status code
+     */
     public ResponseEntity<ErrorResponseDTO> of() {
         return ResponseEntity.status(this.status).body(this);
     }

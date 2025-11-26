@@ -6,18 +6,29 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * @brief DTO para eventos de uso de productos recibidos desde PEPS
+ * @brief DTO for product usage events received from PEPS
  *
- * Contiene la información necesaria para actualizar el contador de uso
- * cuando PEPS notifica que ha utilizado un producto.
+ * Contains the necessary information to update the usage counter
+ * when PEPS notifies that a product has been used.
  */
 @Getter 
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductUsageEventDto {
+    /**
+     * @brief ID of the product used
+     */
     private Long productId;
+
+    /**
+     * @brief ID of the enterprise
+     */
     private String enterpriseId;
+
+    /**
+     * @brief Quantity of product used
+     */
     private Integer quantityUsed;
 }
 

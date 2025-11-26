@@ -112,7 +112,9 @@ public class SyncState {
         return this.updatedAt.isAfter(threshold);
     }
 
-    // Validar estado antes de actualizar
+    /**
+     * @brief Validates state before update
+     */
     public void validateForUpdate() {
         if (this.enterpriseId == null || this.enterpriseId.trim().isEmpty()) {
             throw new IllegalStateException("Cannot update sync state without enterprise ID");
@@ -122,7 +124,9 @@ public class SyncState {
         }
     }
 
-    //Validar consistencia de fechas
+    /**
+     * @brief Validates date consistency
+     */
     public void validateDateConsistency() {
         if (this.createdAt != null && this.updatedAt != null && this.updatedAt.isBefore(this.createdAt)) {
             throw new IllegalStateException("Updated date cannot be before created date");
@@ -133,7 +137,9 @@ public class SyncState {
         }
     }
 
-    // Resetear sincronización (en caso de error crítico)
+    /**
+     * @brief Resets to initial state
+     */
     public void resetToInitialState() {
         this.lastSyncDate = Instant.parse("2000-01-01T00:00:00Z");
         this.updatedAt = Instant.now();

@@ -1,6 +1,7 @@
 package kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.request;
 
 import java.math.BigDecimal;
+import java.time.ZonedDateTime;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -10,11 +11,16 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
+/**
+ * @brief DTO for inventory adjustment entry request
+ * 
+ * Represents the data required to register a positive inventory adjustment.
+ */
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class KardexPurchaseDTORequest {
+public class AdjustmentEntryDTORequest {
 
     @NotNull(message = "The field 'details' cannot be null")
     private String details;
@@ -30,5 +36,8 @@ public class KardexPurchaseDTORequest {
     @NotNull(message = "The field 'productId' cannot be null")
     @Positive(message = "The productId must be positive")
     private Long productId;
+
+     
+    private ZonedDateTime date;
 
 }

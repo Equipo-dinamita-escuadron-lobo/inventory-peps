@@ -8,6 +8,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief DTO for stock sale request
+ * 
+ * Data transfer object sent to the Stock Service to register a stock decrease.
+ */
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter

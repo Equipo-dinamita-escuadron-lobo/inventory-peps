@@ -7,6 +7,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief DTO for filtering kardex records by date range
+ * 
+ * Used in query operations to specify the time period for retrieving inventory movements.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

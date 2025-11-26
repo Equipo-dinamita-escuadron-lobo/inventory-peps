@@ -13,6 +13,12 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.as
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * @brief Configuration for external service clients
+ * 
+ * Configures WebClient proxies for communicating with external microservices
+ * (Stock, Products, Config, KardexExternal). Handles base URLs and JWT propagation.
+ */
 @Configuration
 @EnableConfigurationProperties(ClientProperties.class)
 @RequiredArgsConstructor
@@ -22,9 +28,18 @@ public class ClientConfig {
     private final JwtTokenService jwtTokenService;
 
     /**
-     * Método factory privado y genérico para crear cualquier cliente proxy.
-     * Centraliza la lógica de construcción del WebClient y el HttpServiceProxyFactory.
-    */
+     * @brief Generic factory method to create WebClient proxies
+     * 
+     * Centralizes the logic for building WebClient instances and HttpServiceProxyFactory.
+     * Applies common configurations like base URL and JWT propagation filter.
+     * 
+     * @param <T> The type of the client interface
+     * @param webClientBuilder The builder for WebClient
+     * @param baseUrl The base URL for the service
+     * @param clientInterface The interface class of the client
+     * @return A proxy instance of the client interface
+     * @throws IllegalArgumentException if baseUrl is null or empty
+     */
     private <T> T createWebClientProxy(WebClient.Builder webClientBuilder, String baseUrl, Class<T> clientInterface) {
         // Validar que baseUrl no sea null o vacío
         if (baseUrl == null || baseUrl.trim().isEmpty()) {
@@ -74,9 +89,13 @@ public class ClientConfig {
 
 
     /**
-     * Filtro para propagar el token JWT en las peticiones HTTP.
-     * Funciona tanto para contexto HTTP como para contexto RabbitMQ.
-    */
+     * @brief Filter to propagate JWT token in HTTP requests
+     * 
+     * Intercepts outgoing requests to inject the "Authorization" header with the Bearer token.
+     * Retrieves the token from the current context (HTTP or RabbitMQ).
+     * 
+     * @return ExchangeFilterFunction that applies the JWT header
+     */
     private ExchangeFilterFunction jwtPropagationFilter() {
         return (clientRequest, next) -> {
             try {

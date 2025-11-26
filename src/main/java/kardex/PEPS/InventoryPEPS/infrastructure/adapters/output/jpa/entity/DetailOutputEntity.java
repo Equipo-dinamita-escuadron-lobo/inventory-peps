@@ -14,6 +14,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief JPA Entity for FIFO output details
+ * 
+ * Maps to the 'DetailOutputFIFO' table. Links sale movements to their
+ * corresponding purchase movements (lots) to track cost layers.
+ */
 @Entity
 @Table(name = "DetailOutputFIFO")
 @AllArgsConstructor
@@ -26,10 +32,10 @@ public class DetailOutputEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idDetailOutput;
 
-    @Column(name = "quantityUsed", nullable = false)
+    @Column(name = "quantity_used", nullable = false)
     private int quantityUsed;
 
-    @Column(name="unit_value", nullable = false)
+    @Column(name="unit_price", nullable = false)
     private BigDecimal unitPrice;
 
    @ManyToOne

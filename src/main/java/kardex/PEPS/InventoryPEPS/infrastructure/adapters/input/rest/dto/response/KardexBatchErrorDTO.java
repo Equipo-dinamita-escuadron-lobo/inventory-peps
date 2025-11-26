@@ -6,6 +6,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief DTO for batch processing error
+ * 
+ * Details an error encountered while processing a specific record in a batch.
+ */
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 @Builder

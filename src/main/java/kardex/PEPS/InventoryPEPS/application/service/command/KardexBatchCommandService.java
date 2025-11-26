@@ -6,9 +6,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import kardex.PEPS.InventoryPEPS.application.ports.input.IKardexBatchCommandPort;
+import kardex.PEPS.InventoryPEPS.application.ports.input.IKardexCommandPort;
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexCommandOutputPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexExternalClientPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.command.IKardexCommandOutputPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexBatchErrorDTO;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexBatchProcessingResultDTO;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 public class KardexBatchCommandService implements IKardexBatchCommandPort {
 
     private final IKardexExternalClientPort kardexExternalClientPort;
-    private final IKardexCommandOutputPort kardexCommandOutputPort;
+    private final IKardexCommandPort kardexCommandPort;
     
 
     /**
@@ -43,6 +44,8 @@ public class KardexBatchCommandService implements IKardexBatchCommandPort {
     @Transactional(rollbackFor=Exception.class)
     public KardexBatchProcessingResultDTO processBatchFromExternalService(String enterpriseId) {
       log.info("Starting batch processing for enterprise: {}", enterpriseId);
+
+      kardexCommandPort.deleteAll();
        
         List<KardexBatchErrorDTO> errors = new ArrayList<>();
         int processedCount = 0;
@@ -69,7 +72,7 @@ public class KardexBatchCommandService implements IKardexBatchCommandPort {
                try{
                     switch (kardex.getType()) {
                         case PURCHASE:
-                            kardexCommandOutputPort.registerPurchase(kardex);
+                            kardexCommandPort.registerPurchase(kardex);
                         break;
                     
                         default:

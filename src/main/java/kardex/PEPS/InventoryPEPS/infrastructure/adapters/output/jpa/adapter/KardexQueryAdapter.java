@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.domain.model.KardexMigration;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexQueryOutputPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.query.IKardexQueryOutputPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity.KardexEntity;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.mapper.IKardexEntityQueryMapper;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.repository.IKardexRepository;
@@ -18,21 +18,42 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
+/**
+ * @brief Adapter for Kardex query operations
+ * 
+ * Implements the output port for retrieving Kardex information
+ * from the database using JPA repository.
+ */
 public class KardexQueryAdapter implements IKardexQueryOutputPort{
     private final IKardexEntityQueryMapper kardexEntityQueryMapper;
     private final IKardexRepository kardexRepository;
 
+    /**
+     * @brief Retrieves all Kardex entries for a product
+     * @param idProduct The product ID
+     * @return List of Kardex entries
+     */
     @Override
     public List<Kardex> getAllKardex(Long idProduct) {
         List<KardexEntity> listKardex=kardexRepository.findByProductId(idProduct);
         return kardexEntityQueryMapper.toDomainList(listKardex);
     }
 
+    /**
+     * @brief Calculates total available amount for a product
+     * @param idProduct The product ID
+     * @return Total available quantity
+     */
     @Override
     public int getAvailableAmountByProduct(Long idProduct) {
        return  kardexRepository.sumAvailableAmountByProduct(idProduct);
     }
 
+    /**
+     * @brief Finds the first record with available amount (FIFO)
+     * @param idProduct The product ID
+     * @return Optional containing the first available lot
+     */
     @Override
     public Optional<Kardex> getFirstRecordByAmountAvailable(Long idProduct) {
         
@@ -40,6 +61,13 @@ public class KardexQueryAdapter implements IKardexQueryOutputPort{
         .map(kardexEntityQueryMapper::toDomain);
     }
 
+    /**
+     * @brief Finds movements within a date range
+     * @param productId The product ID
+     * @param startDate Start date
+     * @param endDate End date
+     * @return List of movements in range
+     */
     @Override
     public List<Kardex> findMovementsByProductAndDateRange(Long productId, LocalDate startDate, LocalDate endDate) {
         ZonedDateTime startDateTime=startDate.atStartOfDay(ZoneId.systemDefault());
@@ -49,6 +77,12 @@ public class KardexQueryAdapter implements IKardexQueryOutputPort{
       .collect(Collectors.toList());
     }
 
+    /**
+     * @brief Finds movements before a specific date
+     * @param productId The product ID
+     * @param startDate The cutoff date
+     * @return List of movements before the date
+     */
     @Override
     public List<Kardex> findMovementsByProductBeforeDate(Long productId, LocalDate startDate) {
         ZonedDateTime startDateTime=startDate.atStartOfDay(ZoneId.systemDefault());
@@ -57,12 +91,24 @@ public class KardexQueryAdapter implements IKardexQueryOutputPort{
         .collect(Collectors.toList());
     }
 
+    /**
+     * @brief Finds a Kardex entry by invoice reference and product
+     * @param factCode Invoice code
+     * @param productId Product ID
+     * @return Optional containing the Kardex entry
+     */
     @Override
     public Optional<Kardex> findByRefFacture(Long factCode, Long productId) {
-        return kardexRepository. findByFactCodeAndProduct_ProductId(factCode,productId)
-        .map(kardexEntityQueryMapper::toDomain);
+        return kardexRepository
+            .findFirstByFactCodeAndProduct_ProductIdOrderByDateAsc(factCode, productId)
+            .map(kardexEntityQueryMapper::toDomain);
     }
 
+    /**
+     * @brief Finds available purchases ordered by date (FIFO)
+     * @param idProduct The product ID
+     * @return List of available purchase entries
+     */
     @Override
     public List<Kardex> findAvailablePurchasesOrderedByDate(Long idProduct) {
         List<KardexEntity> kardex=this.kardexRepository.findAvailablePurchasesOrderedByDate(idProduct);
@@ -70,28 +116,49 @@ public class KardexQueryAdapter implements IKardexQueryOutputPort{
        
     }
 
+    /**
+     * @brief Finds a Kardex entry by ID
+     * @param id The ID to search for
+     * @return Optional containing the Kardex entry
+     */
     @Override
     public Optional<Kardex> findById(Long id) {
         return kardexRepository.findById(id)
         .map(kardexEntityQueryMapper::toDomain);
     }
-
-
-
-
-
+    
+    /**
+     * @brief Finds the last Kardex entry for all products of an enterprise
+     * @param enterpriseId The enterprise ID
+     * @return List of migration data
+     */
     @Override
     public List<KardexMigration> findLastKardexForAllProducts(String enterpriseId) {
        List<KardexMigration> kardexMigrations=kardexRepository.findLastKardexForAllProductsByEnterpriseId(enterpriseId);
        return kardexMigrations;
     }
 
+    /**
+     * @brief Gets the latest Kardex entry for a product
+     * @param productId The product ID
+     * @return The latest Kardex entry or null
+     */
     @Override
     public Kardex getLatestKardexByProductId(Long productId) {
       
         KardexEntity kardexEntity=kardexRepository.findTopByProductIdOrderByDateDesc(productId);
         return kardexEntity != null ? kardexEntityQueryMapper.toDomain(kardexEntity):null;
 
+    }
+
+    /**
+     * @brief Checks if any Kardex entries exist for a product
+     * @param productId The product ID
+     * @return True if exists, false otherwise
+     */
+    @Override
+    public boolean existsByProduct_ProductId(Long productId) {
+      return kardexRepository.existsByProduct_ProductId(productId);
     }
 
   

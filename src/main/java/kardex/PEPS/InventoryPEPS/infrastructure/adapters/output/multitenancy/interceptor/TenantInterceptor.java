@@ -14,13 +14,13 @@ public class TenantInterceptor implements WebRequestInterceptor{
     private JwtTokenService jwtTokenService;
 
     /**
-     * Este método se llama antes de que se llame al controlador, y establece el
-     * identificador de inquilino desde el JWT en el TenantContext.
-     * Utiliza el servicio unificado que maneja tanto contexto HTTP como RabbitMQ.
+     * @brief Pre-handle method called before the controller execution.
      * 
-     * @param request La solicitud web
-     * @throws Exception Si no se pudo establecer el identificador de inquilino
-     *                   desde el JWT
+     * Sets the tenant identifier from the JWT into the TenantContext.
+     * Uses the unified service that handles both HTTP and RabbitMQ contexts.
+     * 
+     * @param request The web request
+     * @throws Exception If the tenant identifier could not be set from the JWT
      */
     @Override
     public void preHandle(WebRequest request) throws Exception {
@@ -28,15 +28,20 @@ public class TenantInterceptor implements WebRequestInterceptor{
             String tenantId = jwtTokenService.getTenantId();
             TenantContext.setTenantId(tenantId);
         } catch (Exception e) {
-            // En caso de error, no establecer el tenant context
-            // Esto permitirá que la aplicación funcione sin contexto de tenant si es necesario
+            // In case of error, do not set the tenant context
+            // This allows the application to function without tenant context if necessary
             throw new Exception("No se pudo establecer el contexto del tenant desde el JWT", e);
         }
     }
 
     /**  
-     * Este metodo se llama después de que se llama al controlador. Borra el
-     * identificador de inquilino del TenantContext.
+     * @brief Post-handle method called after the controller execution.
+     * 
+     * Clears the tenant identifier from the TenantContext to prevent context leakage.
+     * 
+     * @param request The web request
+     * @param model The model map
+     * @throws Exception If an error occurs
      */
     @Override
     public void postHandle(WebRequest request, ModelMap model) throws Exception {
@@ -44,17 +49,17 @@ public class TenantInterceptor implements WebRequestInterceptor{
     }
 
     /**
-     * Este metodo se llama después de que se llama al controlador y
-     * después de que se llama al método postHandle. No hace nada en este
-     * caso, pero se declara para implementar la interfaz WebRequestInterceptor.
+     * @brief Callback after request completion.
      * 
-     * @param request La solicitud web
-     * @param ex      La excepcion lanzada por el controlador, si es que se
-     *               lanza, o null si no se lanzó ninguna excepción
-     * @throws Exception Si se produce un error inesperado
+     * Called after the handler and postHandle. No action required here,
+     * but implemented to satisfy WebRequestInterceptor interface.
+     * 
+     * @param request The web request
+     * @param ex The exception thrown by the handler, if any
+     * @throws Exception If an unexpected error occurs
      */
     @Override
     public void afterCompletion(WebRequest request, Exception ex) throws Exception {
-        // No hay nada que hacer aquí
+        // Nothing to do here
     }
 }
