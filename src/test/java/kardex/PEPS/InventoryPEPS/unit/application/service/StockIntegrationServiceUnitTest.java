@@ -4,14 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 
@@ -24,25 +21,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import kardex.PEPS.InventoryPEPS.application.service.command.StockIntegrationService;
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
 import kardex.PEPS.InventoryPEPS.domain.model.Stock;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IMessageServicePort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.external.IStockClientPort;
-
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class StockIntegrationServiceUnitTest {
     @Mock
     private IStockClientPort stockClient;
-    
-    @Mock
-    private IMessageServicePort messageService;
 
     @InjectMocks
     private StockIntegrationService stockIntegrationService;
@@ -72,10 +63,6 @@ public class StockIntegrationServiceUnitTest {
             .quantity(100)
             .price(new BigDecimal("10.50"))
             .build();
-
-        // Mock message service
-        when(messageService.getMessage(anyString(), any()))
-            .thenReturn("Mocked log message");
     }
 
 
@@ -190,7 +177,6 @@ public class StockIntegrationServiceUnitTest {
         // Assert
         verify(stockClient).buyStock(mockStock);
         verify(stockClient, never()).sellStock(any(Stock.class));
-        verify(messageService).getMessage(anyString(), eq("purchase"));
     }
 
     @Test
@@ -218,11 +204,12 @@ public class StockIntegrationServiceUnitTest {
         // Arrange
         doNothing().when(stockClient).buyStock(any(Stock.class));
 
-        // Act
-        stockIntegrationService.callApiStockService(mockStock, true);
-
-        // Assert
-        verify(messageService).getMessage(anyString(), eq("purchase"));
+        // Act & Assert
+        assertDoesNotThrow(() -> 
+            stockIntegrationService.callApiStockService(mockStock, true)
+        );
+        
+        verify(stockClient).buyStock(mockStock);
     }
 
     // ==================== callApiStockService() - Sell Operations ====================
@@ -238,7 +225,6 @@ public class StockIntegrationServiceUnitTest {
         // Assert
         verify(stockClient).sellStock(mockStock);
         verify(stockClient, never()).buyStock(any(Stock.class));
-        verify(messageService).getMessage(anyString(), eq("sale"));
     }
 
     @Test
@@ -266,11 +252,12 @@ public class StockIntegrationServiceUnitTest {
         // Arrange
         doNothing().when(stockClient).sellStock(any(Stock.class));
 
-        // Act
-        stockIntegrationService.callApiStockService(mockStock, false);
-
-        // Assert
-        verify(messageService).getMessage(anyString(), eq("sale"));
+        // Act & Assert
+        assertDoesNotThrow(() -> 
+            stockIntegrationService.callApiStockService(mockStock, false)
+        );
+        
+        verify(stockClient).sellStock(mockStock);
     }
 
     // ==================== Error Handling - Buy ====================
@@ -281,12 +268,12 @@ public class StockIntegrationServiceUnitTest {
         RuntimeException exception = new RuntimeException("Connection timeout");
         doThrow(exception).when(stockClient).buyStock(any(Stock.class));
 
-        // Act
-        stockIntegrationService.callApiStockService(mockStock, true);
-
-        // Assert
+        // Act & Assert - Should not throw exception, just log it
+        assertDoesNotThrow(() -> 
+            stockIntegrationService.callApiStockService(mockStock, true)
+        );
+        
         verify(stockClient).buyStock(mockStock);
-        verify(messageService).getMessage(anyString(), eq("purchase"), eq("Connection timeout"));
     }
 
     @Test
@@ -309,12 +296,12 @@ public class StockIntegrationServiceUnitTest {
         RuntimeException exception = new RuntimeException("Insufficient stock");
         doThrow(exception).when(stockClient).sellStock(any(Stock.class));
 
-        // Act
-        stockIntegrationService.callApiStockService(mockStock, false);
-
-        // Assert
+        // Act & Assert - Should not throw exception, just log it
+        assertDoesNotThrow(() -> 
+            stockIntegrationService.callApiStockService(mockStock, false)
+        );
+        
         verify(stockClient).sellStock(mockStock);
-        verify(messageService).getMessage(anyString(), eq("sale"), eq("Insufficient stock"));
     }
 
     @Test
@@ -336,12 +323,12 @@ public class StockIntegrationServiceUnitTest {
         RuntimeException timeoutException = new RuntimeException("Request timeout after 5000ms");
         doThrow(timeoutException).when(stockClient).buyStock(any(Stock.class));
 
-        // Act
-        stockIntegrationService.callApiStockService(mockStock, true);
-
-        // Assert
-        verify(messageService).getMessage(anyString(), eq("purchase"), 
-            eq("Request timeout after 5000ms"));
+        // Act & Assert - Should not throw exception, just log it
+        assertDoesNotThrow(() -> 
+            stockIntegrationService.callApiStockService(mockStock, true)
+        );
+        
+        verify(stockClient).buyStock(mockStock);
     }
 
     // ==================== Integration Tests ====================
@@ -358,7 +345,6 @@ public class StockIntegrationServiceUnitTest {
         // Assert
         assertNotNull(stock);
         verify(stockClient).buyStock(stock);
-        verify(messageService).getMessage(anyString(), eq("purchase"));
     }
 
     @Test
@@ -374,9 +360,8 @@ public class StockIntegrationServiceUnitTest {
         // Assert
         assertNotNull(stock);
         verify(stockClient).sellStock(stock);
-        verify(messageService).getMessage(anyString(), eq("sale"));
     }
-
+    
     @Test
     @DisplayName("Should handle multiple buy operations")
     void testCallApiStockService_MultipleBuys_CallsClientMultipleTimes() {

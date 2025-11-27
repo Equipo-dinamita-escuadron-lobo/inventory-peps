@@ -43,7 +43,7 @@ public class Kardex {
         
         Kardex kardex = new Kardex();
         kardex.setFactCode(factCode);
-        kardex.setDate(ZonedDateTime.now());
+        kardex.setDate(ZonedDateTime.now(ZoneId.of("America/Bogota")));
         kardex.setDetails(details);
         kardex.setQuantity(quantity);
         kardex.setUnitPrice(unitPrice);
@@ -64,7 +64,7 @@ public class Kardex {
         
         Kardex kardex = new Kardex();
         kardex.setFactCode(factCode);
-        kardex.setDate(ZonedDateTime.now());
+        kardex.setDate(ZonedDateTime.now(ZoneId.of("America/Bogota")));
         kardex.setDetails(details);
         kardex.setQuantity(quantity);
         kardex.setUnitPrice(unitPrice);
@@ -84,7 +84,7 @@ public class Kardex {
         
         Kardex kardex = new Kardex();
         kardex.setFactCode(factCode);
-        kardex.setDate(ZonedDateTime.now());
+        kardex.setDate(ZonedDateTime.now(ZoneId.of("America/Bogota")));
         kardex.setDetails(details);
         kardex.setQuantity(quantity);
         kardex.setUnitPrice(unitPrice);
@@ -104,7 +104,7 @@ public class Kardex {
         
         Kardex kardex = new Kardex();
         kardex.setFactCode(factCode);
-        kardex.setDate(ZonedDateTime.now());
+        kardex.setDate(ZonedDateTime.now(ZoneId.of("America/Bogota")));
         kardex.setDetails(details);
         kardex.setQuantity(quantity);
         kardex.setUnitPrice(unitPrice);
@@ -121,7 +121,7 @@ public class Kardex {
                                              BigDecimal unitPrice, Product product) {
         Kardex kardex = new Kardex();
         kardex.setFactCode(factCode);
-        kardex.setDate(ZonedDateTime.now());
+        kardex.setDate(ZonedDateTime.now(ZoneId.of("America/Bogota")));
         kardex.setDetails(details);
         kardex.setQuantity(quantity);
         kardex.setUnitPrice(unitPrice);
@@ -137,7 +137,7 @@ public class Kardex {
                                          BigDecimal unitPrice, Product product) {
         Kardex kardex = new Kardex();
         kardex.setFactCode(factCode);
-        kardex.setDate(ZonedDateTime.now());
+        kardex.setDate(ZonedDateTime.now(ZoneId.of("America/Bogota")));
         kardex.setDetails(details);
         kardex.setQuantity(quantity);
         kardex.setUnitPrice(unitPrice);

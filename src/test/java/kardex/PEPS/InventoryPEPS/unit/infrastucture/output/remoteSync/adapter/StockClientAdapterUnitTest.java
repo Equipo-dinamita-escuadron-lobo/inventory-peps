@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -22,7 +25,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import kardex.PEPS.InventoryPEPS.domain.model.Stock;
+import kardex.PEPS.InventoryPEPS.domain.port.output.IFormatterResultOutputPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.ResponseDTO;
+import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.exception.customized.GenericErrorException;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.remoteSync.adapter.StockClientAdapter;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.remoteSync.config.IStockClient;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.remoteSync.dto.StockBuyDtoRequest;
@@ -37,6 +42,9 @@ public class StockClientAdapterUnitTest {
 
     @Mock
     private IStockClientMapper stockClientMapper;
+    
+    @Mock
+    private IFormatterResultOutputPort formatterResultOutputPort;
 
     @InjectMocks
     private StockClientAdapter stockClientAdapter;
@@ -121,14 +129,17 @@ public class StockClientAdapterUnitTest {
         when(stockClientMapper.toDtoRequest(mockStock)).thenReturn(mockBuyRequest);
         when(stockClient.buyStock(mockBuyRequest))
             .thenReturn(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mockResponseDTO));
+        doThrow(new GenericErrorException(400, "Failed to buy stock"))
+            .when(formatterResultOutputPort).returnErrorGenericResponse(anyInt(), anyString());
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, 
+        GenericErrorException exception = assertThrows(GenericErrorException.class, 
             () -> stockClientAdapter.buyStock(mockStock)
         );
         
         assertEquals("Failed to buy stock", exception.getMessage());
         verify(stockClient, times(1)).buyStock(mockBuyRequest);
+        verify(formatterResultOutputPort).returnErrorGenericResponse(400, "Failed to buy stock");
     }
 
     @Test
@@ -138,9 +149,11 @@ public class StockClientAdapterUnitTest {
         when(stockClientMapper.toDtoRequest(mockStock)).thenReturn(mockBuyRequest);
         when(stockClient.buyStock(mockBuyRequest))
             .thenReturn(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mockResponseDTO));
+        doThrow(new GenericErrorException(500, "Failed to buy stock"))
+            .when(formatterResultOutputPort).returnErrorGenericResponse(anyInt(), anyString());
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, 
+        GenericErrorException exception = assertThrows(GenericErrorException.class, 
             () -> stockClientAdapter.buyStock(mockStock)
         );
         
@@ -155,9 +168,11 @@ public class StockClientAdapterUnitTest {
         when(stockClientMapper.toDtoRequest(mockStock)).thenReturn(mockBuyRequest);
         when(stockClient.buyStock(mockBuyRequest))
             .thenReturn(ResponseEntity.status(HttpStatus.NOT_FOUND).body(mockResponseDTO));
+        doThrow(new GenericErrorException(404, "Failed to buy stock"))
+            .when(formatterResultOutputPort).returnErrorGenericResponse(anyInt(), anyString());
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, 
+        GenericErrorException exception = assertThrows(GenericErrorException.class, 
             () -> stockClientAdapter.buyStock(mockStock)
         );
         
@@ -227,9 +242,11 @@ public class StockClientAdapterUnitTest {
         when(stockClientMapper.toSellDtoRequest(mockStock)).thenReturn(mockSellRequest);
         when(stockClient.sellStock(mockSellRequest))
             .thenReturn(ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mockResponseDTO));
+        doThrow(new GenericErrorException(400, "Failed to sell stock"))
+            .when(formatterResultOutputPort).returnErrorGenericResponse(anyInt(), anyString());
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, 
+        GenericErrorException exception = assertThrows(GenericErrorException.class, 
             () -> stockClientAdapter.sellStock(mockStock)
         );
         
@@ -244,9 +261,11 @@ public class StockClientAdapterUnitTest {
         when(stockClientMapper.toSellDtoRequest(mockStock)).thenReturn(mockSellRequest);
         when(stockClient.sellStock(mockSellRequest))
             .thenReturn(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mockResponseDTO));
+        doThrow(new GenericErrorException(500, "Failed to sell stock"))
+            .when(formatterResultOutputPort).returnErrorGenericResponse(anyInt(), anyString());
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, 
+        GenericErrorException exception = assertThrows(GenericErrorException.class, 
             () -> stockClientAdapter.sellStock(mockStock)
         );
         
@@ -261,9 +280,11 @@ public class StockClientAdapterUnitTest {
         when(stockClientMapper.toSellDtoRequest(mockStock)).thenReturn(mockSellRequest);
         when(stockClient.sellStock(mockSellRequest))
             .thenReturn(ResponseEntity.status(HttpStatus.NOT_FOUND).body(mockResponseDTO));
+        doThrow(new GenericErrorException(404, "Failed to sell stock"))
+            .when(formatterResultOutputPort).returnErrorGenericResponse(anyInt(), anyString());
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, 
+        GenericErrorException exception = assertThrows(GenericErrorException.class, 
             () -> stockClientAdapter.sellStock(mockStock)
         );
         
@@ -277,9 +298,11 @@ public class StockClientAdapterUnitTest {
         when(stockClientMapper.toSellDtoRequest(mockStock)).thenReturn(mockSellRequest);
         when(stockClient.sellStock(mockSellRequest))
             .thenReturn(ResponseEntity.status(HttpStatus.CONFLICT).body(mockResponseDTO));
+        doThrow(new GenericErrorException(409, "Failed to sell stock"))
+            .when(formatterResultOutputPort).returnErrorGenericResponse(anyInt(), anyString());
 
         // Act & Assert
-        RuntimeException exception = assertThrows(RuntimeException.class, 
+        GenericErrorException exception = assertThrows(GenericErrorException.class, 
             () -> stockClientAdapter.sellStock(mockStock)
         );
         

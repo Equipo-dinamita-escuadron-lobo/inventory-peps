@@ -37,6 +37,8 @@ public class ClientPropertiesUnitTest {
         // Assert
         assertNotNull(clientProperties.getStock());
         assertNotNull(clientProperties.getProducts());
+        assertNotNull(clientProperties.getConfig());
+        assertNotNull(clientProperties.getKardexExternal());
     }
 
     @Test
@@ -71,6 +73,8 @@ public class ClientPropertiesUnitTest {
         // Arrange
         clientProperties.getStock().setBaseUrl("http://localhost:8081/stock");
         clientProperties.getProducts().setBaseUrl("http://localhost:8082/products");
+        clientProperties.getConfig().setBaseUrl("http://localhost:8083/config");
+        clientProperties.getKardexExternal().setBaseUrl("http://localhost:8084/kardex");
 
         // Act & Assert - Should not throw exception
         assertDoesNotThrow(() -> clientProperties.validate());
@@ -82,6 +86,8 @@ public class ClientPropertiesUnitTest {
         // Arrange
         clientProperties.getStock().setBaseUrl(null);
         clientProperties.getProducts().setBaseUrl("http://localhost:8082/products");
+        clientProperties.getConfig().setBaseUrl("http://localhost:8083/config");
+        clientProperties.getKardexExternal().setBaseUrl("http://localhost:8084/kardex");
 
         // Act & Assert
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
@@ -98,6 +104,8 @@ public class ClientPropertiesUnitTest {
         // Arrange
         clientProperties.getStock().setBaseUrl("");
         clientProperties.getProducts().setBaseUrl("http://localhost:8082/products");
+        clientProperties.getConfig().setBaseUrl("http://localhost:8083/config");
+        clientProperties.getKardexExternal().setBaseUrl("http://localhost:8084/kardex");
 
         // Act & Assert
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
@@ -113,6 +121,8 @@ public class ClientPropertiesUnitTest {
         // Arrange
         clientProperties.getStock().setBaseUrl("   ");
         clientProperties.getProducts().setBaseUrl("http://localhost:8082/products");
+        clientProperties.getConfig().setBaseUrl("http://localhost:8083/config");
+        clientProperties.getKardexExternal().setBaseUrl("http://localhost:8084/kardex");
 
         // Act & Assert
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
@@ -128,6 +138,8 @@ public class ClientPropertiesUnitTest {
         // Arrange
         clientProperties.getStock().setBaseUrl("http://localhost:8081/stock");
         clientProperties.getProducts().setBaseUrl(null);
+        clientProperties.getConfig().setBaseUrl("http://localhost:8083/config");
+        clientProperties.getKardexExternal().setBaseUrl("http://localhost:8084/kardex");
 
         // Act & Assert
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
@@ -144,6 +156,8 @@ public class ClientPropertiesUnitTest {
         // Arrange
         clientProperties.getStock().setBaseUrl("http://localhost:8081/stock");
         clientProperties.getProducts().setBaseUrl("");
+        clientProperties.getConfig().setBaseUrl("http://localhost:8083/config");
+        clientProperties.getKardexExternal().setBaseUrl("http://localhost:8084/kardex");
 
         // Act & Assert
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
@@ -159,6 +173,8 @@ public class ClientPropertiesUnitTest {
         // Arrange
         clientProperties.getStock().setBaseUrl("http://localhost:8081/stock");
         clientProperties.getProducts().setBaseUrl("   ");
+        clientProperties.getConfig().setBaseUrl("http://localhost:8083/config");
+        clientProperties.getKardexExternal().setBaseUrl("http://localhost:8084/kardex");
 
         // Act & Assert
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
@@ -174,6 +190,8 @@ public class ClientPropertiesUnitTest {
         // Arrange
         clientProperties.getStock().setBaseUrl(null);
         clientProperties.getProducts().setBaseUrl(null);
+        clientProperties.getConfig().setBaseUrl(null);
+        clientProperties.getKardexExternal().setBaseUrl(null);
 
         // Act & Assert
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
@@ -273,23 +291,6 @@ public class ClientPropertiesUnitTest {
 
         // Assert
         assertEquals(domainUrl, clientProperties.getStock().getBaseUrl());
-    }
-
-    @Test
-    @DisplayName("Should allow setting both URLs independently")
-    void testSetBothUrls_Independently() {
-        // Arrange
-        String stockUrl = "http://stock-service:8081";
-        String productsUrl = "http://products-service:8082";
-
-        // Act
-        clientProperties.getStock().setBaseUrl(stockUrl);
-        clientProperties.getProducts().setBaseUrl(productsUrl);
-
-        // Assert
-        assertEquals(stockUrl, clientProperties.getStock().getBaseUrl());
-        assertEquals(productsUrl, clientProperties.getProducts().getBaseUrl());
-        assertNotEquals(stockUrl, clientProperties.getProducts().getBaseUrl());
     }
 
     @Test
@@ -420,6 +421,8 @@ public class ClientPropertiesUnitTest {
         // Arrange
         clientProperties.getStock().setBaseUrl("h");
         clientProperties.getProducts().setBaseUrl("p");
+        clientProperties.getConfig().setBaseUrl("c");
+        clientProperties.getKardexExternal().setBaseUrl("k");
 
         // Act & Assert - Should not throw exception
         assertDoesNotThrow(() -> clientProperties.validate());
@@ -449,5 +452,187 @@ public class ClientPropertiesUnitTest {
 
         // Assert
         assertEquals(urlWithUnicode, clientProperties.getProducts().getBaseUrl());
+    }
+
+    @Test
+    @DisplayName("Should set and get config base URL")
+    void testSetAndGetConfigBaseUrl() {
+        // Arrange
+        String expectedUrl = "http://localhost:8083/config";
+
+        // Act
+        clientProperties.getConfig().setBaseUrl(expectedUrl);
+
+        // Assert
+        assertEquals(expectedUrl, clientProperties.getConfig().getBaseUrl());
+    }
+
+    @Test
+    @DisplayName("Should set and get kardex external base URL")
+    void testSetAndGetKardexExternalBaseUrl() {
+        // Arrange
+        String expectedUrl = "http://localhost:8084/kardex";
+
+        // Act
+        clientProperties.getKardexExternal().setBaseUrl(expectedUrl);
+
+        // Assert
+        assertEquals(expectedUrl, clientProperties.getKardexExternal().getBaseUrl());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when config base URL is null")
+    void testValidate_WithNullConfigUrl() {
+        // Arrange
+        clientProperties.getStock().setBaseUrl("http://localhost:8081/stock");
+        clientProperties.getProducts().setBaseUrl("http://localhost:8082/products");
+        clientProperties.getConfig().setBaseUrl(null);
+        clientProperties.getKardexExternal().setBaseUrl("http://localhost:8084/kardex");
+
+        // Act & Assert
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            clientProperties.validate();
+        });
+
+        assertTrue(exception.getMessage().contains("Config base URL not configured"));
+        assertTrue(exception.getMessage().contains("services.config.base-url"));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when config base URL is empty")
+    void testValidate_WithEmptyConfigUrl() {
+        // Arrange
+        clientProperties.getStock().setBaseUrl("http://localhost:8081/stock");
+        clientProperties.getProducts().setBaseUrl("http://localhost:8082/products");
+        clientProperties.getConfig().setBaseUrl("");
+        clientProperties.getKardexExternal().setBaseUrl("http://localhost:8084/kardex");
+
+        // Act & Assert
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            clientProperties.validate();
+        });
+
+        assertTrue(exception.getMessage().contains("Config base URL not configured"));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when config base URL is blank")
+    void testValidate_WithBlankConfigUrl() {
+        // Arrange
+        clientProperties.getStock().setBaseUrl("http://localhost:8081/stock");
+        clientProperties.getProducts().setBaseUrl("http://localhost:8082/products");
+        clientProperties.getConfig().setBaseUrl("   ");
+        clientProperties.getKardexExternal().setBaseUrl("http://localhost:8084/kardex");
+
+        // Act & Assert
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            clientProperties.validate();
+        });
+
+        assertTrue(exception.getMessage().contains("Config base URL not configured"));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when kardex external base URL is null")
+    void testValidate_WithNullKardexExternalUrl() {
+        // Arrange
+        clientProperties.getStock().setBaseUrl("http://localhost:8081/stock");
+        clientProperties.getProducts().setBaseUrl("http://localhost:8082/products");
+        clientProperties.getConfig().setBaseUrl("http://localhost:8083/config");
+        clientProperties.getKardexExternal().setBaseUrl(null);
+
+        // Act & Assert
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            clientProperties.validate();
+        });
+
+        assertTrue(exception.getMessage().contains("Kardex External base URL not configured"));
+        assertTrue(exception.getMessage().contains("services.kardex-external.base-url"));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when kardex external base URL is empty")
+    void testValidate_WithEmptyKardexExternalUrl() {
+        // Arrange
+        clientProperties.getStock().setBaseUrl("http://localhost:8081/stock");
+        clientProperties.getProducts().setBaseUrl("http://localhost:8082/products");
+        clientProperties.getConfig().setBaseUrl("http://localhost:8083/config");
+        clientProperties.getKardexExternal().setBaseUrl("");
+
+        // Act & Assert
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            clientProperties.validate();
+        });
+
+        assertTrue(exception.getMessage().contains("Kardex External base URL not configured"));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when kardex external base URL is blank")
+    void testValidate_WithBlankKardexExternalUrl() {
+        // Arrange
+        clientProperties.getStock().setBaseUrl("http://localhost:8081/stock");
+        clientProperties.getProducts().setBaseUrl("http://localhost:8082/products");
+        clientProperties.getConfig().setBaseUrl("http://localhost:8083/config");
+        clientProperties.getKardexExternal().setBaseUrl("   ");
+
+        // Act & Assert
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            clientProperties.validate();
+        });
+
+        assertTrue(exception.getMessage().contains("Kardex External base URL not configured"));
+    }
+
+    @Test
+    @DisplayName("Config inner class should have proper getters and setters")
+    void testConfigInnerClass() {
+        // Arrange
+        ClientProperties.Config config = new ClientProperties.Config();
+        String testUrl = "http://test.com/config";
+
+        // Act
+        config.setBaseUrl(testUrl);
+
+        // Assert
+        assertEquals(testUrl, config.getBaseUrl());
+    }
+
+    @Test
+    @DisplayName("KardexExternal inner class should have proper getters and setters")
+    void testKardexExternalInnerClass() {
+        // Arrange
+        ClientProperties.KardexExternal kardexExternal = new ClientProperties.KardexExternal();
+        String testUrl = "http://test.com/kardex";
+
+        // Act
+        kardexExternal.setBaseUrl(testUrl);
+
+        // Assert
+        assertEquals(testUrl, kardexExternal.getBaseUrl());
+    }
+
+    @Test
+    @DisplayName("Should allow setting all four URLs independently")
+    void testSetAllUrls_Independently() {
+        // Arrange
+        String stockUrl = "http://stock-service:8081";
+        String productsUrl = "http://products-service:8082";
+        String configUrl = "http://config-service:8083";
+        String kardexUrl = "http://kardex-service:8084";
+
+        // Act
+        clientProperties.getStock().setBaseUrl(stockUrl);
+        clientProperties.getProducts().setBaseUrl(productsUrl);
+        clientProperties.getConfig().setBaseUrl(configUrl);
+        clientProperties.getKardexExternal().setBaseUrl(kardexUrl);
+
+        // Assert
+        assertEquals(stockUrl, clientProperties.getStock().getBaseUrl());
+        assertEquals(productsUrl, clientProperties.getProducts().getBaseUrl());
+        assertEquals(configUrl, clientProperties.getConfig().getBaseUrl());
+        assertEquals(kardexUrl, clientProperties.getKardexExternal().getBaseUrl());
+        assertNotEquals(stockUrl, clientProperties.getProducts().getBaseUrl());
+        assertNotEquals(configUrl, clientProperties.getKardexExternal().getBaseUrl());
     }
 }

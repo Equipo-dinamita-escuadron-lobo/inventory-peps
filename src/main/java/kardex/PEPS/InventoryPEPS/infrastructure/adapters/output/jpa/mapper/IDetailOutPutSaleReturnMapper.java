@@ -8,7 +8,7 @@ import org.mapstruct.Mapping;
 import kardex.PEPS.InventoryPEPS.domain.model.DetailOutput;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity.DetailOutputEntity;
 
-@Mapper(componentModel="spring", uses={IKardexSaleReturnMapperImpl.class})
+@Mapper(componentModel="spring", uses={IKardexSaleReturnMapper.class})
 /**
  * @brief Mapper for DetailOutput in Sale Return context
  * 
@@ -16,8 +16,6 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity.Detai
  */
 public interface IDetailOutPutSaleReturnMapper {
 
-
-    
     /**
      * @brief Converts entity to domain model
      * @param entity The DetailOutputEntity

@@ -43,6 +43,8 @@ import kardex.PEPS.InventoryPEPS.domain.port.output.query.IDetailQueryOutPutPort
 import kardex.PEPS.InventoryPEPS.domain.port.output.query.IKardexQueryOutputPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.query.IProductQueryOutputPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.external.IProductEventPort;
+import kardex.PEPS.InventoryPEPS.domain.port.output.IMessageServicePort;
+import kardex.PEPS.InventoryPEPS.infrastructure.adapters.config.i18n.MessageKeys;
 
 @ExtendWith(MockitoExtension.class)
 public class KardexCommandServiceUnitTest {
@@ -70,6 +72,9 @@ public class KardexCommandServiceUnitTest {
 
     @Mock
     private IProductEventPort productEventPort;
+
+    @Mock
+    private IMessageServicePort messageService;
 
     @InjectMocks
     private KardexCommandService  kardexCommandService;
@@ -138,6 +143,8 @@ public class KardexCommandServiceUnitTest {
         // Arrange
         when(productQueryOutputPort.getProductByProductId(1L))
             .thenReturn(Optional.empty());
+        when(messageService.getMessage(eq(MessageKeys.ERROR_NOT_FOUND_PRODUCT), anyLong()))
+            .thenReturn("Product not found");
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(
@@ -189,6 +196,8 @@ public class KardexCommandServiceUnitTest {
             .thenReturn(Optional.of(mockProduct));
         when(kardexQueryOutputPort.findAvailablePurchasesOrderedByDate(1L))
             .thenReturn(List.of(limitedLot));
+        when(messageService.getMessage(eq(MessageKeys.ERROR_INSUFFICIENT_STOCK), anyInt(), anyInt()))
+            .thenReturn("Insufficient stock");
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(
@@ -457,6 +466,8 @@ public class KardexCommandServiceUnitTest {
             .thenReturn(Optional.of(mockProduct));
         when(kardexQueryOutputPort.findAvailablePurchasesOrderedByDate(1L))
             .thenReturn(List.of(limitedLot));
+        when(messageService.getMessage(eq(MessageKeys.ERROR_INSUFFICIENT_STOCK), anyInt(), anyInt()))
+            .thenReturn("Insufficient stock");
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(
@@ -492,6 +503,8 @@ public class KardexCommandServiceUnitTest {
         // Arrange
         when(productQueryOutputPort.getProductByProductId(1L))
             .thenReturn(Optional.empty());
+        when(messageService.getMessage(eq(MessageKeys.ERROR_NOT_FOUND_PRODUCT), anyLong()))
+            .thenReturn("Product not found");
 
         // Act & Assert
         IllegalArgumentException exception = assertThrows(

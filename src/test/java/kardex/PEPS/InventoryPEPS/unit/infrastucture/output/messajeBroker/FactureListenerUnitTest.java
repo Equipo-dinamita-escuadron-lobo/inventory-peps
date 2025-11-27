@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -22,7 +21,6 @@ import org.springframework.amqp.core.Message;
 import kardex.PEPS.InventoryPEPS.application.ports.input.IKardexCommandPort;
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
-import kardex.PEPS.InventoryPEPS.domain.port.output.IMessageErrorHandlingPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.FactureListener;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.dto.EventDto;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.dto.KardexRabbitDto;
