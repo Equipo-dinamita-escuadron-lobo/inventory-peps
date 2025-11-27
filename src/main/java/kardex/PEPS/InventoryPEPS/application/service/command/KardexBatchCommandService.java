@@ -9,7 +9,6 @@ import kardex.PEPS.InventoryPEPS.application.ports.input.IKardexBatchCommandPort
 import kardex.PEPS.InventoryPEPS.application.ports.input.IKardexCommandPort;
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IKardexExternalClientPort;
-import kardex.PEPS.InventoryPEPS.domain.port.output.command.IKardexCommandOutputPort;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexBatchErrorDTO;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response.KardexBatchProcessingResultDTO;
 import lombok.RequiredArgsConstructor;

@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class KardexDateValidationService {
     private final IConfigClientPort  configClientPort;  
-    private IFormatterResultOutputPort formatterResultOutputPort;
+    private final IFormatterResultOutputPort formatterResultOutputPort;
     private final IMessageServicePort messageServicePort;
 
 
