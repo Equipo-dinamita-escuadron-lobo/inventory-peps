@@ -138,8 +138,11 @@ public abstract class AbstractMessageListener<T,U> {
             if (messageErrorHandlingPort != null) {
                 String eventType = extractEventType(event);
                 String messageData = convertEventToJson(event);
-                String errorDescription = "Validation failed: Required fields are missing or invalid";
-                
+                String specificError=getValidationErrorMessage();
+                 String errorDescription = specificError != null 
+                    ? "Validation failed: " + specificError
+                    : "Validation failed: Required fields are missing or invalid";
+              
                 messageErrorHandlingPort.saveProcessingError(eventType, errorDescription, messageData, getEntityType());
             }
         } catch (Exception e) {

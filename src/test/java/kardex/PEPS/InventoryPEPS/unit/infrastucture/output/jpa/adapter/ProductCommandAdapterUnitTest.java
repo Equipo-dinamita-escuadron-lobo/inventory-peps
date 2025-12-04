@@ -43,7 +43,6 @@ public class ProductCommandAdapterUnitTest {
 
     private Product mockProduct;
     private ProductEntity mockProductEntity;
-    private List<Product> mockProducts;
     private List<ProductEntity> mockProductEntities;
 
     @BeforeEach
@@ -51,7 +50,6 @@ public class ProductCommandAdapterUnitTest {
         // Arrange - Common setup
         mockProduct = createMockProduct(1L, 100L);
         mockProductEntity = createMockProductEntity(1L, 100L);
-        mockProducts = createMockProducts();
         mockProductEntities = createMockProductEntities();
     }
 
@@ -210,7 +208,7 @@ public class ProductCommandAdapterUnitTest {
     // Assert
     verify(productEntityMapper).updateEntityFromProduct(any(Product.class), eq(entity));
     
-    
+    @SuppressWarnings("unchecked")
     ArgumentCaptor<List<ProductEntity>> captor = ArgumentCaptor.forClass(List.class);
     verify(productRepository).saveAll(captor.capture());
     
@@ -337,14 +335,6 @@ public class ProductCommandAdapterUnitTest {
         return entity;
     }
 
-    private List<Product> createMockProducts() {
-        List<Product> products = new ArrayList<>();
-        for (long i = 1; i <= 3; i++) {
-            products.add(createMockProduct(i, 100L + i));
-        }
-        return products;
-    }
-
     private List<ProductEntity> createMockProductEntities() {
         List<ProductEntity> entities = new ArrayList<>();
         for (long i = 1; i <= 3; i++) {
@@ -369,5 +359,198 @@ public class ProductCommandAdapterUnitTest {
         return products;
     }
 
+    
+    // ==================== delete() ====================
+    @Test
+    @DisplayName("Should delete product by ID successfully")
+    void testDelete_ExistingProduct_DeletesSuccessfully() {
+        // Arrange
+        Long productId = 100L;
+        when(productRepository.deleteByProductId(productId)).thenReturn(1);
+
+        // Act
+        String result = productCommandAdapter.delete(productId);
+
+        // Assert
+        assertEquals("Product deleted successfully.", result);
+        verify(productRepository).deleteByProductId(productId);
+    }
+
+    @Test
+    @DisplayName("Should return not found message when deleting non-existing product")
+    void testDelete_NonExistingProduct_ReturnsNotFoundMessage() {
+        // Arrange
+        Long productId = 999L;
+        when(productRepository.deleteByProductId(productId)).thenReturn(0);
+
+        // Act
+        String result = productCommandAdapter.delete(productId);
+
+        // Assert
+        assertEquals("Product not found.", result);
+        verify(productRepository).deleteByProductId(productId);
+    }
+
+    @Test
+    @DisplayName("Should handle exception when deleting product")
+    void testDelete_RepositoryThrowsException_ReturnsErrorMessage() {
+        // Arrange
+        Long productId = 100L;
+        when(productRepository.deleteByProductId(productId))
+            .thenThrow(new RuntimeException("Database error"));
+
+        // Act
+        String result = productCommandAdapter.delete(productId);
+
+        // Assert
+        assertTrue(result.contains("An error occurred"));
+        assertTrue(result.contains("Database error"));
+    }
+
+    @Test
+    @DisplayName("Should handle null productId when deleting")
+    void testDelete_NullProductId_HandlesGracefully() {
+        // Arrange
+        when(productRepository.deleteByProductId(null))
+            .thenThrow(new IllegalArgumentException("Product ID cannot be null"));
+
+        // Act
+        String result = productCommandAdapter.delete(null);
+
+        // Assert
+        assertTrue(result.contains("An error occurred"));
+    }
+
+    @Test
+    @DisplayName("Should delete multiple products with different IDs")
+    void testDelete_MultipleProducts_DeletesEachCorrectly() {
+        // Arrange
+        when(productRepository.deleteByProductId(100L)).thenReturn(1);
+        when(productRepository.deleteByProductId(101L)).thenReturn(1);
+        when(productRepository.deleteByProductId(102L)).thenReturn(1);
+
+        // Act
+        String result1 = productCommandAdapter.delete(100L);
+        String result2 = productCommandAdapter.delete(101L);
+        String result3 = productCommandAdapter.delete(102L);
+
+        // Assert
+        assertEquals("Product deleted successfully.", result1);
+        assertEquals("Product deleted successfully.", result2);
+        assertEquals("Product deleted successfully.", result3);
+        verify(productRepository, times(3)).deleteByProductId(any());
+    }
+
+    // ==================== deleteAllByEnterpriseId() ====================
+    @Test
+    @DisplayName("Should delete all products by enterprise ID successfully")
+    void testDeleteAllByEnterpriseId_ExistingProducts_DeletesAll() {
+        // Arrange
+        String enterpriseId = "ENT-001";
+        when(productRepository.deleteByEnterpriseId(enterpriseId)).thenReturn(5);
+
+        // Act
+        String result = productCommandAdapter.deleteAllByEnterpriseId(enterpriseId);
+
+        // Assert
+        assertEquals("Deleted 5 products successfully.", result);
+        verify(productRepository).deleteByEnterpriseId(enterpriseId);
+    }
+
+    @Test
+    @DisplayName("Should return zero count when no products exist for enterprise")
+    void testDeleteAllByEnterpriseId_NoProducts_ReturnsZeroCount() {
+        // Arrange
+        String enterpriseId = "ENT-999";
+        when(productRepository.deleteByEnterpriseId(enterpriseId)).thenReturn(0);
+
+        // Act
+        String result = productCommandAdapter.deleteAllByEnterpriseId(enterpriseId);
+
+        // Assert
+        assertEquals("Deleted 0 products successfully.", result);
+        verify(productRepository).deleteByEnterpriseId(enterpriseId);
+    }
+
+    @Test
+    @DisplayName("Should handle exception when deleting by enterprise ID")
+    void testDeleteAllByEnterpriseId_RepositoryThrowsException_ReturnsErrorMessage() {
+        // Arrange
+        String enterpriseId = "ENT-001";
+        when(productRepository.deleteByEnterpriseId(enterpriseId))
+            .thenThrow(new RuntimeException("Database connection lost"));
+
+        // Act
+        String result = productCommandAdapter.deleteAllByEnterpriseId(enterpriseId);
+
+        // Assert
+        assertTrue(result.contains("An error occurred"));
+        assertTrue(result.contains("Database connection lost"));
+    }
+
+    @Test
+    @DisplayName("Should handle null enterprise ID")
+    void testDeleteAllByEnterpriseId_NullEnterpriseId_HandlesGracefully() {
+        // Arrange
+        when(productRepository.deleteByEnterpriseId(null))
+            .thenThrow(new IllegalArgumentException("Enterprise ID cannot be null"));
+
+        // Act
+        String result = productCommandAdapter.deleteAllByEnterpriseId(null);
+
+        // Assert
+        assertTrue(result.contains("An error occurred"));
+    }
+
+    @Test
+    @DisplayName("Should delete large number of products for enterprise")
+    void testDeleteAllByEnterpriseId_LargeCount_DeletesSuccessfully() {
+        // Arrange
+        String enterpriseId = "ENT-001";
+        when(productRepository.deleteByEnterpriseId(enterpriseId)).thenReturn(1000);
+
+        // Act
+        String result = productCommandAdapter.deleteAllByEnterpriseId(enterpriseId);
+
+        // Assert
+        assertEquals("Deleted 1000 products successfully.", result);
+        verify(productRepository).deleteByEnterpriseId(enterpriseId);
+    }
+
+    @Test
+    @DisplayName("Should handle different enterprise IDs correctly")
+    void testDeleteAllByEnterpriseId_DifferentEnterprises_DeletesCorrectly() {
+        // Arrange
+        when(productRepository.deleteByEnterpriseId("ENT-001")).thenReturn(10);
+        when(productRepository.deleteByEnterpriseId("ENT-002")).thenReturn(20);
+        when(productRepository.deleteByEnterpriseId("ENT-003")).thenReturn(5);
+
+        // Act
+        String result1 = productCommandAdapter.deleteAllByEnterpriseId("ENT-001");
+        String result2 = productCommandAdapter.deleteAllByEnterpriseId("ENT-002");
+        String result3 = productCommandAdapter.deleteAllByEnterpriseId("ENT-003");
+
+        // Assert
+        assertTrue(result1.contains("10 products"));
+        assertTrue(result2.contains("20 products"));
+        assertTrue(result3.contains("5 products"));
+        verify(productRepository, times(3)).deleteByEnterpriseId(any());
+    }
+
+    @Test
+    @DisplayName("Should handle empty enterprise ID")
+    void testDeleteAllByEnterpriseId_EmptyEnterpriseId_CallsRepository() {
+        // Arrange
+        String emptyEnterpriseId = "";
+        when(productRepository.deleteByEnterpriseId(emptyEnterpriseId)).thenReturn(0);
+
+        // Act
+        String result = productCommandAdapter.deleteAllByEnterpriseId(emptyEnterpriseId);
+
+        // Assert
+        assertEquals("Deleted 0 products successfully.", result);
+        verify(productRepository).deleteByEnterpriseId(emptyEnterpriseId);
+    }
 
 }
+

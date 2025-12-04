@@ -197,7 +197,7 @@ class ProductListenerUnitTest {
         // Assert
         verify(messageErrorHandlingPortImpl, times(1)).saveProcessingError(
             eq("CREATED"),
-            eq("Validation failed: Required fields are missing or invalid"), // ✅ Mensaje exacto
+            contains("Validation failed"),
             anyString(),
             eq("Product")
         );
@@ -217,7 +217,7 @@ class ProductListenerUnitTest {
         // Assert
         verify(messageErrorHandlingPortImpl, times(1)).saveProcessingError(
             eq("CREATED"),
-            eq("Validation failed: Required fields are missing or invalid"), // ✅ Cambiar
+            contains("Validation failed"),
             anyString(),
             eq("Product")
         );
@@ -236,7 +236,7 @@ class ProductListenerUnitTest {
         // Assert
         verify(messageErrorHandlingPortImpl, times(1)).saveProcessingError(
             eq("CREATED"),
-            eq("Validation failed: Required fields are missing or invalid"), // ✅ Cambiar
+            contains("Validation failed"),
             anyString(),
             eq("Product")
         );
@@ -255,7 +255,7 @@ class ProductListenerUnitTest {
         // Assert
         verify(messageErrorHandlingPortImpl, times(1)).saveProcessingError(
             eq("CREATED"),
-            eq("Validation failed: Required fields are missing or invalid"), // ✅ Cambiar
+            contains("Validation failed"),
             anyString(),
             eq("Product")
         );
@@ -274,7 +274,7 @@ class ProductListenerUnitTest {
         // Assert
         verify(messageErrorHandlingPortImpl, times(1)).saveProcessingError(
             eq("CREATED"),
-            eq("Validation failed: Required fields are missing or invalid"), // ✅ Cambiar
+            contains("Validation failed"),
             anyString(),
             eq("Product")
         );
@@ -293,7 +293,7 @@ class ProductListenerUnitTest {
         // Assert
         verify(messageErrorHandlingPortImpl, times(1)).saveProcessingError(
             eq("CREATED"),
-            eq("Validation failed: Required fields are missing or invalid"), // ✅ Cambiar
+            contains("Validation failed"),
             anyString(),
             eq("Product")
         );
@@ -312,7 +312,7 @@ class ProductListenerUnitTest {
         // Assert
         verify(messageErrorHandlingPortImpl, times(1)).saveProcessingError(
             eq("CREATED"),
-            eq("Validation failed: Required fields are missing or invalid"), // ✅ Cambiar
+            contains("Validation failed"),
             anyString(),
             eq("Product")
         );

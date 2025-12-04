@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -31,12 +32,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import kardex.PEPS.InventoryPEPS.application.service.command.KardexAdjustmentValidationService;
 import kardex.PEPS.InventoryPEPS.application.service.command.KardexCommandService ;
 import kardex.PEPS.InventoryPEPS.application.service.command.KardexDateValidationService;
 import kardex.PEPS.InventoryPEPS.application.service.command.StockIntegrationService;
 import kardex.PEPS.InventoryPEPS.domain.model.DetailOutput;
 import kardex.PEPS.InventoryPEPS.domain.model.Kardex;
 import kardex.PEPS.InventoryPEPS.domain.model.Product;
+import kardex.PEPS.InventoryPEPS.domain.model.Stock;
 import kardex.PEPS.InventoryPEPS.domain.port.output.IFormatterResultOutputPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.command.IKardexCommandOutputPort;
 import kardex.PEPS.InventoryPEPS.domain.port.output.query.IDetailQueryOutPutPort;
@@ -63,6 +66,9 @@ public class KardexCommandServiceUnitTest {
     
     @Mock
     private  IFormatterResultOutputPort formatterResultOutputPort;
+
+    @Mock
+    private KardexAdjustmentValidationService kardexAdjustmentValidationService;
 
     @Mock
     private KardexDateValidationService kardexDateValidationService;
@@ -234,11 +240,11 @@ public class KardexCommandServiceUnitTest {
 
         // Assert
         assertNotNull(result);
-        // Verify FIFO logic reduced quantities
         assertEquals(0, lot1.getAvailableQuantity()); // Fully consumed
         assertEquals(40, lot2.getAvailableQuantity()); // Partially consumed
         
-        ArgumentCaptor<List> lotsCaptor = ArgumentCaptor.forClass(List.class);
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<List<Kardex>> lotsCaptor = ArgumentCaptor.forClass(List.class);
         verify(kardexCommandOutputPort).registerSale(any(Kardex.class), lotsCaptor.capture());
         assertEquals(2, lotsCaptor.getValue().size());
     }
@@ -515,10 +521,166 @@ public class KardexCommandServiceUnitTest {
         assertEquals("Product not found", exception.getMessage());
     }
 
+ 
+    @Test
+    @DisplayName("Should throw exception when product not found for adjustment entry")
+    void testRegisterAdjustmentEntry_ProductNotFound_ThrowsException() {
+        // Arrange
+        when(productQueryOutputPort.getProductByProductId(1L))
+            .thenReturn(Optional.empty());
+        when(messageService.getMessage(eq(MessageKeys.ERROR_NOT_FOUND_PRODUCT), anyLong()))
+            .thenReturn("Product not found");
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> kardexCommandService.registerAdjustmentEntry(kardexRequest)
+        );
+
+        assertEquals("Product not found", exception.getMessage());
+        verify(kardexAdjustmentValidationService, never()).validateDateForAdjustment(any(), anyString());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when product is inactive for adjustment entry")
+    void testRegisterAdjustmentEntry_InactiveProduct_ThrowsException() {
+        // Arrange
+        mockProduct.setState(false);
+        
+        when(productQueryOutputPort.getProductByProductId(1L))
+            .thenReturn(Optional.of(mockProduct));
+        when(messageService.getMessage(eq(MessageKeys.ERROR_PRODUCT_NOT_ACTIVE), anyLong()))
+            .thenReturn("Product is inactive");
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> kardexCommandService.registerAdjustmentEntry(kardexRequest)
+        );
+
+        assertEquals("Product is inactive", exception.getMessage());
+        verify(kardexAdjustmentValidationService, never()).validateDateForAdjustment(any(), anyString());
+    }
+
+    
+   
+
+    @Test
+    @DisplayName("Should throw exception when insufficient stock for adjustment exit")
+    void testRegisterAdjustmentExit_InsufficientStock_ThrowsException() {
+        // Arrange
+        kardexRequest.setDate(ZonedDateTime.now());
+        Kardex limitedLot = Kardex.createPurchase(1002L, "Limited", 50, new BigDecimal("10.00"), mockProduct);
+        
+        when(productQueryOutputPort.getProductByProductId(1L))
+            .thenReturn(Optional.of(mockProduct));
+        when(kardexQueryOutputPort.findAvailablePurchasesOrderedByDate(1L))
+            .thenReturn(List.of(limitedLot));
+        when(messageService.getMessage(eq(MessageKeys.ERROR_INSUFFICIENT_STOCK), anyInt(), anyInt()))
+            .thenReturn("Insufficient stock");
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> kardexCommandService.registerAdjustmentExit(kardexRequest)
+        );
+
+        assertTrue(exception.getMessage().contains("Insufficient stock"));
+        verify(kardexAdjustmentValidationService, never()).validateDateForAdjustment(any(), anyString());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when product not found for adjustment exit")
+    void testRegisterAdjustmentExit_ProductNotFound_ThrowsException() {
+        // Arrange
+        kardexRequest.setDate(ZonedDateTime.now());
+        
+        when(productQueryOutputPort.getProductByProductId(1L))
+            .thenReturn(Optional.empty());
+        when(messageService.getMessage(eq(MessageKeys.ERROR_NOT_FOUND_PRODUCT), anyLong()))
+            .thenReturn("Product not found");
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> kardexCommandService.registerAdjustmentExit(kardexRequest)
+        );
+
+        assertEquals("Product not found", exception.getMessage());
+        verify(kardexAdjustmentValidationService, never()).validateDateForAdjustment(any(), anyString());
+    }
+
+   
+
+    // ==================== deleteAll() ====================
+    @Test
+    @DisplayName("Should delete all kardex records successfully")
+    void testDeleteAll_Success() {
+        // Arrange
+        doNothing().when(kardexCommandOutputPort).deleteAll();
+
+        // Act
+        kardexCommandService.deleteAll();
+
+        // Assert
+        verify(kardexCommandOutputPort, times(1)).deleteAll();
+    }
+
+    @Test
+    @DisplayName("Should handle exception when deleting all kardex records without throwing")
+    void testDeleteAll_HandlesException() {
+        // Arrange
+        RuntimeException exception = new RuntimeException("Database error");
+        doThrow(exception).when(kardexCommandOutputPort).deleteAll();
+
+        // Act - Should not throw exception because it's handled internally
+        kardexCommandService.deleteAll();
+
+        // Assert - Verify the method was called even though it threw an exception
+        verify(kardexCommandOutputPort, times(1)).deleteAll();
+    }
 
 
+    @Test
+    @DisplayName("Should throw exception when product is inactive")
+    void testGetValidatedProduct_InactiveProduct_ThrowsException() {
+        // Arrange
+        mockProduct.setState(false);
+        
+        when(productQueryOutputPort.getProductByProductId(1L))
+            .thenReturn(Optional.of(mockProduct));
+        when(messageService.getMessage(eq(MessageKeys.ERROR_PRODUCT_NOT_ACTIVE), anyLong()))
+            .thenReturn("Product is inactive");
 
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> kardexCommandService.registerPurchase(kardexRequest)
+        );
 
+        assertEquals("Product is inactive", exception.getMessage());
+        verify(formatterResultOutputPort)
+            .returnBusinessRuleErrorResponse(eq(400), eq("Product is inactive"));
+    }
 
+    @Test
+    @DisplayName("Should validate product state for sale operation")
+    void testGetValidatedProduct_SaleOperation_ValidatesProductState() {
+        // Arrange
+        mockProduct.setState(false);
+        
+        when(productQueryOutputPort.getProductByProductId(1L))
+            .thenReturn(Optional.of(mockProduct));
+        when(messageService.getMessage(eq(MessageKeys.ERROR_PRODUCT_NOT_ACTIVE), anyLong()))
+            .thenReturn("Product is inactive");
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> kardexCommandService.registerSale(kardexRequest)
+        );
+
+        assertTrue(exception.getMessage().contains("Product is inactive"));
+    }
 
 }

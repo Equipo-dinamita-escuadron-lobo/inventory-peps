@@ -41,7 +41,7 @@ public class MessageProcessingErrorQueryService implements  IMessageProcessingEr
         Optional<MessageProcessingError> messageProcessingError = messageProcessingErrorQueryRepositoryPort.findById(id);
         if (!messageProcessingError.isPresent()) {
             formatterResultOutputPort.returnEntityDoesNotExistErrorResponse(404, 
-                messageService.getMessage(MessageKeys.ERROR_NOT_FOUND, "Message processing error with id: " + id));
+                messageService.getMessage(MessageKeys.ERROR_NOT_FOUND,"Message processing error with id:"+id));
         }else{
             try {
                 messageProcessingError.get().requireValid();
@@ -59,21 +59,20 @@ public class MessageProcessingErrorQueryService implements  IMessageProcessingEr
      * @brief Finds the most recent message processing error
      * @return Optional containing the latest error record if found
      */
-    @Override
+   @Override
     public Optional<MessageProcessingError> findLastRecord() {
         log.info("Finding the most recent message processing error");
         Optional<MessageProcessingError> messageProcessingError = messageProcessingErrorQueryRepositoryPort.findLastRecord();
         if (!messageProcessingError.isPresent()) {
             formatterResultOutputPort.returnEntityDoesNotExistErrorResponse(404, 
                 messageService.getMessage(MessageKeys.ERROR_NOT_FOUND, "No message processing errors found"));
-        }else{
+        } else {
             try {
                 messageProcessingError.get().requireValid();
             } catch (IllegalArgumentException ex) {
-                log.warn("Latest MPE has invalid state: {}", ex.getMessage());
-            
+                log.warn("Last MPE has invalid state: {}", ex.getMessage());
             }
-            log.debug("Latest MPE found: {}", messageProcessingError.get().summary(180));
+            log.debug("Last MPE: {}", messageProcessingError.get().summary(180));
         }
         return messageProcessingError;
     }

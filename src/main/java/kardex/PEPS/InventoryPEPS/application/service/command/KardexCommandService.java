@@ -161,7 +161,7 @@ public class KardexCommandService implements IKardexCommandPort {
         }
         
         //Actualizar disponibilidad del lote 
-        kardexCommandOutputPort.updateAvaliableAmount(originalPurchase.getIdKardex(), originalPurchase.getQuantity()-kardex.getQuantity());
+        kardexCommandOutputPort.updateAvaliableAmount(originalPurchase.getIdKardex(), originalPurchase.getAvailableQuantity()-kardex.getQuantity());
         
         //  Obtener producto
         Product product = getValidatedProduct(kardex.getProduct().getProductId());
@@ -396,7 +396,7 @@ public class KardexCommandService implements IKardexCommandPort {
 
        
         Kardex purchaseAdjustment = Kardex.createPurchaseAdjustment(
-            kardex.getFactCode(),
+            kardex.generateAdjustmentFactCode(),
             kardex.getDetails(),
             kardex.getQuantity(),
             kardex.getUnitPrice(),
@@ -443,7 +443,7 @@ public class KardexCommandService implements IKardexCommandPort {
 
         //Crear movimiento de venta usando 
         Kardex saleMovement = Kardex.createSaleAdjustment(
-            kardex.getFactCode(),
+            kardex.generateAdjustmentFactCode(),
             kardex.getDetails(),
             kardex.getQuantity(),
             kardex.getUnitPrice(),

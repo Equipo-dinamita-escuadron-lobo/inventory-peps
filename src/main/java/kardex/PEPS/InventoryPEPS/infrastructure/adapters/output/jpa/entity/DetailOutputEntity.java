@@ -1,6 +1,9 @@
 package kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity;
 
 import java.math.BigDecimal;
+
+import org.hibernate.annotations.TenantId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -46,4 +49,9 @@ public class DetailOutputEntity {
     @JoinColumn(name = "id_movement_origin")
     private KardexEntity movementOrigin;
 
+    /* 
+    @TenantId
+    String tenantId;
+
+    */
 }

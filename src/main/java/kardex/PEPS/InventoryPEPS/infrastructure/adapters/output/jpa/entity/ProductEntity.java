@@ -1,6 +1,9 @@
 package kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity;
 
 import java.util.List;
+
+import org.hibernate.annotations.TenantId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -31,7 +34,7 @@ public class ProductEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name="product_id", nullable = false, unique = true)
     private Long productId;
     
     @Column(name ="name", nullable = false, length =50 )
@@ -52,4 +55,9 @@ public class ProductEntity {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "product")
     private List<KardexEntity> recordsKardex;
 
+    
+    /* 
+    @TenantId
+    String tenantId;
+    */
 }

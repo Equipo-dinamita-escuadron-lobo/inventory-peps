@@ -24,7 +24,7 @@ import lombok.Setter;
 @Entity
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
-@Table(name = "message_processing_error")
+@Table(name = "message_processing_errors")
 public class MessageProcessingErrorEntity {
     
     @Id
@@ -55,9 +55,9 @@ public class MessageProcessingErrorEntity {
             errorTimestamp = Instant.now();
         }
     }
-
+    /* 
 
     @TenantId
     String tenantId;
+    */
 }
-

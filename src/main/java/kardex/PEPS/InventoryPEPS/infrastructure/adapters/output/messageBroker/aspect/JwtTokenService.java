@@ -1,5 +1,6 @@
 package kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.aspect;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,19 +16,17 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 public class JwtTokenService {
+
     @Autowired
     private IJwtUtils jwtUtils;
 
-    // ThreadLocal para tokens de RabbitMQ
+    // ThreadLocal for tokens from RabbitMQ context
     private static final ThreadLocal<String> rabbitJwtToken = new ThreadLocal<>();
     private static final ThreadLocal<String> rabbitTenantId = new ThreadLocal<>();
 
-
     /**
-     * @brief Sets the JWT token for the RabbitMQ context
-     * 
-     * Used when receiving a RabbitMQ message to store the token in ThreadLocal.
-     * @param token The JWT token string
+     * @brief Sets JWT token for RabbitMQ context
+     * @param token JWT token from RabbitMQ message header
      */
     public void setRabbitJwtToken(String token) {
         rabbitJwtToken.set(token);
@@ -35,10 +34,8 @@ public class JwtTokenService {
     }
 
     /**
-     * @brief Sets the tenant ID for the RabbitMQ context
-     * 
-     * Used when receiving a RabbitMQ message to store the tenant ID in ThreadLocal.
-     * @param tenantId The tenant identifier
+     * @brief Sets tenant ID for RabbitMQ context
+     * @param tenantId Tenant identifier from RabbitMQ message
      */
     public void setRabbitTenantId(String tenantId) {
         rabbitTenantId.set(tenantId);
@@ -46,13 +43,9 @@ public class JwtTokenService {
     }
 
     /**
-     * @brief Retrieves the JWT token from the current context
-     * 
-     * Checks RabbitMQ context (ThreadLocal) first, then falls back to
-     * standard HTTP SecurityContext.
-     * 
-     * @return The JWT token string
-     * @throws IllegalStateException If no token is available in either context
+     * @brief Gets JWT token from current context (RabbitMQ or HTTP)
+     * @return JWT token string
+     * @throws IllegalStateException If no token is available in any context
      */
     public String getToken() {
         String token = rabbitJwtToken.get();
@@ -72,13 +65,9 @@ public class JwtTokenService {
     }
 
     /**
-     * @brief Retrieves the tenant ID from the current context
-     * 
-     * Checks RabbitMQ context (ThreadLocal) first, then falls back to
-     * standard HTTP SecurityContext.
-     * 
-     * @return The tenant identifier
-     * @throws IllegalStateException If no tenant ID is available in either context
+     * @brief Gets tenant ID from current context (RabbitMQ or HTTP)
+     * @return Tenant identifier string
+     * @throws IllegalStateException If no tenant ID is available in any context
      */
     public String getTenantId() {
         String tenantId = rabbitTenantId.get();
@@ -97,12 +86,10 @@ public class JwtTokenService {
         }
     }
 
-
     /**
-     * @brief Clears the RabbitMQ context for the current thread
+     * @brief Clears RabbitMQ context for current thread
      * 
-     * Removes token and tenant ID from ThreadLocal storage.
-     * Should be called in the finally block of the RabbitMQ aspect.
+     * Must be called in finally block of RabbitMQ aspect to prevent memory leaks.
      */
     public void clearRabbitContext() {
         rabbitJwtToken.remove();
@@ -111,11 +98,10 @@ public class JwtTokenService {
     }
 
     /**
-     * @brief Checks if currently executing within a RabbitMQ context
-     * @return True if a RabbitMQ token is present, false otherwise
+     * @brief Checks if currently in RabbitMQ context
+     * @return True if RabbitMQ context is active, false otherwise
      */
     public boolean isInRabbitContext() {
         return rabbitJwtToken.get() != null;
     }
-
 }

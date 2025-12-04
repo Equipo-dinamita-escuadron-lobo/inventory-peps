@@ -1,7 +1,7 @@
 package kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.multitenancy.async;
 
 import org.springframework.core.task.TaskDecorator;
-
+import org.springframework.lang.NonNull;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.multitenancy.utils.TenantContext;
 
 public class TenantAwareTaskDecorator implements TaskDecorator{
@@ -16,14 +16,15 @@ public class TenantAwareTaskDecorator implements TaskDecorator{
      * @return A new Runnable that wraps the execution with tenant context management
      */
     @Override
-    public Runnable decorate(Runnable runnable) {
+     @NonNull
+    public Runnable decorate(@NonNull Runnable runnable) {
          String tenantId = TenantContext.getTenantId();
         return () -> {
             try {
                 TenantContext.setTenantId(tenantId);
                 runnable.run();
             } finally {
-                TenantContext.setTenantId(null);
+                TenantContext.clear();
             }
         };
     }

@@ -26,6 +26,6 @@ public interface IMessageProcessingErrorEntityMapper {
      * @param domain MessageProcessingError domain model
      * @return MessageProcessingError entity
      */
-    @Mapping(target = "tenantId", ignore = true)
+    //@Mapping(target = "tenantId", ignore = true)
     MessageProcessingErrorEntity toEntity(MessageProcessingError domain);
 }

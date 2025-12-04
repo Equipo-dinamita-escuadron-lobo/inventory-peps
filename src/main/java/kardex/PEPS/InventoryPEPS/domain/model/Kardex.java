@@ -1,12 +1,16 @@
 package kardex.PEPS.InventoryPEPS.domain.model;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
+
 import kardex.PEPS.InventoryPEPS.domain.enums.MovementType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -88,7 +92,7 @@ public class Kardex {
         kardex.setDetails(details);
         kardex.setQuantity(quantity);
         kardex.setUnitPrice(unitPrice);
-        kardex.setType(MovementType.nonCommercialEntry);
+        kardex.setType(MovementType.NONCOMMERCIALENTRY);
         kardex.setAvailableQuantity(quantity); 
         kardex.setProduct(product);
         kardex.setDetailsOutput(new ArrayList<>());
@@ -108,7 +112,7 @@ public class Kardex {
         kardex.setDetails(details);
         kardex.setQuantity(quantity);
         kardex.setUnitPrice(unitPrice);
-        kardex.setType(MovementType.nonCommercialExit); 
+        kardex.setType(MovementType.NONCOMMERCIALEXIT); 
         kardex.setAvailableQuantity(0); 
         kardex.setProduct(product);
         kardex.setDetailsOutput(new ArrayList<>());
@@ -125,7 +129,7 @@ public class Kardex {
         kardex.setDetails(details);
         kardex.setQuantity(quantity);
         kardex.setUnitPrice(unitPrice);
-        kardex.setType(MovementType.PURCHASE_RETURN);
+        kardex.setType(MovementType.PURCHASERETURN);
         kardex.setAvailableQuantity(0); 
         kardex.setProduct(product);
         kardex.setDetailsOutput(new ArrayList<>());
@@ -141,7 +145,7 @@ public class Kardex {
         kardex.setDetails(details);
         kardex.setQuantity(quantity);
         kardex.setUnitPrice(unitPrice);
-        kardex.setType(MovementType.SALES_RETURN);
+        kardex.setType(MovementType.SALESRETURN);
         kardex.setAvailableQuantity(0); 
         kardex.setProduct(product);
         kardex.setDetailsOutput(new ArrayList<>());
@@ -161,10 +165,11 @@ public class Kardex {
         Kardex kardex = new Kardex();
 
         kardex.setDate(date);
-        kardex.setDetails(details+" Factura:"+factCode);
+        kardex.setDetails("Ajuste de inventario entrada-Factura:"+factCode+" "+details);
         kardex.setQuantity(quantity);
+        kardex.setFactCode(factCode);
         kardex.setUnitPrice(unitPrice);
-        kardex.setType(MovementType.PURCHASE);
+        kardex.setType(MovementType.ADJUSTMENTENTRY);
         kardex.setAvailableQuantity(quantity);
         kardex.setProduct(product);
         kardex.setDetailsOutput(new ArrayList<>());
@@ -172,7 +177,7 @@ public class Kardex {
         
         return kardex;
     }
-     public static Kardex createSaleAdjustment(Long factCode, String details, int quantity, 
+    public static Kardex createSaleAdjustment(Long factCode, String details, int quantity, 
                                    BigDecimal unitPrice, Product product,ZonedDateTime date) {
         validateProduct(product);
         validateQuantity(quantity);
@@ -181,10 +186,10 @@ public class Kardex {
         Kardex kardex = new Kardex();
         kardex.setFactCode(factCode);
         kardex.setDate(date);
-        kardex.setDetails(details+" Factura:"+factCode);
+        kardex.setDetails("Ajuste de inventario salida-Factura:"+factCode+" "+details);
         kardex.setQuantity(quantity);
         kardex.setUnitPrice(unitPrice);
-        kardex.setType(MovementType.SALE);
+        kardex.setType(MovementType.ADJUSTMENTEXIT);
         kardex.setAvailableQuantity(0);
         kardex.setProduct(product);
         kardex.setDetailsOutput(new ArrayList<>());
@@ -240,11 +245,11 @@ public class Kardex {
     }
     
     public boolean isPurchaseReturn() {
-        return this.type == MovementType.PURCHASE_RETURN;
+        return this.type == MovementType.PURCHASERETURN;
     }
     
     public boolean isSaleReturn() {
-        return this.type == MovementType.SALES_RETURN;
+        return this.type == MovementType.SALESRETURN;
     }
     
   
@@ -355,13 +360,25 @@ public class Kardex {
         }
     }
 
+     /**
+     * @brief Generates a unique fact code for inventory adjustments
+     * Format: YYMMDDHHMMSSX (timestamp + random digit)
+     * @return The generated fact code as Long
+     */
+    public Long generateAdjustmentFactCode() {
+        String timestamp = new SimpleDateFormat("yyMMddHHmmss").format(new Date());
+        int randomDigit = new Random().nextInt(10); // Genera un dígito del 0-9
+        this.factCode = Long.parseLong(timestamp + randomDigit);
+        return this.factCode;
+    }
+
    
     public boolean isNonCommercialEntry() {
-        return this.type == MovementType.nonCommercialEntry;
+        return this.type == MovementType.NONCOMMERCIALENTRY;
     }
 
     public boolean isNonCommercialExit() {
-        return this.type == MovementType.nonCommercialExit;
+        return this.type == MovementType.NONCOMMERCIALEXIT;
     }
     
     @Override

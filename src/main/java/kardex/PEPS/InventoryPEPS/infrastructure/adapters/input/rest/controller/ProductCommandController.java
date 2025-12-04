@@ -49,7 +49,7 @@ public class ProductCommandController {
      * @param enterpriseId Enterprise identifier
      * @return Response indicating deletion result
      */
-    @DeleteMapping("/products/{enterpriseId}")
+    @DeleteMapping("/products/enterprise/{enterpriseId}")
     public ResponseEntity<ResponseDTO<String>> deleteAllProducts(@PathVariable String enterpriseId) {
         log.info("Deleting all products for enterprise {}", enterpriseId);
         String result = productCommandPort.deleteAllByEnterpriseId(enterpriseId);
