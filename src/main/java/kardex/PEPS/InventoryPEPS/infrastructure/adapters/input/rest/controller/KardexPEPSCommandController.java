@@ -1,6 +1,7 @@
 package kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/kardex/peps")
+@Validated
 public class KardexPEPSCommandController {
     
     private final IKardexCommandPort kardexCommandPort;

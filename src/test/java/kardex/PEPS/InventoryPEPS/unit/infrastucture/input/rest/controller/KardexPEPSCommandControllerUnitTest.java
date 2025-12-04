@@ -63,7 +63,6 @@ public class KardexPEPSCommandControllerUnitTest {
         entryRequest.setDetails("Purchase adjustment");
         entryRequest.setQuantity(10);
         entryRequest.setUnitPrice(new BigDecimal("100.00"));
-        entryRequest.setFactCode(1L);
         entryRequest.setProductId(1L);
         entryRequest.setDate(ZonedDateTime.now());
         
@@ -71,7 +70,6 @@ public class KardexPEPSCommandControllerUnitTest {
         exitRequest = new AdjustmentExitDTORequest();
         exitRequest.setDetails("Sale adjustment");
         exitRequest.setQuantity(5);
-        exitRequest.setFactCode(2L);
         exitRequest.setProductId(1L);
         exitRequest.setDate(ZonedDateTime.now());
         
@@ -184,7 +182,6 @@ public class KardexPEPSCommandControllerUnitTest {
         minRequest.setDetails("Min purchase");
         minRequest.setQuantity(1);
         minRequest.setUnitPrice(new BigDecimal("0.01"));
-        minRequest.setFactCode(1L);
         minRequest.setProductId(1L);
         
         when(kardexRestMapper.toDomain(minRequest)).thenReturn(mockKardex);
@@ -209,7 +206,6 @@ public class KardexPEPSCommandControllerUnitTest {
         largeRequest.setDetails("Large purchase");
         largeRequest.setQuantity(10000);
         largeRequest.setUnitPrice(new BigDecimal("99999.99"));
-        largeRequest.setFactCode(999999L);
         largeRequest.setProductId(999999L);
         
         when(kardexRestMapper.toDomain(largeRequest)).thenReturn(mockKardex);
@@ -233,7 +229,6 @@ public class KardexPEPSCommandControllerUnitTest {
         AdjustmentExitDTORequest minRequest = new AdjustmentExitDTORequest();
         minRequest.setDetails("Min sale");
         minRequest.setQuantity(1);
-        minRequest.setFactCode(1L);
         minRequest.setProductId(1L);
         
         when(kardexRestMapper.toDomain(minRequest)).thenReturn(mockKardex);
@@ -257,7 +252,6 @@ public class KardexPEPSCommandControllerUnitTest {
         AdjustmentExitDTORequest largeRequest = new AdjustmentExitDTORequest();
         largeRequest.setDetails("Large sale");
         largeRequest.setQuantity(10000);
-        largeRequest.setFactCode(999999L);
         largeRequest.setProductId(999999L);
         
         when(kardexRestMapper.toDomain(largeRequest)).thenReturn(mockKardex);

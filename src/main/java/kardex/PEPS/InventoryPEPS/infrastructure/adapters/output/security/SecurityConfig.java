@@ -1,5 +1,6 @@
 package kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.security;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,10 +14,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import lombok.RequiredArgsConstructor;
 
 /**
- * @brief Security Configuration
+ * @brief Spring Security configuration for JWT-based authentication
  * 
- * Configures Spring Security filter chains, OAuth2 resource server settings,
- * and session management policies.
+ * Configures OAuth2 resource server with JWT authentication,
+ * CSRF protection disabled, and stateless session management.
  */
 @Configuration
 @EnableWebSecurity
@@ -29,16 +30,16 @@ public class SecurityConfig {
     private JwtAuthConverter jwtAuthConverter;
 
     /**
-     * @brief Configures the security filter chain
+     * @brief Configures the security filter chain for HTTP requests
      * 
-     * Disables CSRF, configures public endpoints (Swagger, Actuator),
-     * requires authentication for other requests, sets up OAuth2 resource server
-     * with JWT converter, and enforces stateless session policy.
-     * 
+     * Disables CSRF protection, permits anonymous access to Swagger and actuator endpoints,
+     * requires authentication for all other endpoints, and configures JWT authentication
+     * with stateless session management.
+     *
      * @param httpSecurity The HttpSecurity object to configure
-     * @return The configured SecurityFilterChain
-     * @throws Exception If configuration fails
-    */
+     * @return The configured security filter chain
+     * @throws Exception If there's an error configuring the security filter chain
+     */
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
@@ -53,4 +54,5 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }
+
 }

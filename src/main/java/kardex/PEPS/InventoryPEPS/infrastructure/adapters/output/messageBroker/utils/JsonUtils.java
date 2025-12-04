@@ -21,11 +21,7 @@ public class JsonUtils {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
-     * @brief Converts ProductAsyncDto to JSON with null handling
-     * 
-     * Explicitly handles null fields to ensure valid JSON structure.
-     * @param product The product DTO to convert
-     * @return JSON string representation or error JSON on failure
+     * Convierte un ProductAsyncDto a JSON, manejando campos nulos apropiadamente.
      */
     public static String toJsonWithNullHandling(ProductAsyncDto product) {
         try {
@@ -76,11 +72,7 @@ public class JsonUtils {
     }
 
     /**
-     * @brief Converts KardexRabbitDto to JSON with null handling
-     * 
-     * Explicitly handles null fields to ensure valid JSON structure.
-     * @param kardex The kardex DTO to convert
-     * @return JSON string representation or error JSON on failure
+     * Convierte un KardexRabbitDto a JSON, manejando campos nulos apropiadamente.
      */
     public static String toJsonWithNullHandling(KardexRabbitDto kardex) {
         try {
@@ -90,7 +82,7 @@ public class JsonUtils {
 
             ObjectNode jsonNode = objectMapper.createObjectNode();
             
-            if (kardex.getQuantity()!= null) {
+            if (kardex.getQuantity() != null) {
                 jsonNode.put("quantity", kardex.getQuantity());
             } else {
                 jsonNode.putNull("quantity");
@@ -129,10 +121,7 @@ public class JsonUtils {
     }
 
     /**
-     * @brief Safely converts any object to JSON
-     * 
-     * @param object The object to convert
-     * @return JSON string representation or error JSON on failure/null input
+     * Convierte cualquier objeto a JSON.
      */
     public static String toJsonSafely(Object object) {
         try {

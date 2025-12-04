@@ -17,14 +17,18 @@ public enum MovementType {
     OPENING_BALANCE,
 
     /** @brief Return of goods to supplier */
-    PURCHASE_RETURN,
+    PURCHASERETURN,
 
     /** @brief Return of goods from customer */
-    SALES_RETURN,
+    SALESRETURN,
 
     /** @brief Exit of goods for non-commercial reasons (e.g., damage, internal use) */
-    nonCommercialExit,
+    NONCOMMERCIALEXIT,
 
     /** @brief Entry of goods for non-commercial reasons (e.g., surplus, gifts) */
-    nonCommercialEntry
+    NONCOMMERCIALENTRY,
+
+    ADJUSTMENTEXIT,
+
+    ADJUSTMENTENTRY
 }

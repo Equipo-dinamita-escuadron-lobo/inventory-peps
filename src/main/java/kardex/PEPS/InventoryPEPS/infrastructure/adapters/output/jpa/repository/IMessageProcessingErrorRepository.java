@@ -2,6 +2,7 @@ package kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.repository;
 
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity.MessageProcessingErrorEntity;
 
 
@@ -17,5 +18,4 @@ public interface IMessageProcessingErrorRepository extends JpaRepository<Message
      * @return Optional containing the latest error record if found
      */
     Optional<MessageProcessingErrorEntity> findFirstByOrderByErrorTimestampDesc();
-
 }

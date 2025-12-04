@@ -4,26 +4,29 @@ package kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.messageBroker.a
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+
 import com.rabbitmq.client.LongString;
 
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.multitenancy.utils.TenantContext;
 import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.security.JwtDecoder;
 
 /**
- * @brief Aspect for handling JWT context in RabbitMQ listeners
+ * @brief Aspect for setting tenant context from RabbitMQ message headers
  * 
- * Intercepts RabbitMQ messages to extract authentication tokens and
- * establish the tenant context for message processing.
+ * This advice intercepts methods annotated with @RabbitListener to extract
+ * a JWT token from message headers, decode the tenantId, set it in the
+ * TenantContext, execute the listener method, and finally clear the context.
  */
 @Aspect
 @Component
 public class JWTContextRabbitMqAspect {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(JWTContextRabbitMqAspect.class);
     private static final String JWT_TOKEN_HEADER = "x-jwt-token";
 
@@ -34,65 +37,61 @@ public class JWTContextRabbitMqAspect {
     private JwtDecoder jwtDecoder;
 
     /**
-     * @brief Intercepts RabbitListener methods to set up tenant context
-     * 
-     * Extracts the JWT token from message headers, decodes the tenant ID,
-     * sets it in the TenantContext, executes the listener, and ensures cleanup.
-     * 
+     * @brief Sets tenant context around methods annotated with @RabbitListener
      * @param joinPoint The proceeding join point
-     * @return The result of the method execution
-     * @throws Throwable If an error occurs during execution
+     * @return The result of the listener method execution
+     * @throws Throwable If an error occurs during processing
      */
     @Around("@annotation(org.springframework.amqp.rabbit.annotation.RabbitListener)")
     public Object setTenantContext(ProceedingJoinPoint joinPoint) throws Throwable {
         
-        // Buscamos el objeto 'Message' en los argumentos del método del listener
+        // Find the 'Message' object in the listener method's arguments
         Message message = findMessageArgument(joinPoint.getArgs());
 
         if (message == null) {
-            logger.warn("El listener [{}] no recibe un objeto 'Message'. No se puede establecer el contexto del tenant.", joinPoint.getSignature().getName());
-            return joinPoint.proceed(); // Ejecutar sin contexto
+            logger.warn("Listener [{}] does not receive a 'Message' object. Cannot set tenant context.", joinPoint.getSignature().getName());
+            return joinPoint.proceed(); // Execute without context
         }
 
         Object tokenObject = message.getMessageProperties().getHeaders().get(JWT_TOKEN_HEADER);
         String jwtToken = extractTokenFromObject(tokenObject);
 
         if (jwtToken == null || jwtToken.isEmpty()) {
-            logger.error("Mensaje recibido sin la cabecera '{}'. Se procesará sin contexto de tenant.", JWT_TOKEN_HEADER);
-            return joinPoint.proceed(); // Ejecutar sin contexto
+            logger.error("Message received without the '{}' header. Processing without tenant context.", JWT_TOKEN_HEADER);
+            return joinPoint.proceed(); // Execute without context
         }
 
         try {
-            // 1. Decodificar el token para extraer el tenantId
+            // 1. Decode the token to extract the tenantId
             String tenantId = jwtDecoder.extractTenantId(jwtToken);
             
             if (tenantId == null || tenantId.isEmpty()) {
-                logger.error("No se pudo extraer el tenant ID del token JWT. Se procesará sin contexto de tenant.");
+                logger.error("Could not extract tenant ID from JWT token. Processing without tenant context.");
                 return joinPoint.proceed();
             }
 
-            // 2. Establecer el contexto RabbitMQ en el servicio unificado
+            // 2. Set the RabbitMQ context in the unified service
             jwtTokenService.setRabbitJwtToken(jwtToken);
             jwtTokenService.setRabbitTenantId(tenantId);
 
-            // 3. Establecer el contexto del Tenant para este hilo
+            // 3. Set the Tenant context for this thread
             TenantContext.setTenantId(tenantId);
-            logger.info("Contexto de tenant '{}' establecido para el listener [{}].", tenantId, joinPoint.getSignature().getName());
+            logger.info("Tenant context '{}' set for listener [{}].", tenantId, joinPoint.getSignature().getName());
 
-            // 4. Ejecutar el método original del listener
+            // 4. Execute the original listener method
             return joinPoint.proceed();
 
         } finally {
-            logger.info("Limpiando el contexto del tenant.");
+            logger.info("Clearing tenant context.");
             TenantContext.clear();
             jwtTokenService.clearRabbitContext();
         }
     }
 
     /**
-     * @brief Helper to find the Message argument in method arguments
-     * @param args Array of method arguments
-     * @return The Message object if found, null otherwise
+     * @brief Utility method to find the Message argument
+     * @param args The arguments of the listener method
+     * @return The Message object, or null if not found
      */
     private Message findMessageArgument(Object[] args) {
         for (Object arg : args) {
@@ -103,13 +102,12 @@ public class JWTContextRabbitMqAspect {
         return null;
     }
 
-
     /**
-     * @brief Extracts JWT token string from header object
-     * @param tokenObject The header object (String or LongString)
-     * @return The token string or null
+     * @brief Extracts JWT token from header object (String or LongString)
+     * @param tokenObject The header object
+     * @return The JWT token as a String, or null if not found or invalid type
      */
-     private String extractTokenFromObject(Object tokenObject) {
+    private String extractTokenFromObject(Object tokenObject) {
         if (tokenObject instanceof LongString) {
             return tokenObject.toString();
         } else if (tokenObject instanceof String) {
@@ -117,6 +115,4 @@ public class JWTContextRabbitMqAspect {
         }
         return null;
     }
-
-
 }

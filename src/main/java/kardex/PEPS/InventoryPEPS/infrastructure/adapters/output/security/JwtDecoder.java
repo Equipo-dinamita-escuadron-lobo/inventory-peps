@@ -1,7 +1,5 @@
 package kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.security;
 
-import java.util.Base64;
-
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -9,26 +7,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Base64;
+
 /**
- * @brief Utility for decoding JWT tokens manually
- * 
- * Provides methods to parse JWT strings and extract specific claims or the tenant ID
- * without relying on the full Spring Security context.
+ * Componente para decodificar tokens JWT y extraer información específica.
  */
 @Component
 @Slf4j
 public class JwtDecoder {
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-     /**
-     * @brief Extracts the tenant ID from a JWT string
+    /**
+     * Extrae el tenant ID del token JWT.
+     * Decodifica el payload del JWT y extrae el claim "sub" que contiene el tenant ID.
      * 
-     * Decodes the payload and retrieves the "sub" claim which represents the tenant/user ID.
-     * 
-     * @param jwtToken The raw JWT string (with or without "Bearer " prefix)
-     * @return The extracted tenant ID, or null if invalid/not found
-    */
-    public String extractTenantId(String jwtToken){
+     * @param jwtToken el token JWT como string
+     * @return el tenant ID extraído del token, o null si no se puede extraer
+     */
+    public String extractTenantId(String jwtToken) {
         try {
             // Remover el prefijo "Bearer " si existe
             String token = jwtToken.startsWith("Bearer ") ? jwtToken.substring(7) : jwtToken;
@@ -59,22 +56,21 @@ public class JwtDecoder {
                 return null;
             }
             
-            
         } catch (Exception e) {
-           log.error("Error al decodificar el token JWT: {}", e.getMessage(), e);
+            log.error("Error al decodificar el token JWT: {}", e.getMessage(), e);
             return null;
         }
     }
 
-     /**
-     * @brief Extracts a specific claim from a JWT string
+    /**
+     * Extrae cualquier claim del token JWT.
      * 
-     * @param jwtToken The raw JWT string
-     * @param claimName The name of the claim to extract
-     * @return The claim value as string, or null if invalid/not found
-    */
+     * @param jwtToken el token JWT como string
+     * @param claimName nombre del claim a extraer
+     * @return el valor del claim como string, o null si no se puede extraer
+     */
     public String extractClaim(String jwtToken, String claimName) {
-        try{
+        try {
             // Remover el prefijo "Bearer " si existe
             String token = jwtToken.startsWith("Bearer ") ? jwtToken.substring(7) : jwtToken;
             
@@ -103,12 +99,10 @@ public class JwtDecoder {
                 log.warn("No se encontró el claim '{}' en el token JWT", claimName);
                 return null;
             }
-
-        }catch(Exception e){
+            
+        } catch (Exception e) {
             log.error("Error al extraer el claim '{}' del token JWT: {}", claimName, e.getMessage(), e);
             return null;
         }
     }
-
-
 }

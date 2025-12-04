@@ -66,7 +66,7 @@ public class TenantInterceptorUnitTest {
         Exception exception = assertThrows(Exception.class, 
             () -> tenantInterceptor.preHandle(webRequest)
         );
-        assertTrue(exception.getMessage().contains("No se pudo establecer el contexto del tenant desde el JWT"));
+        assertTrue(exception.getMessage().contains("Could not establish tenant context from JWT"));
         assertNull(TenantContext.getTenantId());
     }
 

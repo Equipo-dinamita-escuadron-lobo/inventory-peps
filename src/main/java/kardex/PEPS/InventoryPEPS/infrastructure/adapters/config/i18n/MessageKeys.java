@@ -12,6 +12,7 @@ public final class MessageKeys {
 
     //ERROR MESSAGES
      public static final String ERROR_NOT_FOUND = "kardex.error.not.found";
+    public static final String ERROR_MISSING_RECORD = "kardex.error.missing.record";
     public static final String ERROR_NOT_FOUND_PURCHASE_ORIGIN = "kardex.error.not.found.purchase.origin";
     public static final String ERROR_VALIDATION_PURCHASE_ORIGIN = "kardex.error.validation.purchase.origin";
     public static final String ERROR_NOT_FOUND_SALE_ORIGIN = "kardex.error.not.found.sale.origin";

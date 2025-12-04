@@ -11,16 +11,19 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.multitenancy.uti
 
 import java.util.Map;
 
-
+/**
+ * @brief Hibernate tenant identifier resolver for multi-tenant database access
+ * 
+ * Resolves the current tenant identifier from TenantContext and configures
+ * Hibernate for multi-tenant operation.
+ */
 @SuppressWarnings("rawtypes")
 @Component
-public class CurrentTenatIdentifierResolverImpl  implements CurrentTenantIdentifierResolver, HibernatePropertiesCustomizer {
+class CurrentTenantIdentifierResolverImpl implements CurrentTenantIdentifierResolver, HibernatePropertiesCustomizer {
 
-     /**
-     * @brief Resolves the current tenant identifier.
-     * 
-     * @return The current tenant identifier from TenantContext if available;
-     *         otherwise returns "BOOTSTRAP" to allow EntityManagerFactory initialization.
+    /**
+     * @brief Resolves the current tenant identifier
+     * @return Current tenant ID from TenantContext, or "BOOTSTRAP" if none available
      */
     @Override
     public String resolveCurrentTenantIdentifier() {
@@ -34,11 +37,9 @@ public class CurrentTenatIdentifierResolverImpl  implements CurrentTenantIdentif
         }
     }
 
-    
     /**
-     * @brief Validates existing current sessions.
-     * 
-     * @return true always, as current sessions are considered valid by default.
+     * @brief Validates existing current sessions
+     * @return Always true, as current sessions are considered valid by default
      */
     @Override
     public boolean validateExistingCurrentSessions() {
@@ -46,16 +47,12 @@ public class CurrentTenatIdentifierResolverImpl  implements CurrentTenantIdentif
     }
 
     /**
-     * @brief Customizes the given Hibernate properties.
-     * 
-     * Adds the current tenant identifier resolver as the value for the
-     * {@link AvailableSettings#MULTI_TENANT_IDENTIFIER_RESOLVER} setting.
-     * 
-     * @param hibernateProperties The properties to customize
+     * @brief Customizes Hibernate properties for multi-tenant configuration
+     * @param hibernateProperties Properties map to customize
      */
     @Override
     public void customize(Map<String, Object> hibernateProperties) {
         hibernateProperties.put(AvailableSettings.MULTI_TENANT_IDENTIFIER_RESOLVER, this);
     }
-    
+
 }

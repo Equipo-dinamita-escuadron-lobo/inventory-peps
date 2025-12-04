@@ -20,6 +20,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.util.List;
 
+import org.hibernate.annotations.TenantId;
+
 /**
  * @brief JPA Entity representing a Kardex record
  * 
@@ -60,7 +62,7 @@ public class KardexEntity {
     private int availableQuantity;
 
     @ManyToOne
-    @JoinColumn(name="product_id", nullable = false)
+    @JoinColumn(name="product_id",referencedColumnName = "product_id", nullable = false)
     private ProductEntity product;
 
    @OneToMany(mappedBy = "movementSale")
@@ -68,5 +70,9 @@ public class KardexEntity {
 
     @OneToMany(mappedBy = "movementOrigin")
     private List<DetailOutputEntity> detailsOrigin;
-    
+    /* 
+
+    @TenantId
+    String tenantId;
+    */
 }
