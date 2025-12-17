@@ -26,7 +26,7 @@ public class KardexRabbitDto {
     /**
      * @brief Invoice or reference code
      */
-    private Long factCode;
+    private String factCode;
 
     /**
      * @brief Unit price of the product

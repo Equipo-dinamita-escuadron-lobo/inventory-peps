@@ -40,7 +40,7 @@ public class KardexEntity {
     private Long idKardex;
 
     @Column(name="fact_code")
-    private Long factCode;
+    private String factCode;
 
     @Column(name = "date", nullable=false)
     private  ZonedDateTime date;

@@ -40,7 +40,7 @@ public class KardexReportUnitTest {
 
 
         purchaseMovement = Kardex.createPurchase(
-            1001L,
+            "1001",
             "Purchase details",
             100,
             new BigDecimal("10.00"),
@@ -51,7 +51,7 @@ public class KardexReportUnitTest {
         purchaseMovement.setDate(ZonedDateTime.now().minusDays(1));
 
         saleMovement = Kardex.createSale(
-            2001L,
+            "2001",
             "Sale details",
             50,
             new BigDecimal("10.00"),
@@ -96,7 +96,7 @@ public class KardexReportUnitTest {
     @DisplayName("calculate entry total price correctly-success")
     void testCreateEntryReport_CalculatesTotalPrice() {
         // Arrange
-        Kardex movement = Kardex.createPurchase(1002L, "Purchase", 25, new BigDecimal("15.50"), product);
+        Kardex movement = Kardex.createPurchase("1002", "Purchase", 25, new BigDecimal("15.50"), product);
         movement.setDate(ZonedDateTime.now());
         BigDecimal expectedTotal = new BigDecimal("387.50");
         

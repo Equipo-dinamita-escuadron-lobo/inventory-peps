@@ -220,7 +220,7 @@ public class ProductUniTest {
         Product product = Product.create(validProductId, validName, validReference, validPresentation, validEnterpriseId);
         
         Kardex kardex = Kardex.createPurchase(
-            1001L,
+            "1001",
             "Purchase",
             100,
             new BigDecimal("10.00"),
@@ -244,7 +244,7 @@ public class ProductUniTest {
         Product product = Product.create(validProductId, validName, validReference, validPresentation, validEnterpriseId);
         
         Kardex kardex = Kardex.createPurchase(
-            1001L,
+            "1001",
             "Purchase",
             100,
             new BigDecimal("10.00"),
@@ -290,7 +290,7 @@ public class ProductUniTest {
         Product product = Product.create(validProductId, validName, validReference, validPresentation, validEnterpriseId);
         
         Kardex kardex = Kardex.createPurchase(
-            1001L,
+            "1001",
             "Purchase",
             100,
             new BigDecimal("10.00"),
@@ -309,7 +309,7 @@ public class ProductUniTest {
         Product product = Product.create(validProductId, validName, validReference, validPresentation, validEnterpriseId);
         
         Kardex kardex = Kardex.createPurchase(
-            1001L,
+            "1001",
             "Purchase",
             100,
             new BigDecimal("10.00"),
@@ -340,8 +340,8 @@ public class ProductUniTest {
         // Arrange
         Product product = Product.create(validProductId, validName, validReference, validPresentation, validEnterpriseId);
         
-        Kardex kardex1 = Kardex.createPurchase(1001L, "Purchase 1", 100, new BigDecimal("10.00"), product);
-        Kardex kardex2 = Kardex.createPurchase(1002L, "Purchase 2", 50, new BigDecimal("12.00"), product);
+        Kardex kardex1 = Kardex.createPurchase("1001", "Purchase 1", 100, new BigDecimal("10.00"), product);
+        Kardex kardex2 = Kardex.createPurchase("1002", "Purchase 2", 50, new BigDecimal("12.00"), product);
         
         product.addKardexRecord(kardex1);
         product.addKardexRecord(kardex2);
@@ -380,10 +380,10 @@ public class ProductUniTest {
         // Arrange
         Product product = Product.create(validProductId, validName, validReference, validPresentation, validEnterpriseId);
         
-        Kardex kardex1 = Kardex.createPurchase(1001L, "Purchase 1", 100, new BigDecimal("10.00"), product);
+        Kardex kardex1 = Kardex.createPurchase("1001", "Purchase 1", 100, new BigDecimal("10.00"), product);
         kardex1.reduceAvailableQuantity(30); 
         
-        Kardex kardex2 = Kardex.createPurchase(1002L, "Purchase 2", 50, new BigDecimal("12.00"), product);
+        Kardex kardex2 = Kardex.createPurchase("1002", "Purchase 2", 50, new BigDecimal("12.00"), product);
         kardex2.reduceAvailableQuantity(20); 
         product.addKardexRecord(kardex1);
         product.addKardexRecord(kardex2);
@@ -401,7 +401,7 @@ public class ProductUniTest {
     void testAddKardexRecord_ValidKardex_AddsToList() {
         // Arrange
         Product product = Product.create(validProductId, validName, validReference, validPresentation, validEnterpriseId);
-        Kardex kardex = Kardex.createPurchase(1001L, "Purchase", 100, new BigDecimal("10.00"), product);
+        Kardex kardex = Kardex.createPurchase("1001", "Purchase", 100, new BigDecimal("10.00"), product);
         
         // Act
         product.addKardexRecord(kardex);
@@ -433,7 +433,7 @@ public class ProductUniTest {
         Product product1 = Product.create(1L, "Product 1", "REF-001", "Box", "ENT-001");
         Product product2 = Product.create(2L, "Product 2", "REF-002", "Box", "ENT-001");
         
-        Kardex kardex = Kardex.createPurchase(1001L, "Purchase", 100, new BigDecimal("10.00"), product2);
+        Kardex kardex = Kardex.createPurchase("1001", "Purchase", 100, new BigDecimal("10.00"), product2);
         
         // Act y Assert
         IllegalArgumentException exception = assertThrows(
@@ -450,7 +450,7 @@ public class ProductUniTest {
         // Arrange
         Product product = Product.create(validProductId, validName, validReference, validPresentation, validEnterpriseId);
         product.setRecordsKardex(null);
-        Kardex kardex = Kardex.createPurchase(1001L, "Purchase", 100, new BigDecimal("10.00"), product);
+        Kardex kardex = Kardex.createPurchase("1001", "Purchase", 100, new BigDecimal("10.00"), product);
         
         // Act
         product.addKardexRecord(kardex);
@@ -551,7 +551,7 @@ public class ProductUniTest {
     void testGetRecordsKardexReadOnly_WithRecords_ReturnsUnmodifiableList() {
         // Arrange
         Product product = Product.create(validProductId, validName, validReference, validPresentation, validEnterpriseId);
-        Kardex kardex = Kardex.createPurchase(1001L, "Purchase", 100, new BigDecimal("10.00"), product);
+        Kardex kardex = Kardex.createPurchase("1001", "Purchase", 100, new BigDecimal("10.00"), product);
         product.addKardexRecord(kardex);
         
         // Act
@@ -560,7 +560,7 @@ public class ProductUniTest {
         // Assert
         assertEquals(1, readOnly.size());
         assertThrows(UnsupportedOperationException.class,
-            () -> readOnly.add(Kardex.createPurchase(1002L, "Purchase 2", 50, new BigDecimal("10.00"), product)));
+            () -> readOnly.add(Kardex.createPurchase("1002", "Purchase 2", 50, new BigDecimal("10.00"), product)));
     }
     
     @Test

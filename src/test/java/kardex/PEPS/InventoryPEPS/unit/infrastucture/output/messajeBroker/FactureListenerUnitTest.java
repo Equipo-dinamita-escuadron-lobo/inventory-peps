@@ -65,7 +65,7 @@ public class FactureListenerUnitTest {
         // Initialize KardexRabbitDto
         kardexRabbitDto = new KardexRabbitDto();
         kardexRabbitDto.setProductId(100L);
-        kardexRabbitDto.setFactCode(1001L);
+        kardexRabbitDto.setFactCode("1001");
         kardexRabbitDto.setQuantity(10L);
         kardexRabbitDto.setUnitPrice(BigDecimal.valueOf(100.00));
         kardexRabbitDto.setDetails("Test purchase");
@@ -73,7 +73,7 @@ public class FactureListenerUnitTest {
         // Initialize Kardex domain object
         kardex = Kardex.builder()
             .idKardex(1L)
-            .factCode(1001L)
+            .factCode("1001")
             .quantity(10)
             .unitPrice(BigDecimal.valueOf(100.00))
             .details("Test purchase")

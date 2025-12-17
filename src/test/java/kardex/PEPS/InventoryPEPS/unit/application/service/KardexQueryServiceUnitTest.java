@@ -106,11 +106,11 @@ public class KardexQueryServiceUnitTest {
 
     // ==================== Purchase Movements ====================
     @Test
-    @DisplayName("Should handle purchase movement correctly")
+    @DisplayName("Should create entry report for purchase movement")
     void testGetRecordsKardexByProduct_PurchaseMovement_CreatesEntryReport() {
         // Arrange
         Kardex purchase = Kardex.createPurchase(
-            1001L,
+            "1001",
             "Purchase",
             100,
             new BigDecimal("10.00"),
@@ -138,10 +138,10 @@ public class KardexQueryServiceUnitTest {
     @DisplayName("Should handle multiple purchase movements")
     void testGetRecordsKardexByProduct_MultiplePurchases_AccumulatesBalance() {
         // Arrange
-        Kardex purchase1 = Kardex.createPurchase(1001L, "Purchase 1", 100, new BigDecimal("10.00"), mockProduct);
+        Kardex purchase1 = Kardex.createPurchase("1001", "Purchase 1", 100, new BigDecimal("10.00"), mockProduct);
         purchase1.setDate(ZonedDateTime.now().minusDays(2));
         
-        Kardex purchase2 = Kardex.createPurchase(1002L, "Purchase 2", 50, new BigDecimal("12.00"), mockProduct);
+        Kardex purchase2 = Kardex.createPurchase("1002", "Purchase 2", 50, new BigDecimal("12.00"), mockProduct);
         purchase2.setDate(ZonedDateTime.now().minusDays(1));
 
         when(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
@@ -163,10 +163,10 @@ public class KardexQueryServiceUnitTest {
     @DisplayName("handle sale movement with FIFO consumption")
     void testGetRecordsKardexByProduct_SaleMovement_ConsumesFromQueue() {
         // Arrange
-        Kardex purchase = Kardex.createPurchase(1001L, "Purchase", 100, new BigDecimal("10.00"), mockProduct);
+        Kardex purchase = Kardex.createPurchase("1001", "Purchase", 100, new BigDecimal("10.00"), mockProduct);
         purchase.setDate(ZonedDateTime.now().minusDays(2));
         
-        Kardex sale = Kardex.createSale(2001L, "Sale", 30, new BigDecimal("15.00"), mockProduct);
+        Kardex sale = Kardex.createSale("2001", "Sale", 30, new BigDecimal("15.00"), mockProduct);
         sale.setDate(ZonedDateTime.now().minusDays(1));
 
         when(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
@@ -190,13 +190,13 @@ public class KardexQueryServiceUnitTest {
     @DisplayName("Should handle sale consuming from multiple lots")
     void testGetRecordsKardexByProduct_SaleMultipleLots_ProcessesFIFO() {
         // Arrange
-        Kardex purchase1 = Kardex.createPurchase(1001L, "Purchase 1", 50, new BigDecimal("10.00"), mockProduct);
+        Kardex purchase1 = Kardex.createPurchase("1001", "Purchase 1", 50, new BigDecimal("10.00"), mockProduct);
         purchase1.setDate(ZonedDateTime.now().minusDays(3));
         
-        Kardex purchase2 = Kardex.createPurchase(1002L, "Purchase 2", 50, new BigDecimal("12.00"), mockProduct);
+        Kardex purchase2 = Kardex.createPurchase("1002", "Purchase 2", 50, new BigDecimal("12.00"), mockProduct);
         purchase2.setDate(ZonedDateTime.now().minusDays(2));
         
-        Kardex sale = Kardex.createSale(2001L, "Sale", 80, new BigDecimal("15.00"), mockProduct);
+        Kardex sale = Kardex.createSale("2001", "Sale", 80, new BigDecimal("15.00"), mockProduct);
         sale.setDate(ZonedDateTime.now().minusDays(1));
 
         when(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
@@ -218,10 +218,10 @@ public class KardexQueryServiceUnitTest {
     @DisplayName("Should handle purchase return by removing from queue by price")
     void testGetRecordsKardexByProduct_PurchaseReturn_RemovesByUnitPrice() {
         // Arrange
-        Kardex purchase = Kardex.createPurchase(1001L, "Purchase", 100, new BigDecimal("10.00"), mockProduct);
+        Kardex purchase = Kardex.createPurchase("1001", "Purchase", 100, new BigDecimal("10.00"), mockProduct);
         purchase.setDate(ZonedDateTime.now().minusDays(2));
         
-        Kardex purchaseReturn = Kardex.createPurchaseReturn(1001L, "Return", 20, new BigDecimal("10.00"), mockProduct);
+        Kardex purchaseReturn = Kardex.createPurchaseReturn("1001", "Return", 20, new BigDecimal("10.00"), mockProduct);
         purchaseReturn.setDate(ZonedDateTime.now().minusDays(1));
 
         when(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
@@ -243,13 +243,13 @@ public class KardexQueryServiceUnitTest {
     @DisplayName("Should handle sale return by adding to beginning of queue")
     void testGetRecordsKardexByProduct_SaleReturn_AddsToQueueFirst() {
         // Arrange
-        Kardex purchase = Kardex.createPurchase(1001L, "Purchase", 100, new BigDecimal("10.00"), mockProduct);
+        Kardex purchase = Kardex.createPurchase("1001", "Purchase", 100, new BigDecimal("10.00"), mockProduct);
         purchase.setDate(ZonedDateTime.now().minusDays(3));
         
-        Kardex sale = Kardex.createSale(2001L, "Sale", 30, new BigDecimal("15.00"), mockProduct);
+        Kardex sale = Kardex.createSale("2001", "Sale", 30, new BigDecimal("15.00"), mockProduct);
         sale.setDate(ZonedDateTime.now().minusDays(2));
         
-        Kardex saleReturn = Kardex.createSaleReturn(2001L, "Sale Return", 10, new BigDecimal("10.00"), mockProduct);
+        Kardex saleReturn = Kardex.createSaleReturn("2001", "Sale Return", 10, new BigDecimal("10.00"), mockProduct);
         saleReturn.setDate(ZonedDateTime.now().minusDays(1));
 
         when(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
@@ -272,7 +272,7 @@ public class KardexQueryServiceUnitTest {
     void testGetRecordsKardexByProduct_NonCommercialEntry_CreatesEntryReport() {
         // Arrange
         Kardex nonCommercialEntry = Kardex.createNonCommercialEntry(
-            3001L,
+            "3001",
             "Donation received",
             50,
             new BigDecimal("8.00"),
@@ -298,11 +298,11 @@ public class KardexQueryServiceUnitTest {
     @DisplayName("Should handle non-commercial exit as sale")
     void testGetRecordsKardexByProduct_NonCommercialExit_ConsumesFromQueue() {
         // Arrange
-        Kardex purchase = Kardex.createPurchase(1001L, "Purchase", 100, new BigDecimal("10.00"), mockProduct);
+        Kardex purchase = Kardex.createPurchase("1001", "Purchase", 100, new BigDecimal("10.00"), mockProduct);
         purchase.setDate(ZonedDateTime.now().minusDays(2));
         
         Kardex nonCommercialExit = Kardex.createNonCommercialExit(
-            3002L,
+            "3002",
             "Damage loss",
             25,
             new BigDecimal("10.00"),
@@ -332,7 +332,7 @@ public class KardexQueryServiceUnitTest {
         List<Kardex> movements = new ArrayList<>();
         for (int i = 1; i <= 25; i++) {
             Kardex purchase = Kardex.createPurchase(
-                1000L + i,
+                String.valueOf(1000 + i),
                 "Purchase " + i,
                 10,
                 new BigDecimal("10.00"),
@@ -384,16 +384,16 @@ public class KardexQueryServiceUnitTest {
     @DisplayName("Should handle mixed movement types in correct order")
     void testGetRecordsKardexByProduct_MixedMovements_ProcessesInOrder() {
         // Arrange
-        Kardex purchase1 = Kardex.createPurchase(1001L, "Purchase 1", 100, new BigDecimal("10.00"), mockProduct);
+        Kardex purchase1 = Kardex.createPurchase("1001", "Purchase 1", 100, new BigDecimal("10.00"), mockProduct);
         purchase1.setDate(ZonedDateTime.now().minusDays(5));
         
-        Kardex sale1 = Kardex.createSale(2001L, "Sale 1", 30, new BigDecimal("15.00"), mockProduct);
+        Kardex sale1 = Kardex.createSale("2001", "Sale 1", 30, new BigDecimal("15.00"), mockProduct);
         sale1.setDate(ZonedDateTime.now().minusDays(4));
         
-        Kardex purchase2 = Kardex.createPurchase(1002L, "Purchase 2", 50, new BigDecimal("12.00"), mockProduct);
+        Kardex purchase2 = Kardex.createPurchase("1002", "Purchase 2", 50, new BigDecimal("12.00"), mockProduct);
         purchase2.setDate(ZonedDateTime.now().minusDays(3));
         
-        Kardex sale2 = Kardex.createSale(2002L, "Sale 2", 40, new BigDecimal("15.00"), mockProduct);
+        Kardex sale2 = Kardex.createSale("2002", "Sale 2", 40, new BigDecimal("15.00"), mockProduct);
         sale2.setDate(ZonedDateTime.now().minusDays(2));
 
         when(kardexQueryOutputPort.findMovementsByProductBeforeDate(1L, startDate))
@@ -431,7 +431,7 @@ public class KardexQueryServiceUnitTest {
     // ==================== Helper Methods ====================
     private List<Kardex> createPurchaseMovements() {
         Kardex purchase = Kardex.createPurchase(
-            1001L,
+            "1001",
             "Purchase",
             100,
             new BigDecimal("10.00"),
@@ -443,7 +443,7 @@ public class KardexQueryServiceUnitTest {
 
     private List<Kardex> createSaleMovements() {
         Kardex sale = Kardex.createSale(
-            2001L,
+            "2001",
             "Sale",
             30,
             new BigDecimal("15.00"),

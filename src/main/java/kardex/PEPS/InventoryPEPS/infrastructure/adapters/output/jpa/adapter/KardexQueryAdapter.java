@@ -98,7 +98,7 @@ public class KardexQueryAdapter implements IKardexQueryOutputPort{
      * @return Optional containing the Kardex entry
      */
     @Override
-    public Optional<Kardex> findByRefFacture(Long factCode, Long productId) {
+    public Optional<Kardex> findByRefFacture(String factCode, Long productId) {
         return kardexRepository
             .findFirstByFactCodeAndProduct_ProductIdOrderByDateAsc(factCode, productId)
             .map(kardexEntityQueryMapper::toDomain);

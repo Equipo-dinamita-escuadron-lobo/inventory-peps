@@ -73,7 +73,7 @@ class KardexEntityUnitTest {
     void testAllArgsConstructor() {
         // Arrange
         Long id = 1L;
-        Long factCode = 12345L;
+        String factCode = "12345";
         String details = "Purchase";
         int quantity = 100;
         BigDecimal unitPrice = new BigDecimal("50.00");
@@ -133,7 +133,7 @@ class KardexEntityUnitTest {
     @DisplayName("Should set and get factCode correctly")
     void testFactCodeGetterSetter() {
         // Arrange
-        Long expectedFactCode = 54321L;
+        String expectedFactCode = "54321";
 
         // Act
         kardexEntity.setFactCode(expectedFactCode);
@@ -156,7 +156,7 @@ class KardexEntityUnitTest {
     @DisplayName("Should handle large factCode values")
     void testLargeFactCode() {
         // Arrange
-        Long largeFactCode = 9999999999999L;
+        String largeFactCode = "9999999999999";
 
         // Act
         kardexEntity.setFactCode(largeFactCode);
@@ -645,7 +645,7 @@ class KardexEntityUnitTest {
     void testCompletePurchaseEntity() {
         // Arrange & Act
         kardexEntity.setIdKardex(1L);
-        kardexEntity.setFactCode(12345L);
+        kardexEntity.setFactCode("12345");
         kardexEntity.setDate(testDate);
         kardexEntity.setDetails("Purchase from supplier XYZ");
         kardexEntity.setQuantity(100);
@@ -658,7 +658,7 @@ class KardexEntityUnitTest {
 
         // Assert
         assertEquals(1L, kardexEntity.getIdKardex());
-        assertEquals(12345L, kardexEntity.getFactCode());
+        assertEquals("12345", kardexEntity.getFactCode());
         assertEquals(testDate, kardexEntity.getDate());
         assertEquals("Purchase from supplier XYZ", kardexEntity.getDetails());
         assertEquals(100, kardexEntity.getQuantity());
@@ -675,7 +675,7 @@ class KardexEntityUnitTest {
     void testCompleteSaleEntity() {
         // Arrange & Act
         kardexEntity.setIdKardex(2L);
-        kardexEntity.setFactCode(67890L);
+        kardexEntity.setFactCode("67890");
         kardexEntity.setDate(testDate);
         kardexEntity.setDetails("Sale to customer ABC");
         kardexEntity.setQuantity(50);
@@ -686,7 +686,7 @@ class KardexEntityUnitTest {
 
         // Assert
         assertEquals(2L, kardexEntity.getIdKardex());
-        assertEquals(67890L, kardexEntity.getFactCode());
+        assertEquals("67890", kardexEntity.getFactCode());
         assertEquals(MovementType.SALE, kardexEntity.getType());
         assertEquals(0, kardexEntity.getAvailableQuantity());
     }
@@ -711,20 +711,20 @@ class KardexEntityUnitTest {
     void testUpdateAllFields() {
         // Arrange - Initial values
         kardexEntity.setIdKardex(1L);
-        kardexEntity.setFactCode(11111L);
+        kardexEntity.setFactCode("11111");
         kardexEntity.setQuantity(100);
         kardexEntity.setType(MovementType.PURCHASE);
 
         // Act - Update values
         kardexEntity.setIdKardex(2L);
-        kardexEntity.setFactCode(22222L);
+        kardexEntity.setFactCode("22222");
         kardexEntity.setQuantity(200);
         kardexEntity.setType(MovementType.SALE);
         kardexEntity.setDetails("Updated details");
 
         // Assert
         assertEquals(2L, kardexEntity.getIdKardex());
-        assertEquals(22222L, kardexEntity.getFactCode());
+        assertEquals("22222", kardexEntity.getFactCode());
         assertEquals(200, kardexEntity.getQuantity());
         assertEquals(MovementType.SALE, kardexEntity.getType());
         assertEquals("Updated details", kardexEntity.getDetails());
@@ -771,7 +771,7 @@ class KardexEntityUnitTest {
         // Arrange
         KardexEntity kardex1 = new KardexEntity();
         KardexEntity kardex2 = new KardexEntity();
-        Long sharedFactCode = 99999L;
+        String sharedFactCode = "99999";
 
         // Act
         kardex1.setFactCode(sharedFactCode);

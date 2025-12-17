@@ -256,7 +256,7 @@ public class KardexQueryAdapterUnitTest {
     @DisplayName("Should find kardex by reference facture and product")
     void testFindByRefFacture_ValidReference_ReturnsOptional() {
         // Arrange
-        Long factCode = 1001L;
+        String factCode = "1001";
         Long productId = 1L;
         
         when(kardexRepository.findFirstByFactCodeAndProduct_ProductIdOrderByDateAsc(factCode, productId))
@@ -268,7 +268,7 @@ public class KardexQueryAdapterUnitTest {
 
         // Assert
         assertTrue(result.isPresent());
-        assertEquals(1001L, result.get().getFactCode());
+        assertEquals("1001", result.get().getFactCode());
         verify(kardexRepository).findFirstByFactCodeAndProduct_ProductIdOrderByDateAsc(factCode, productId);
         verify(kardexEntityQueryMapper).toDomain(mockEntity);
     }
@@ -277,7 +277,7 @@ public class KardexQueryAdapterUnitTest {
     @DisplayName("Should return empty when reference not found")
     void testFindByRefFacture_NotFound_ReturnsEmpty() {
         // Arrange
-        Long factCode = 9999L;
+        String factCode = "9999";
         Long productId = 1L;
         
         when(kardexRepository.findFirstByFactCodeAndProduct_ProductIdOrderByDateAsc(factCode, productId))
@@ -368,7 +368,7 @@ public class KardexQueryAdapterUnitTest {
     private KardexEntity createMockEntity(Long id) {
         KardexEntity entity = new KardexEntity();
         entity.setIdKardex(id);
-        entity.setFactCode(1001L);
+        entity.setFactCode("1001");
         entity.setQuantity(100);
         entity.setAvailableQuantity(80);
         entity.setUnitPrice(new BigDecimal("10.00"));
@@ -378,7 +378,7 @@ public class KardexQueryAdapterUnitTest {
     private Kardex createMockDomain(Long id) {
         return Kardex.builder()
             .idKardex(id)
-            .factCode(1001L)
+            .factCode("1001")
             .quantity(100)
             .availableQuantity(80)
             .unitPrice(new BigDecimal("10.00"))

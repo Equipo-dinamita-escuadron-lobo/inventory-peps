@@ -91,7 +91,7 @@ public class KardexBatchCommandService implements IKardexBatchCommandPort {
                     
                     errors.add(KardexBatchErrorDTO.builder()
                             .productId(kardex.getProduct().getProductId())
-                            .factCode(kardex.getFactCode().toString(failedCount))
+                            .factCode(kardex.getFactCode())
                             .errorMessage(errorMsg)
                             .recordIndex(i)
                             .build());

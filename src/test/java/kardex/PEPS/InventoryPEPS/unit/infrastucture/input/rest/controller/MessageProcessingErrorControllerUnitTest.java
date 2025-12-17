@@ -64,7 +64,7 @@ public class MessageProcessingErrorControllerUnitTest {
     /* 
     @BeforeEach
     void setUp() {
-        errorId = 1L;
+        errorId = "1";
         
         // Setup message processing error
         messageProcessingError = new MessageProcessingError(
@@ -215,7 +215,7 @@ public class MessageProcessingErrorControllerUnitTest {
     @DisplayName("Should handle different error IDs for findById")
     void testFindById_DifferentIds() {
         // Arrange
-        Long differentId = 999L;
+        Long differentId = "999";
         MessageProcessingError differentError = new MessageProcessingError(
             differentId,
             "SALE_EVENT",
@@ -334,7 +334,7 @@ public class MessageProcessingErrorControllerUnitTest {
     @DisplayName("Should delete different error IDs")
     void testDeleteById_DifferentIds() {
         // Arrange
-        Long differentId = 999L;
+        Long differentId = "999";
         
         // Act
         ResponseEntity<ResponseDTO<Void>> response = 
