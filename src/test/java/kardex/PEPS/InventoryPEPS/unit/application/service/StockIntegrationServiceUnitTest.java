@@ -51,7 +51,7 @@ public class StockIntegrationServiceUnitTest {
         mockProduct.setState(true);
 
         mockKardex = Kardex.createPurchase(
-            1001L,
+            "1001",
             "Purchase",
             100,
             new BigDecimal("10.50"),
@@ -87,7 +87,7 @@ public class StockIntegrationServiceUnitTest {
         productWithDifferentId.setState(true); // ✅ AGREGAR ESTA LÍNEA
         
         Kardex kardexWithDifferentProduct = Kardex.createPurchase(
-            2001L,
+            "2001",
             "Purchase",
             50,
             new BigDecimal("25.00"),
@@ -109,7 +109,7 @@ public class StockIntegrationServiceUnitTest {
     void testCreateStock_DifferentQuantities_CopiesCorrectly() {
         // Arrange
         Kardex kardexWithDifferentQuantity = Kardex.createPurchase(
-            3001L,
+            "3001",
             "Purchase",
             500,
             new BigDecimal("15.75"),
@@ -128,7 +128,7 @@ public class StockIntegrationServiceUnitTest {
     void testCreateStock_DifferentPrices_CopiesCorrectly() {
         // Arrange
         Kardex kardexWithDifferentPrice = Kardex.createPurchase(
-            4001L,
+            "4001",
             "Purchase",
             100,
             new BigDecimal("99.99"),
@@ -147,7 +147,7 @@ public class StockIntegrationServiceUnitTest {
     void testCreateStock_SaleKardex_CreatesStock() {
         // Arrange
         Kardex saleKardex = Kardex.createSale(
-            5001L,
+            "5001",
             "Sale",
             30,
             new BigDecimal("12.00"),
@@ -425,7 +425,7 @@ public class StockIntegrationServiceUnitTest {
     void testCreateStock_LargeQuantity_CreatesStock() {
         // Arrange
         Kardex largeQuantityKardex = Kardex.createPurchase(
-            6001L,
+            "6001",
             "Large Purchase",
             1_000_000,
             new BigDecimal("0.01"),
@@ -444,7 +444,7 @@ public class StockIntegrationServiceUnitTest {
     void testCreateStock_VerySmallPrice_CreatesStock() {
         // Arrange
         Kardex smallPriceKardex = Kardex.createPurchase(
-            7001L,
+            "7001",
             "Small Price Purchase",
             100,
             new BigDecimal("0.0001"),

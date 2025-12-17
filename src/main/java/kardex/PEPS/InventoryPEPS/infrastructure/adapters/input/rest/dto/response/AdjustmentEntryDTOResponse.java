@@ -24,5 +24,5 @@ public class AdjustmentEntryDTOResponse {
     private int quantity;
     private BigDecimal unitPrice;
     private String type;
-    private Long factCode;
+    private String factCode;
 }

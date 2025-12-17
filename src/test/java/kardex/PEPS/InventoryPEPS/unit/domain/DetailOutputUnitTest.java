@@ -37,7 +37,7 @@ public class DetailOutputUnitTest {
 
 
         purchaseMovement = Kardex.createPurchase(
-            1001L, 
+            "1001", 
             "Purchase", 
             100, 
             validUnitPrice, 
@@ -45,7 +45,7 @@ public class DetailOutputUnitTest {
         );
 
         saleMovement = Kardex.createSale(
-            2001L, 
+            "2001", 
             "Sale", 
             50, 
             validUnitPrice, 
@@ -173,9 +173,9 @@ public class DetailOutputUnitTest {
     @DisplayName("throw exception when FIFO rule is violated")
     void testCreate_FIFOViolation() {
         // Arrange - Crear origen con fecha posterior a la venta
-        Kardex newerPurchase = Kardex.createPurchase(1002L, "Purchase", 100, validUnitPrice, product);
+        Kardex newerPurchase = Kardex.createPurchase("1002", "Purchase", 100, validUnitPrice, product);
         // Forzar una fecha anterior en la venta
-        Kardex olderSale = Kardex.createSale(2002L, "Sale", 50, validUnitPrice, product);
+        Kardex olderSale = Kardex.createSale("2002", "Sale", 50, validUnitPrice, product);
         olderSale.setDate(ZonedDateTime.now().minusDays(1));
         newerPurchase.setDate(ZonedDateTime.now());
         
@@ -226,8 +226,8 @@ public class DetailOutputUnitTest {
     @DisplayName("calculate total value with large quantity -(return total)")
     void testGetTotalValue_LargeQuantity() {
         // Arrange
-        Kardex largePurchase = Kardex.createPurchase(1003L, "Purchase", 5000, validUnitPrice, product);
-        Kardex largeSale = Kardex.createSale(2003L, "Sale", 1000, validUnitPrice, product);
+        Kardex largePurchase = Kardex.createPurchase("1003", "Purchase", 5000, validUnitPrice, product);
+        Kardex largeSale = Kardex.createSale("2003", "Sale", 1000, validUnitPrice, product);
         int amountUsed = 1000;
         BigDecimal unitPrice = new BigDecimal("5.00");
         DetailOutput detail = DetailOutput.create(amountUsed, unitPrice, largeSale, largePurchase);
@@ -259,7 +259,7 @@ public class DetailOutputUnitTest {
         
         DetailOutput detail = DetailOutput.create(30, validUnitPrice, saleMovement, purchaseMovement);
         
-        Kardex differentSale = Kardex.createSale(2999L, "Other Sale", 20, validUnitPrice, product);
+        Kardex differentSale = Kardex.createSale("2999", "Other Sale", 20, validUnitPrice, product);
         differentSale.setIdKardex(2L); // Asignar ID diferente
         
         // Act y Assert
@@ -283,9 +283,9 @@ public class DetailOutputUnitTest {
     @DisplayName("return true when FIFO is valid - origin before sale")
     void testIsValidFIFO_OriginBeforeSale() {
         // Arrange
-        Kardex earlierPurchase = Kardex.createPurchase(1004L, "Purchase", 100, validUnitPrice, product);
+        Kardex earlierPurchase = Kardex.createPurchase("1004", "Purchase", 100, validUnitPrice, product);
         earlierPurchase.setDate(ZonedDateTime.now().minusDays(1));
-        Kardex laterSale = Kardex.createSale(2004L, "Sale", 50, validUnitPrice, product);
+        Kardex laterSale = Kardex.createSale("2004", "Sale", 50, validUnitPrice, product);
         laterSale.setDate(ZonedDateTime.now());
         
         DetailOutput detail = DetailOutput.create(30, validUnitPrice, laterSale, earlierPurchase);
@@ -312,9 +312,9 @@ public class DetailOutputUnitTest {
     @DisplayName("return false when FIFO is violated")
     void testIsValidFIFO_OriginAfterSale() {
         // Arrange
-        Kardex newerPurchase = Kardex.createPurchase(1005L, "Purchase", 100, validUnitPrice, product);
+        Kardex newerPurchase = Kardex.createPurchase("1005", "Purchase", 100, validUnitPrice, product);
         newerPurchase.setDate(ZonedDateTime.now().plusDays(1));
-        Kardex olderSale = Kardex.createSale(2005L, "Sale", 50, validUnitPrice, product);
+        Kardex olderSale = Kardex.createSale("2005", "Sale", 50, validUnitPrice, product);
         olderSale.setDate(ZonedDateTime.now());
         
         DetailOutput detail = new DetailOutput();
@@ -372,7 +372,7 @@ public class DetailOutputUnitTest {
         differentProduct.setState(true);
         
         Kardex purchaseDifferentProduct = Kardex.createPurchase(
-            1006L, 
+            "1006", 
             "Purchase", 
             100, 
             validUnitPrice, 
@@ -418,7 +418,7 @@ public class DetailOutputUnitTest {
     @DisplayName("return false when origin product is null")
     void testBelongsToSameProduct_NullOriginProduct() {
         // Arrange
-        Kardex purchaseNoProduct = Kardex.createPurchase(1007L, "Purchase", 100, validUnitPrice, product);
+        Kardex purchaseNoProduct = Kardex.createPurchase("1007", "Purchase", 100, validUnitPrice, product);
         purchaseNoProduct.setProduct(null);
         
         DetailOutput detail = new DetailOutput();
@@ -443,9 +443,9 @@ public class DetailOutputUnitTest {
     @DisplayName("throw exception when FIFO is violated in consistency check")
     void testValidateConsistency_FIFOViolation() {
         // Arrange
-        Kardex newerPurchase = Kardex.createPurchase(1008L, "Purchase", 100, validUnitPrice, product);
+        Kardex newerPurchase = Kardex.createPurchase("1008", "Purchase", 100, validUnitPrice, product);
         newerPurchase.setDate(ZonedDateTime.now().plusDays(1));
-        Kardex olderSale = Kardex.createSale(2008L, "Sale", 50, validUnitPrice, product);
+        Kardex olderSale = Kardex.createSale("2008", "Sale", 50, validUnitPrice, product);
         olderSale.setDate(ZonedDateTime.now());
         
         DetailOutput detail = new DetailOutput();
@@ -473,7 +473,7 @@ public class DetailOutputUnitTest {
         differentProduct.setState(true);
         
         Kardex purchaseDifferentProduct = Kardex.createPurchase(
-            1009L, 
+            "1009", 
             "Purchase", 
             100, 
             validUnitPrice, 
@@ -503,7 +503,7 @@ public class DetailOutputUnitTest {
     @DisplayName("Should throw exception when origin has insufficient quantity")
     void testValidateConsistency_InsufficientQuantity_ThrowsException() {
         // Arrange
-        Kardex limitedPurchase = Kardex.createPurchase(1010L, "Purchase", 10, validUnitPrice, product);
+        Kardex limitedPurchase = Kardex.createPurchase("1010", "Purchase", 10, validUnitPrice, product);
 
         limitedPurchase.setDate(ZonedDateTime.now().minusDays(1));
         saleMovement.setDate(ZonedDateTime.now());

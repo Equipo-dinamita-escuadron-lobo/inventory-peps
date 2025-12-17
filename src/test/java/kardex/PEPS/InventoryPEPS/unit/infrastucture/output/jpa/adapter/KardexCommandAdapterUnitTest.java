@@ -63,7 +63,7 @@ public class KardexCommandAdapterUnitTest {
 
         mockKardex = Kardex.builder()
             .idKardex(1L)
-            .factCode(1001L)
+            .factCode("1001")
             .quantity(100)
             .unitPrice(new BigDecimal("10.00"))
             .product(mockProduct)
@@ -71,7 +71,7 @@ public class KardexCommandAdapterUnitTest {
 
         mockKardexEntity = new KardexEntity();
         mockKardexEntity.setIdKardex(1L);
-        mockKardexEntity.setFactCode(1001L);
+        mockKardexEntity.setFactCode("1001");
         mockKardexEntity.setQuantity(100);
     }
 
@@ -90,7 +90,7 @@ public class KardexCommandAdapterUnitTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(1001L, result.getFactCode());
+        assertEquals("1001", result.getFactCode());
         verify(productRepository).getReferenceById(1L);
         verify(kardexRepository).save(mockKardexEntity);
         verify(kardexEntityCommandMapper).toDomain(mockKardexEntity);

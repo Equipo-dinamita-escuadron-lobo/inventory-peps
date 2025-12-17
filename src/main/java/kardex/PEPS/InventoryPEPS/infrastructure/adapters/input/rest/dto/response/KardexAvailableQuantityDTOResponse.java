@@ -24,5 +24,5 @@ public class KardexAvailableQuantityDTOResponse {
     private int availableQuantity;
     private BigDecimal unitPrice;
     private String type;
-    private Long factCode;
+    private String factCode;
 }

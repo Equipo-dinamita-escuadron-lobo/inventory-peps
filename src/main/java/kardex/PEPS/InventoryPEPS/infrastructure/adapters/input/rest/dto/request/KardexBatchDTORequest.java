@@ -26,8 +26,7 @@ public class KardexBatchDTORequest {
 
     private BigDecimal unitPrice;
     @NotNull(message = "The field 'factCode' cannot be null")
-    @Positive(message = "The factCode must be positive")
-    private Long factCode;
+    private String factCode;
      
     @NotNull(message = "The field 'productId' cannot be null")
     @Positive(message = "The productId must be positive")

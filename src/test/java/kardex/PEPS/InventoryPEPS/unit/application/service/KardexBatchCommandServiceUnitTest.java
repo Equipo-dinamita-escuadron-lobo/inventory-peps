@@ -176,7 +176,7 @@ class KardexBatchCommandServiceUnitTest {
     void testProcessBatchFromExternalService_WithInvalidMovementType_ShouldFail() {
         // Arrange
         Kardex invalidKardex = Kardex.builder()
-                .factCode(1001L)
+                .factCode("1001")
                 .date(ZonedDateTime.now(ZoneId.of("America/Bogota")))
                 .details("Invalid movement")
                 .quantity(10)
@@ -371,7 +371,7 @@ class KardexBatchCommandServiceUnitTest {
             Product product = (i % 2 == 0) ? product1 : product2;
             
             Kardex kardex = Kardex.builder()
-                    .factCode(1000L + i)
+                    .factCode(String.valueOf(1000 + i))
                     .date(ZonedDateTime.now(ZoneId.of("America/Bogota")))
                     .details("Purchase " + (i + 1))
                     .quantity(10 + i)

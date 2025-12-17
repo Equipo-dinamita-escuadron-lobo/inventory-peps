@@ -57,7 +57,7 @@ public interface IKardexQueryOutputPort {
      * @param productId Product identifier
      * @return Optional containing the kardex record if found
      */
-    Optional<Kardex> findByRefFacture(Long factCode, Long productId);
+    Optional<Kardex> findByRefFacture(String factCode, Long productId);
 
     /**
      * @brief Finds available purchase records ordered by date

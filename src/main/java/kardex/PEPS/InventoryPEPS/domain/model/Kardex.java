@@ -25,7 +25,7 @@ import lombok.Setter;
 @Builder
 public class Kardex {
     private Long idKardex;
-    private Long factCode;
+    private String factCode;
     private ZonedDateTime date;
     private String details;
     private int quantity;
@@ -38,8 +38,8 @@ public class Kardex {
 
 
     
-    public static Kardex createPurchase(Long factCode, String details, int quantity, 
-                                       BigDecimal unitPrice, Product product) {
+    public static Kardex createPurchase(String factCode, String details, int quantity, 
+                                   BigDecimal unitPrice, Product product) {
         validateProduct(product);
         validateQuantity(quantity);
         validateUnitPrice(unitPrice);
@@ -60,7 +60,7 @@ public class Kardex {
         return kardex;
     }
 
-    public static Kardex createSale(Long factCode, String details, int quantity, 
+    public static Kardex createSale(String factCode, String details, int quantity, 
                                    BigDecimal unitPrice, Product product) {
         validateProduct(product);
         validateQuantity(quantity);
@@ -81,7 +81,7 @@ public class Kardex {
         return kardex;
     }
 
-    public static Kardex createNonCommercialEntry(Long factCode, String details, int quantity, 
+    public static Kardex createNonCommercialEntry(String factCode, String details, int quantity, 
                                                  BigDecimal unitPrice, Product product) {
         validateProduct(product);
         validateQuantity(quantity);
@@ -101,7 +101,7 @@ public class Kardex {
         return kardex;
     }
 
-    public static Kardex createNonCommercialExit(Long factCode, String details, int quantity, 
+    public static Kardex createNonCommercialExit(String factCode, String details, int quantity, 
                                                 BigDecimal unitPrice, Product product) {
         validateProduct(product);
         validateQuantity(quantity);
@@ -121,7 +121,7 @@ public class Kardex {
         return kardex;
     }
 
-    public static Kardex createPurchaseReturn(Long factCode, String details, int quantity, 
+    public static Kardex createPurchaseReturn(String factCode, String details, int quantity, 
                                              BigDecimal unitPrice, Product product) {
         Kardex kardex = new Kardex();
         kardex.setFactCode(factCode);
@@ -137,7 +137,7 @@ public class Kardex {
         
         return kardex;
     }
-    public static Kardex createSaleReturn(Long factCode, String details, int quantity, 
+    public static Kardex createSaleReturn(String factCode, String details, int quantity, 
                                          BigDecimal unitPrice, Product product) {
         Kardex kardex = new Kardex();
         kardex.setFactCode(factCode);
@@ -155,7 +155,7 @@ public class Kardex {
     }
 
        
-    public static Kardex createPurchaseAdjustment(Long factCode,String details, int quantity, 
+    public static Kardex createPurchaseAdjustment(String factCode,String details, int quantity, 
                                        BigDecimal unitPrice, Product product, ZonedDateTime date) {
         validateProduct(product);
         validateQuantity(quantity);
@@ -177,7 +177,7 @@ public class Kardex {
         
         return kardex;
     }
-    public static Kardex createSaleAdjustment(Long factCode, String details, int quantity, 
+    public static Kardex createSaleAdjustment(String factCode, String details, int quantity, 
                                    BigDecimal unitPrice, Product product,ZonedDateTime date) {
         validateProduct(product);
         validateQuantity(quantity);
@@ -276,7 +276,7 @@ public class Kardex {
     }
     
 
-    public void validateForPurchaseReturn(Long factCode, int quantity) {
+    public void validateForPurchaseReturn(String factCode, int quantity) {
         if (!this.isPurchase()) {
             throw new IllegalArgumentException("Return must be for a purchase movement");
         }
@@ -305,7 +305,7 @@ public class Kardex {
     }
     
 
-    public void validateForSaleReturn(Long factCode, int quantityToReturn) {
+    public void validateForSaleReturn(String factCode, int quantityToReturn) {
         if (!this.isSale()) {
             throw new IllegalArgumentException("Return must be for a sale movement");
         }
@@ -354,21 +354,21 @@ public class Kardex {
         }
     }
     
-    private static void validateFactCode(Long factCode) {
-        if (factCode == null || factCode <= 0) {
-            throw new IllegalArgumentException("Fact code must be positive");
+    private static void validateFactCode(String factCode) {
+        if (factCode == null || factCode.trim().isEmpty()) {
+            throw new IllegalArgumentException("Fact code cannot be null or empty");
         }
     }
 
      /**
      * @brief Generates a unique fact code for inventory adjustments
      * Format: YYMMDDHHMMSSX (timestamp + random digit)
-     * @return The generated fact code as Long
+     * @return The generated fact code as String
      */
-    public Long generateAdjustmentFactCode() {
+    public String generateAdjustmentFactCode() {
         String timestamp = new SimpleDateFormat("yyMMddHHmmss").format(new Date());
         int randomDigit = new Random().nextInt(10); // Genera un dígito del 0-9
-        this.factCode = Long.parseLong(timestamp + randomDigit);
+        this.factCode = timestamp + randomDigit;
         return this.factCode;
     }
 

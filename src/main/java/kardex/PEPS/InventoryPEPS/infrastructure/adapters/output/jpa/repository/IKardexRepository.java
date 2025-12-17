@@ -108,7 +108,7 @@ public interface  IKardexRepository extends JpaRepository<KardexEntity, Long>{
        * @return Optional containing the Kardex entry
        */
       @Query("SELECT k FROM KardexEntity k WHERE k.factCode = :factCode AND k.product.id = :productId")
-      Optional<KardexEntity> findByFactCode(@Param("factCode") long factCode, @Param("productId")long product);
+      Optional<KardexEntity> findByFactCode(@Param("factCode") String factCode, @Param("productId")long product);
 
       /**
      * @brief Finds a Kardex record by invoice code and product ID
@@ -119,7 +119,7 @@ public interface  IKardexRepository extends JpaRepository<KardexEntity, Long>{
      * @param productId Product ID
      * @return Optional with the first record found ordered by date ascending
      */
-     Optional<KardexEntity> findFirstByFactCodeAndProduct_ProductIdOrderByDateAsc(Long factCode, Long productId);
+     Optional<KardexEntity> findFirstByFactCodeAndProduct_ProductIdOrderByDateAsc(String factCode, Long productId);
 
       /**
        * @brief Finds available purchases ordered by date (FIFO)
@@ -163,8 +163,9 @@ public interface  IKardexRepository extends JpaRepository<KardexEntity, Long>{
         LEFT JOIN p.recordsKardex k
         WHERE p.enterpriseId = :enterpriseId
             AND p.state = true
-            AND (k.availableQuantity > 0 OR k.availableQuantity IS NULL)
+            AND k.availableQuantity > 0
         GROUP BY p.productId, p.name, p.reference, p.presentation
+        HAVING SUM(k.availableQuantity) > 0
         ORDER BY p.name ASC
         """)
     List<KardexMigration> findLastKardexForAllProductsByEnterpriseId(@Param("enterpriseId") String enterpriseId);

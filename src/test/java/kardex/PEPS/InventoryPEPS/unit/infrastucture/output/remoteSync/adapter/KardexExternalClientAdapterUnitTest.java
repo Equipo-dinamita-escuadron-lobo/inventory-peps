@@ -75,7 +75,7 @@ public class KardexExternalClientAdapterUnitTest {
         mockDTO.setDetails("Test movement");
         mockDTO.setQuantity(10);
         mockDTO.setUnitPrice(new BigDecimal("100.00"));
-        mockDTO.setFactCode(1L);
+        mockDTO.setFactCode("1");
         mockDTO.setProductId(1L);
         mockDTO.setType(MovementType.PURCHASE);
         
@@ -162,7 +162,7 @@ public class KardexExternalClientAdapterUnitTest {
         secondDTO.setDetails("Second movement");
         secondDTO.setQuantity(20);
         secondDTO.setUnitPrice(new BigDecimal("200.00"));
-        secondDTO.setFactCode(2L);
+        secondDTO.setFactCode("2");
         secondDTO.setProductId(2L);
         secondDTO.setType(MovementType.SALE);
         
@@ -376,7 +376,7 @@ public class KardexExternalClientAdapterUnitTest {
             dto.setDetails("Movement " + i);
             dto.setQuantity(i);
             dto.setUnitPrice(new BigDecimal(i * 10));
-            dto.setFactCode((long) i);
+            dto.setFactCode(String.valueOf(i));
             dto.setProductId((long) i);
             dto.setType(i % 2 == 0 ? MovementType.PURCHASE : MovementType.SALE);
             largeList.add(dto);
