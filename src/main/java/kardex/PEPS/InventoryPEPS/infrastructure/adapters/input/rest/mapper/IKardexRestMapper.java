@@ -24,15 +24,20 @@ import kardex.PEPS.InventoryPEPS.infrastructure.adapters.input.rest.dto.response
 public interface IKardexRestMapper {
     
     @Mapping(target = "product", source = "productId", qualifiedByName = "idToProduct")
-   @Mapping(target = "date", ignore = true)
     @Mapping(target = "idKardex", ignore = true)
     @Mapping(target = "type", ignore = true)
+    @Mapping(target = "detailsOutput", ignore = true)
+    @Mapping(target = "detailsOrigin", ignore = true)
+    @Mapping(target = "availableQuantity", ignore = true)
     Kardex toDomain(AdjustmentEntryDTORequest adjustmentEntryDTORequest);
 
     @Mapping(target = "product", source = "productId", qualifiedByName = "idToProduct")
-    @Mapping(target = "date", ignore = true)
     @Mapping(target = "idKardex", ignore = true)
     @Mapping(target = "type", ignore = true)
+    @Mapping(target = "detailsOutput", ignore = true)
+    @Mapping(target = "detailsOrigin", ignore = true)
+    @Mapping(target = "availableQuantity", ignore = true)
+    @Mapping(target = "unitPrice", ignore = true)
     Kardex toDomain(AdjustmentExitDTORequest AdjustmentDTORequest);
 
 
