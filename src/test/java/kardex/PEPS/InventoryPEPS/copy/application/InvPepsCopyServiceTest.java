@@ -52,7 +52,7 @@ class InvPepsCopyServiceTest {
     @BeforeEach
     void setUp() {
         service = new InvPepsCopyService(logRepo, kardexSourceRepo, kardexTargetRepo,
-                detailSourceRepo, detailTargetRepo);
+                detailSourceRepo, detailTargetRepo, null);
     }
 
     // ----------------------------------------------------------------
@@ -144,7 +144,7 @@ class InvPepsCopyServiceTest {
         // DetailOutput con movementSale=k1, movementOrigin=k1
         DetailOutputEntity detail = new DetailOutputEntity();
         detail.setIdDetailOutput(50L);
-        detail.setAmountUsed(5);
+        detail.setQuantityUsed(5);
         detail.setUnitPrice(BigDecimal.TEN);
         detail.setMovementSale(k1);
         detail.setMovementOrigin(k1);
@@ -218,11 +218,10 @@ class InvPepsCopyServiceTest {
     private ProductEntity buildProduct(long externalId, String ref) {
         ProductEntity p = new ProductEntity();
         p.setId(externalId);
-        p.setIdProduct(externalId);
+        p.setProductId(externalId);
         p.setName("Product " + ref);
         p.setReference(ref);
         p.setPresentation("unit");
-        p.setManager("mgr");
         return p;
     }
 
@@ -231,10 +230,10 @@ class InvPepsCopyServiceTest {
         k.setIdKardex(id);
         k.setDate(ZonedDateTime.now());
         k.setDetails("detail");
-        k.setAmount(10);
+        k.setQuantity(10);
         k.setUnitPrice(BigDecimal.valueOf(100));
-        k.setType(MovementType.COMPRA);
-        k.setObjProduct(product);
+        k.setType(MovementType.PURCHASE);
+        k.setProduct(product);
         return k;
     }
 }

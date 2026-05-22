@@ -31,7 +31,6 @@ public class CopyPhaseRequestDto {
     @NotBlank
     private String entOrigen;
 
-    @NotBlank
     private String entDestino;
 
     @NotNull
@@ -43,4 +42,12 @@ public class CopyPhaseRequestDto {
      * ADR-39.
      */
     private List<CopyEquivalenciaDto> equivalenciasPrev;
+
+    /**
+     * Payload de importación (modo RESTORE).
+     * Contiene los datos exportados por ejecutarExportacion() de otra instancia.
+     * Null en modo DUPLICATE.
+     */
+    @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+    private Object datosImportados;
 }

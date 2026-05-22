@@ -51,7 +51,7 @@ class InvPepsCopyFkRemapTest {
     @BeforeEach
     void setUp() {
         service = new InvPepsCopyService(logRepo, kardexSourceRepo, kardexTargetRepo,
-                detailSourceRepo, detailTargetRepo);
+                detailSourceRepo, detailTargetRepo, null);
     }
 
     @Test
@@ -73,20 +73,19 @@ class InvPepsCopyFkRemapTest {
 
         ProductEntity product = new ProductEntity();
         product.setId(77L);
-        product.setIdProduct(77L);
+        product.setProductId(77L);
         product.setName("Prod77");
         product.setReference("R77");
         product.setPresentation("unit");
-        product.setManager("mgr");
 
         KardexEntity k = new KardexEntity();
         k.setIdKardex(1L);
         k.setDate(ZonedDateTime.now());
         k.setDetails("d");
-        k.setAmount(5);
+        k.setQuantity(5);
         k.setUnitPrice(BigDecimal.TEN);
-        k.setType(MovementType.COMPRA);
-        k.setObjProduct(product);
+        k.setType(MovementType.PURCHASE);
+        k.setProduct(product);
 
         when(kardexSourceRepo.findByEntOrigenBeforeSnapshot(eq("ENT_A"), any())).thenReturn(List.of(k));
 
@@ -100,7 +99,7 @@ class InvPepsCopyFkRemapTest {
         CopyPhaseResponseDto response = service.ejecutar(request);
 
         assertThat(response.getEstado()).isEqualTo("COMPLETADO");
-        assertThat(captor.getValue().getObjProduct().getIdProduct()).isEqualTo(777L);
+        assertThat(captor.getValue().getProduct().getProductId()).isEqualTo(777L);
     }
 
     @Test
@@ -122,20 +121,19 @@ class InvPepsCopyFkRemapTest {
 
         ProductEntity product = new ProductEntity();
         product.setId(10L);
-        product.setIdProduct(10L);
+        product.setProductId(10L);
         product.setName("Prod10");
         product.setReference("R10");
         product.setPresentation("unit");
-        product.setManager("mgr");
 
         KardexEntity k = new KardexEntity();
         k.setIdKardex(5L);
         k.setDate(ZonedDateTime.now());
         k.setDetails("d");
-        k.setAmount(10);
+        k.setQuantity(10);
         k.setUnitPrice(BigDecimal.ONE);
-        k.setType(MovementType.VENTA);
-        k.setObjProduct(product);
+        k.setType(MovementType.SALE);
+        k.setProduct(product);
 
         when(kardexSourceRepo.findByEntOrigenBeforeSnapshot(eq("ENT_A"), any())).thenReturn(List.of(k));
 
@@ -145,7 +143,7 @@ class InvPepsCopyFkRemapTest {
 
         DetailOutputEntity detail = new DetailOutputEntity();
         detail.setIdDetailOutput(20L);
-        detail.setAmountUsed(3);
+        detail.setQuantityUsed(3);
         detail.setUnitPrice(BigDecimal.ONE);
         detail.setMovementSale(k);
         detail.setMovementOrigin(k);
