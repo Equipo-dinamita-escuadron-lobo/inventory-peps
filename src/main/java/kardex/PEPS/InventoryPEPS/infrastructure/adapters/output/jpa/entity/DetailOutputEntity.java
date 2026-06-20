@@ -1,6 +1,9 @@
 package kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity;
 
 import java.math.BigDecimal;
+
+import org.hibernate.annotations.TenantId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,6 +17,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief JPA Entity for FIFO output details
+ * 
+ * Maps to the 'DetailOutputFIFO' table. Links sale movements to their
+ * corresponding purchase movements (lots) to track cost layers.
+ */
 @Entity
 @Table(name = "DetailOutputFIFO")
 @AllArgsConstructor
@@ -26,11 +35,11 @@ public class DetailOutputEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idDetailOutput;
 
-    @Column(name = "amountUsed", nullable = false)
-    private int amountUsed;
+    @Column(name = "quantity_used", nullable = false)
+    private int quantityUsed;
 
-    @Column(name="unit_value", nullable = false)
-    private BigDecimal UnitPrice;
+    @Column(name="unit_price", nullable = false)
+    private BigDecimal unitPrice;
 
    @ManyToOne
     @JoinColumn(name = "id_movement_sale")
@@ -40,4 +49,9 @@ public class DetailOutputEntity {
     @JoinColumn(name = "id_movement_origin")
     private KardexEntity movementOrigin;
 
+    /* 
+    @TenantId
+    String tenantId;
+
+    */
 }

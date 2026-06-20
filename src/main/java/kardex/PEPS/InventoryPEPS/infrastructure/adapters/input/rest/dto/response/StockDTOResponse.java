@@ -7,6 +7,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief DTO for stock response
+ * 
+ * Represents the current stock status of a product.
+ */
 @Getter
 @Setter
 @AllArgsConstructor
@@ -17,7 +22,7 @@ public class StockDTOResponse {
 
     private Long idProduct;
 
-    private int amount;
+    private int quantity;
 
     private Double price;
 

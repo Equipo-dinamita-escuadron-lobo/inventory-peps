@@ -1,6 +1,9 @@
 package kardex.PEPS.InventoryPEPS.infrastructure.adapters.output.jpa.entity;
 
 import java.util.List;
+
+import org.hibernate.annotations.TenantId;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -14,8 +17,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * @brief JPA Entity representing a Product
+ * 
+ * Maps to the 'product' table. Stores product reference data needed
+ * for inventory management.
+ */
 @Entity
-@Table(name="Product")
+@Table(name="product")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -25,7 +34,8 @@ public class ProductEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long idProduct;
+    @Column(name="product_id", nullable = false, unique = true)
+    private Long productId;
     
     @Column(name ="name", nullable = false, length =50 )
     private String name;
@@ -36,10 +46,18 @@ public class ProductEntity {
     @Column(name ="presentation", nullable = false, length =50 )
     private String presentation;
 
-    @Column(name ="responsible", nullable = false, length =50 )
-    private String manager;
+    @Column(name="enterprise_id", nullable = false)
+    private String enterpriseId;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "objProduct")
+    @Column(nullable = false)
+    private boolean state;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "product")
     private List<KardexEntity> recordsKardex;
 
+    
+    /* 
+    @TenantId
+    String tenantId;
+    */
 }
